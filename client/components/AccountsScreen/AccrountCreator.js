@@ -21,6 +21,7 @@ class AccountCreator extends React.Component {
     accountName: '',
     personalName: '',
     publicName: '',
+    accountError: '',
   };
 
   render() {
@@ -48,7 +49,7 @@ class AccountCreator extends React.Component {
             </label>
             <input
               autoFocus
-              placeholder={'Account Name'}
+              placeholder={this.state.accountError || 'Account Name'}
               value={this.state.accountName}
               onChange={(event) => {
                 this.setState({ accountName: event.target.value });
