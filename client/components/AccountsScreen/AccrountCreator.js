@@ -24,6 +24,26 @@ class AccountCreator extends React.Component {
     accountError: '',
   };
 
+  create = async () => {
+    if (!this.state.accountName) {
+      $modal.confirm(
+        'An account name is required. Would you like one randomly generated?',
+        (shouldCreateAccount) => {
+          if (shouldCreateAccount) {
+            let accountNumber = `${Math.random()}`.slice(-3);
+            const accountName = `Account${accountNumber}`;
+            this.setState({ accountName });
+          }
+        });
+      return this.setState({
+        accountError: 'An account name is required',
+      });
+    }
+
+    const keyPairs = await createKeyPairs();
+    console.log({ keyPairs });
+  };
+
   render() {
     return (
       <Segment>
@@ -95,7 +115,7 @@ class AccountCreator extends React.Component {
           {/*<Form.Field>*/}
           {/*  <Checkbox label="Save this account on the server"/>*/}
           {/*</Form.Field>*/}
-          <Button onClick={() => {}} type="submit">Create</Button>
+          <Button onClick={this.create} type="submit">Create</Button>
         </Form>
       </Segment>
     );
