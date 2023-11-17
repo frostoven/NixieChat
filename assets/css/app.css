@@ -1,0 +1,41 @@
+/* Semantic UI overrides */
+/* =================================== */
+
+.ui.progress .bar {
+  /* Darkly theme fix. */
+  margin-top: 7px !important;
+}
+
+/* Fixes overly bright dropdown borders. */
+.ui.selection.active.dropdown .menu, .ui.selection.active.dropdown {
+  border-color: #282828 !important;
+}
+
+/* Fixes overly bright dropdown borders. */
+.ui.selection.dropdown .menu > .item {
+  border-top: 1px solid #282828 !important;
+}
+
+.ui.dropdown {
+  border-color: #282828 !important;
+}
+
+/* Fixes inverse-colour form colours. */
+.ui.form input:not([type]), .ui.form input {
+  color: #fff !important;
+  background-color: #303030 !important;
+  border-color: #282828 !important;
+}
+
+/* Overrides toast message position to better fit the board */
+.ui-alerts.top-right {
+  position: fixed;
+  top: 18px;
+  right: 15%;
+  min-width: 270px;
+  z-index: 100;
+}
+
+.ui-alerts.top-right i {
+  font-size: 14pt !important;
+}
