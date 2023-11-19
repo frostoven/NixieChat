@@ -226,7 +226,7 @@ function exportPublicKey(keys, format = 'raw') {
   if (format === 'raw') {
     return exportPublicKeyRaw(keys);
   }
-  else if (format === null || typeof format === 'undefined') {
+  else if (format === 'string' || !format) {
     return exportPublicKeyString(keys);
   }
   else {
@@ -238,7 +238,7 @@ function exportPrivateKey(keys, format = 'raw') {
   if (format === 'raw') {
     return exportPrivateKeyRaw(keys);
   }
-  else if (format === null || typeof format === 'undefined') {
+  else if (format === 'string' || !format) {
     return exportPrivateKeyString(keys);
   }
   else {
