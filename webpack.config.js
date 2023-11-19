@@ -50,6 +50,62 @@ module.exports = {
     ]
   },
 
+  plugins: [
+    // Update the terminal title with build info.
+    {
+      apply: (compiler) => {
+        function updateTerminalTitle(string) {
+          const command =
+            `echo -n '\\033k${string}\\033\\\\' > /dev/null && ` +
+            `echo -n '\\033]2;'${string}'\\007'`;
+          exec(command, (err, stdout, stderr) => {
+            if (stdout) process.stdout.write(stdout);
+            if (stderr) process.stderr.write(stderr);
+          });
+        }
+
+        let buildInProgress = false;
+        let lastBuildStart = 0;
+        let buildCount = 0;
+
+        compiler.hooks.watchRun.tap('NixieRebuildNoticePlugin', (compilation) => {
+          buildInProgress = true;
+          lastBuildStart = Date.now();
+          const timer = setInterval(() => {
+            if (!buildInProgress) {
+              return clearInterval(timer);
+            }
+            const duration = (Date.now() - lastBuildStart) / 1000;
+            if (++buildCount < 6) {
+              updateTerminalTitle(`Building... ${Math.floor(duration)}s`);
+            }
+            else {
+              updateTerminalTitle(`Rebuilding... ${Math.floor(duration)}s`);
+            }
+          }, 900);
+        });
+
+        // AfterEmitPlugin
+        compiler.hooks.afterEmit.tap('NixieUpdateTitlePlugin', (compilation) => {
+          buildInProgress = false;
+          const date = new Date();
+          let hh = date.getHours();
+          let mm = date.getMinutes();
+          let ss = date.getSeconds();
+
+          hh < 10 && (hh = '0' + hh);
+          mm < 10 && (mm = '0' + mm);
+          ss < 10 && (ss = '0' + ss);
+
+          // Wait a little so the update doesn't seem glitchy when rapid.1
+          setTimeout(() => {
+            updateTerminalTitle(`${hh}:${mm}:${ss} - NixieChat`);
+          }, 250);
+        });
+      }
+    }
+  ],
+
   resolve: {
     extensions: ['.js', '.json', '.jsx']
   },
