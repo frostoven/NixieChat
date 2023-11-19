@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const { clearInterval } = require('node:timers');
 const exec = require('child_process').exec;
 
 module.exports = {
@@ -66,6 +67,7 @@ module.exports = {
 
         let buildInProgress = false;
         let lastBuildStart = 0;
+        let lastBuildEnd = Infinity;
         let buildCount = 0;
 
         compiler.hooks.watchRun.tap('NixieRebuildNoticePlugin', (compilation) => {
@@ -73,6 +75,7 @@ module.exports = {
           lastBuildStart = Date.now();
           const timer = setInterval(() => {
             if (!buildInProgress) {
+              lastBuildEnd = Date.now();
               return clearInterval(timer);
             }
             const duration = (Date.now() - lastBuildStart) / 1000;
@@ -99,7 +102,15 @@ module.exports = {
 
           // Wait a little so the update doesn't seem glitchy when rapid.1
           setTimeout(() => {
-            updateTerminalTitle(`${hh}:${mm}:${ss} - NixieChat`);
+            const timer = setInterval(() => {
+              if (Date.now() - lastBuildEnd < 5000) {
+                updateTerminalTitle(`Rebuilt \\<5s ago - NixieChat`);
+              }
+              else {
+                clearInterval(timer);
+                updateTerminalTitle(`${hh}:${mm}:${ss} - NixieChat`);
+              }
+            }, 2000);
           }, 250);
         });
       }
