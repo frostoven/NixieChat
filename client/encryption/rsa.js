@@ -107,7 +107,17 @@ function importPrivateKey(pemKey) {
   });
 }
 
-function exportPublicKey(keys) {
+async function exportPublicKeyRaw(keys) {
+  const buffer = await window.crypto.subtle.exportKey('spki', keys.publicKey);
+  return new Uint8Array(buffer);
+}
+
+async function exportPrivateKeyRaw(keys) {
+  const buffer = await window.crypto.subtle.exportKey('pkcs8', keys.privateKey);
+  return new Uint8Array(buffer);
+}
+
+function exportPublicKeyString(keys) {
   return new Promise(function(resolve) {
     window.crypto.subtle.exportKey('spki', keys.publicKey).then(function(spki) {
       resolve(convertBinaryToPem(spki, 'RSA PUBLIC KEY'));
@@ -115,7 +125,7 @@ function exportPublicKey(keys) {
   });
 }
 
-function exportPrivateKey(keys) {
+function exportPrivateKeyString(keys) {
   return new Promise(function(resolve) {
     var expK = window.crypto.subtle.exportKey('pkcs8', keys.privateKey);
     expK.then(function(pkcs8) {
@@ -126,8 +136,8 @@ function exportPrivateKey(keys) {
 
 function exportPemKeys(keys) {
   return new Promise(function(resolve) {
-    exportPublicKey(keys).then(function(pubKey) {
-      exportPrivateKey(keys).then(function(privKey) {
+    exportPublicKeyString(keys).then(function(pubKey) {
+      exportPrivateKeyString(keys).then(function(privKey) {
         resolve({ publicKey: pubKey, privateKey: privKey });
       });
     });
@@ -210,6 +220,30 @@ function generateRsaKey() {
 
 function signDataRsa(keyPair, data) {
   return signData(keyPair.private, data);
+}
+
+function exportPublicKey(keys, format = 'raw') {
+  if (format === 'raw') {
+    return exportPublicKeyRaw(keys);
+  }
+  else if (format === null || typeof format === 'undefined') {
+    return exportPublicKeyString(keys);
+  }
+  else {
+    console.error('Support export formats params are "raw" and null.');
+  }
+}
+
+function exportPrivateKey(keys, format = 'raw') {
+  if (format === 'raw') {
+    return exportPrivateKeyRaw(keys);
+  }
+  else if (format === null || typeof format === 'undefined') {
+    return exportPrivateKeyString(keys);
+  }
+  else {
+    console.error('Support export formats params are "raw" and null.');
+  }
 }
 
 export {
