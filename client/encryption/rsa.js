@@ -58,19 +58,19 @@ function arrayBufferToBase64(arr) {
 
 function convertBinaryToPem(binaryData, label) {
   var base64Cert = arrayBufferToBase64String(binaryData);
-  var pemCert = '-----BEGIN ' + label + '-----\r\n';
+  var pemCert = '-----BEGIN ' + label + '-----\n';
   var nextIndex = 0;
   var lineLength;
   while (nextIndex < base64Cert.length) {
     if (nextIndex + 64 <= base64Cert.length) {
-      pemCert += base64Cert.substr(nextIndex, 64) + '\r\n';
+      pemCert += base64Cert.substr(nextIndex, 64) + '\n';
     }
     else {
-      pemCert += base64Cert.substr(nextIndex) + '\r\n';
+      pemCert += base64Cert.substr(nextIndex) + '\n';
     }
     nextIndex += 64;
   }
-  pemCert += '-----END ' + label + '-----\r\n';
+  pemCert += '-----END ' + label + '-----\n';
   return pemCert;
 }
 

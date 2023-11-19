@@ -7,7 +7,7 @@ import {
   Popup,
   Segment,
 } from 'semantic-ui-react';
-import { createKeyPairs } from '../../encryption';
+import { createKeyPairs, exportKeys } from '../../encryption';
 
 class AccountCreator extends React.Component {
   static propTypes = {
@@ -43,6 +43,7 @@ class AccountCreator extends React.Component {
 
     const keyPairs = await createKeyPairs();
     console.log({ keyPairs });
+    console.log(await exportKeys(keyPairs, 'string'));
   };
 
   render() {
