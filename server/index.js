@@ -23,7 +23,7 @@ app.use(require('./routes/error.server.route'));
 // Show boot message.
 console.log('=============================================================');
 console.log('Client can be accessed at:\n',
-	`http://localhost:${config.server.listeningPort}/app`
+	`http://localhost:${config.server.listeningPort}`
 );
 console.log('Note: WebPack will need a bit of time to finish booting.');
 console.log('=============================================================');
