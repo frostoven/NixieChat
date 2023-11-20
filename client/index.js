@@ -4,6 +4,7 @@ import './modal';
 import { serverEmitter } from './comms';
 import { NixieStorage } from './storage/NixieStorage';
 import { AccountsScreen } from './components/AccountsScreen';
+import { MainSection } from './components/MainSection';
 
 /**
  * TODO list:
@@ -18,7 +19,7 @@ import { AccountsScreen } from './components/AccountsScreen';
  *  * create a SHA-256 address of the person's public key.
  */
 
-class MainComponent extends React.Component {
+class RootNode extends React.Component {
   static defaultState = {
     booting: true,
     loggedIn: false,
@@ -28,7 +29,7 @@ class MainComponent extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { ...MainComponent.defaultState };
+    this.state = { ...RootNode.defaultState };
   }
 
   componentDidMount() {
@@ -63,13 +64,11 @@ class MainComponent extends React.Component {
     }
 
     return (
-      <div>
-        // test
-      </div>
+      <MainSection/>
     );
   }
 }
 
 const domContainer = document.querySelector('#react-element');
 const element = React.createElement;
-ReactDOM.render(element(MainComponent), domContainer);
+ReactDOM.render(element(RootNode), domContainer);
