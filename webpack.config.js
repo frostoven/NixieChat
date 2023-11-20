@@ -9,12 +9,12 @@ module.exports = {
   devtool: 'source-map',
 
   entry: {
-    bundle: './client/index.js',
+    'NixieChat-v0': './client/index.js',
   },
 
   output: {
-    path: __dirname + '/build',
-    publicPath: 'build/',
+    path: __dirname + '/client/.build',
+    publicPath: 'client/.build/',
     filename: '[name].js'
   },
 
