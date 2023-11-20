@@ -39,3 +39,7 @@
 .ui-alerts.top-right i {
   font-size: 14pt !important;
 }
+
+.ui.sidebar .item {
+  text-align: left !important;
+}
