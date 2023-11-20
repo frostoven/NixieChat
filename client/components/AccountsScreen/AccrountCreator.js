@@ -26,9 +26,11 @@ class AccountCreator extends React.Component {
     personalName: '',
     publicName: '',
     accountError: '',
+    buttonIcon: 'user circle',
+    buttonText: 'Create',
   };
 
-  create = async () => {
+  create = () => {
     if (!this.state.accountName) {
       $modal.confirm(
         'An account name is required. Would you like one randomly generated?',
@@ -44,11 +46,29 @@ class AccountCreator extends React.Component {
       });
     }
 
-    const keyPairs = await createKeyPairs();
-    console.log({ keyPairs });
-    console.log(await exportKeys(keyPairs));
-    console.log(await exportKeys(keyPairs, 'string'));
-    this.storage.storeAccount(this.state.accountName, keyPairs, false);
+    this.setState({
+      buttonIcon: 'hourglass start',
+      buttonText: 'Generating key pair...',
+    }, async () => {
+
+      const keyPairs = await createKeyPairs();
+      console.log({ keyPairs });
+      // console.log(await exportKeys(keyPairs));
+      // console.log(await exportKeys(keyPairs, 'string'));
+
+
+      this.setState({
+        buttonIcon: 'hourglass end',
+        buttonText: 'Saving...',
+      }, async () => {
+        // await this.storage.storeAccount(this.state.accountName, keyPairs, false);
+        setTimeout(() => {
+          // The timeout is just so things don't move too fast and look like a
+          // glitch fest.
+        }, 250);
+      });
+
+    });
   };
 
   render() {
@@ -122,7 +142,16 @@ class AccountCreator extends React.Component {
           {/*<Form.Field>*/}
           {/*  <Checkbox label="Save this account on the server"/>*/}
           {/*</Form.Field>*/}
-          <Button onClick={this.create} type="submit">Create</Button>
+          <Button
+            icon
+            primary
+            type="submit"
+            labelPosition="left"
+            onClick={this.create}
+          >
+            <Icon name={this.state.buttonIcon}/>
+            {this.state.buttonText}
+          </Button>
         </Form>
       </Segment>
     );
