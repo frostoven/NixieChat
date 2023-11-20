@@ -5,7 +5,7 @@ let instance = null;
 let NX;
 
 class NixieStorage extends StorageProxy {
-  static ACCOUNT_ARRAY_KEY = 'account_array_key';
+  static ACCOUNT_COLLECTION_KEY = 'account_collection';
 
   constructor() {
     if (!instance) {
@@ -19,17 +19,31 @@ class NixieStorage extends StorageProxy {
     this.initialized = false;
   }
 
-  initStorage() {
-    this.createKeyIfNotExists(NX.ACCOUNT_ARRAY_KEY, []);
+  async initStorage() {
+    await this.createKeyIfNotExists(NX.ACCOUNT_COLLECTION_KEY, {});
     this.initialized = true;
     return this;
   }
 
-  getAccountList() {
+  async getAccountStore() {
     if (!this.initialized) {
       return console.error('NixieStorage queried before initialization.');
     }
-    return this.getItem(NX.ACCOUNT_ARRAY_KEY);
+    return await this.getItem(NX.ACCOUNT_COLLECTION_KEY);
+  }
+
+  async storeAccount(accountName, { privateKey, publicKey }, overwrite = false) {
+    const accounts = await this.getAccountStore();
+    if (accounts[accountName] && !overwrite) {
+      console.error(`Account with name '${accountName}' already exists.`);
+      return;
+    }
+
+    accounts[accountName] = {
+      accountName, privateKey, publicKey,
+    };
+
+    await this.setItem(NX.ACCOUNT_COLLECTION_KEY, accounts);
   }
 }
 

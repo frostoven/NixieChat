@@ -1,7 +1,9 @@
+import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
+
 let storageInstance = null;
 
 const StorageEngine = {
-  localStorage: 'LocalStorage',
+  indexedDb: 'IndexedDb',
 };
 
 class StorageProxy {
@@ -9,19 +11,14 @@ class StorageProxy {
     return new StorageProxy();
   }
 
-  static testLocalStorage() {
-    // https://stackoverflow.com/questions/16427636/check-if-localstorage-is-available
+  static async testIndexedDbStorage() {
     try {
-      const storage = window['localStorage'];
-      if (!storage) {
-        return false;
-      }
       const testKey = '__storage_test__';
-      storage.setItem(testKey, testKey);
-      storage.removeItem(testKey);
+      await idbSet(testKey, testKey);
+      await idbDel(testKey);
       return true;
     }
-    catch(error) {
+    catch (error) {
       return false;
     }
   }
@@ -35,17 +32,17 @@ class StorageProxy {
     }
 
     this.readOnly = false;
-    this.setStorageEngine(StorageEngine.localStorage);
+    this.setStorageEngine(StorageEngine.indexedDb).catch(console.error);
   }
 
-  setStorageEngine(engineName) {
+  async setStorageEngine(engineName) {
     this.storageEngine = engineName;
-    if (engineName === StorageEngine.localStorage) {
-      const localStorageAllowed = StorageProxy.testLocalStorage();
-      if (!localStorageAllowed) {
+    if (engineName === StorageEngine.indexedDb) {
+      const indexedDbAllowed = await StorageProxy.testIndexedDbStorage();
+      if (!indexedDbAllowed) {
         return $modal.alert(
           'Your browser has blocked local storage. Local storage is ' +
-          'required for game login'
+          'required for game login',
         );
       }
     }
@@ -55,7 +52,7 @@ class StorageProxy {
    * @param keyName
    * @return {*}
    */
-  getItem(keyName) {
+  async getItem(keyName) {
     if (this.readOnly) {
       return console.warn('Not reading data - read-only flag set.');
     }
@@ -64,14 +61,14 @@ class StorageProxy {
     const reader = this[fnName];
     if (!reader) {
       this.readOnly = true;
-      console.error(`Function name ${fnName} does not exist on NixieStorage.`);
+      console.error(`Function name ${fnName} does not exist on Storage.`);
       return $modal.alert({
         header: 'Storage Error',
         body: 'Error: Cannot read storage.',
       });
     }
 
-    return reader(keyName);
+    return await reader(keyName);
   }
 
   /**
@@ -79,7 +76,7 @@ class StorageProxy {
    * @param value
    * @return {*}
    */
-  setItem(keyName, value) {
+  async setItem(keyName, value) {
     if (this.readOnly) {
       return console.warn('Not writing data - read-only flag set.');
     }
@@ -88,21 +85,21 @@ class StorageProxy {
     const writer = this[fnName];
     if (!writer) {
       this.readOnly = true;
-      console.error(`Function name ${fnName} does not exist on NixieStorage.`);
+      console.error(`Function name ${fnName} does not exist on Storage.`);
       return $modal.alert({
         header: 'Storage Error',
         body: 'Error: Cannot write to storage.',
       });
     }
 
-    writer(keyName, value);
+    await writer(keyName, value);
   }
 
   /**
    * @param keyName
    * @param defaultValue
    */
-  createKeyIfNotExists(keyName, defaultValue = null) {
+  async createKeyIfNotExists(keyName, defaultValue = null) {
     if (this.readOnly) {
       return console.warn('Not writing data - read-only flag set.');
     }
@@ -112,22 +109,22 @@ class StorageProxy {
     console.log(this, fnName);
     if (!writer) {
       this.readOnly = true;
-      console.error(`Function name ${fnName} does not exist on NixieStorage.`);
+      console.error(`Function name ${fnName} does not exist on Storage.`);
       return $modal.alert({
         header: 'Storage Error',
         body: 'Error: Cannot write to storage.',
       });
     }
 
-    writer(keyName, defaultValue);
+    await writer(keyName, defaultValue);
   }
 
   /**
    * @param keyName
    * @return {*}
    */
-  _getItemLocalStorage(keyName) {
-    return localStorage.getItem(keyName);
+  async _getItemIndexedDb(keyName) {
+    return await idbGet(keyName);
   }
 
   /**
@@ -135,8 +132,8 @@ class StorageProxy {
    * @param value
    * @return {*}
    */
-  _setItemLocalStorage(keyName, value) {
-    localStorage.setItem(keyName, value);
+  async _setItemIndexedDb(keyName, value) {
+    await idbSet(keyName, value);
   }
 
   /**
@@ -144,10 +141,10 @@ class StorageProxy {
    * @param defaultValue
    * @return {*}
    */
-  _createKeyIfNotExistsLocalStorage(keyName, defaultValue) {
-    const item = localStorage.getItem(keyName);
-    if (item === null) {
-      localStorage.setItem(keyName, defaultValue);
+  async _createKeyIfNotExistsIndexedDb(keyName, defaultValue) {
+    const item = await idbGet(keyName);
+    if (typeof item === 'undefined') {
+      await idbSet(keyName, defaultValue);
     }
   }
 }
@@ -155,4 +152,4 @@ class StorageProxy {
 export {
   StorageEngine,
   StorageProxy,
-}
+};
