@@ -2,8 +2,7 @@
 
 Offers a non-blocking API that resembles DOM dialog functions.
 
-That this was (with permission) taken from the Cosmosis game project. This
-document may have some redundant references.
+That this was (with permission) taken from the Cosmosis game project.
 
 _Dev note: When the modal system is busy, no other control systems should
 process input. This can be checked via `$modal.allowExternalListeners`._
@@ -196,90 +195,6 @@ $modal.listPrompt({
 });
 ```
 
-## Capturing Keys and Analog actions
-
-For situations where you want to capture a specific key (such as for user
-control bindings), `$modal` has a key capture function built right in. The rest
-of the game will entirely ignore input while key capture dialogs are open.
-
-`$modal` also includes methods which aren't true captures, but descriptive
-selections, such as mouse axis choosers. For consistency, these dialogs also
-start with the term `capture` even though they aren't technically capture
-functions.
-
-#### Automatic
-
-You can use `autoInputCapture()` to let the user decide the type of input to
-capture, which will then choose one of the methods in this section below.
-
-```javascript
-// Let the user choose which device to capture:
-$modal.autoInputCapture((code) => {
-  // Example outputs: 'KeyW', 'spMouseMiddle', 'bt10'
-  console.log(code);
-});
-
-// You may optionally add a filter to reduce the amount of devices to choose
-// from:
-let filter = [ InputType.gamepadAxisStandard, InputType.mouseAxisStandard ];
-$modal.autoInputCapture(filter, (code) => {
-  // Example outputs: 'spEastWest', 'ax1'
-  console.log(code);
-});
-```
-
-#### Keyboard code capture
-
-```javascript
-$modal.captureKeyboardKey((keyCode) => {
-  // Example output: 'ArrowUp'
-  console.log(keyCode);
-});
-```
-
-#### Mouse button / scroll chooser
-
-```javascript
-// Capture a mouse click:
-$modal.captureMouseButton((spCode) => {
-  // Example outputs: 'spMouseLeft', 'spMouseMiddle'
-  console.log(spCode);
-});
-
-// To include the scroll wheel as an option:
-$modal.captureMouseButton({ allowScroller: true }, (spCode) => {
-  // Example outputs: 'spMouseRight','spScrollUp','spScrollDown'
-  console.log(spCode);
-});
-```
-
-#### Mouse axis chooser
-
-```javascript
-$modal.captureMouseAxis((spCode) => {
-  // Example outputs: 'spNorthSouth' or 'spEastWest'
-  console.log(spCode);
-});
-```
-
-#### Gamepad button capture
-
-```javascript
-$modal.captureGamepadButton((buttonCode) => {
-  // Example outputs: 'bt0', 'hb24'
-  console.log(buttonCode);
-});
-```
-
-#### Gamepad axis capture
-
-```javascript
-$modal.captureGamepadAxis((axisData) => {
-  // Example outputs: 'ax1', 'ha3'
-  console.log(axisData);
-});
-```
-
 ## Other modal API details
 
 This is not an exhaustive list, updating this properly in the todo.
@@ -296,7 +211,7 @@ The only variables you'll really want to care about for most situations is are
 the static ones. You can reach them by importing Modal, or via `$modal.static`.
 
 * `Modal.allowExternalListeners` - while this is false, you should avoid
-  letting your own input plugins control game state.
+  letting your own listeners handle input.
 * 
 #### Methods
 

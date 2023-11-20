@@ -328,8 +328,8 @@ export default class Modal extends React.Component {
   /**
    * Asks a question and offers the user with a list of options to select from.
    * Intended to be used in place of dropdowns, which in their standard form
-   * are somewhat difficult to get right in a video game context if not using
-   * the mouse.
+   * are somewhat difficult to get right when allowing for peripherals other
+   * than the mouse.
    * @param {object} options
    * @param {string|JSX.Element} options.header
    * @param {undefined|JSX.Element} options.actions
