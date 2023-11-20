@@ -1,5 +1,5 @@
 import * as ReactDOM from 'react-dom';
-import React, { createElement } from 'react';
+import React from 'react';
 import Modal from './Modal';
 
 // Add CSS style tag.
