@@ -41,8 +41,8 @@ class StorageProxy {
       const indexedDbAllowed = await StorageProxy.testIndexedDbStorage();
       if (!indexedDbAllowed) {
         return $modal.alert(
-          'Your browser has blocked local storage. Local storage is ' +
-          'required for game login',
+          'Your browser has blocked local DB storage. NixieChat will not ' +
+          'function properly, and account details will be lost on refresh.',
         );
       }
     }
