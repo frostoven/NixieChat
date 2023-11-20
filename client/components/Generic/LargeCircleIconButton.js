@@ -7,6 +7,7 @@ class LargeCircleIconButton extends React.Component {
     onClick: PropTypes.func,
     icon: PropTypes.string,
     label: PropTypes.string,
+    iconStyle: PropTypes.object,
   };
 
   static defaultProps = {
@@ -15,6 +16,7 @@ class LargeCircleIconButton extends React.Component {
     },
     icon: 'paperclip',
     label: 'Button',
+    iconStyle: {},
   };
 
   render() {
@@ -37,7 +39,7 @@ class LargeCircleIconButton extends React.Component {
             size="big"
             /** @type  */
             name={this.props.icon}
-            style={{ paddingLeft: 12 }}
+            style={{ paddingLeft: 12, ...this.props.iconStyle }}
           />
         </Button>
         <br/><br/>
