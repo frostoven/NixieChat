@@ -28,6 +28,7 @@ class AccountCreator extends React.Component {
     accountError: '',
     buttonIcon: 'user circle',
     buttonText: 'Create',
+    buttonDisabled: false,
   };
 
   create = () => {
@@ -49,6 +50,7 @@ class AccountCreator extends React.Component {
     this.setState({
       buttonIcon: 'hourglass start',
       buttonText: 'Generating key pair...',
+      buttonDisabled: true,
     }, async () => {
 
       const keyPairs = await createKeyPairs();
@@ -148,6 +150,7 @@ class AccountCreator extends React.Component {
             type="submit"
             labelPosition="left"
             onClick={this.create}
+            disabled={this.state.buttonDisabled}
           >
             <Icon name={this.state.buttonIcon}/>
             {this.state.buttonText}
