@@ -10,7 +10,6 @@ class AccountChooser extends React.Component {
   };
 
   render() {
-    const accounts = this.storage.getAccountList();
     return (
       <div>
       </div>

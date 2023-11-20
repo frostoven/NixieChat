@@ -16,7 +16,10 @@ class AccountsScreen extends React.Component {
   storage = new NixieStorage();
 
   render() {
-    const accounts = this.storage.getAccountList();
+    // TODO: this no longer works because we've switched to promises. Pass in
+    //  as prop instead.
+    const accountStore = this.storage.getAccountStore();
+    const accounts = Object.values(accountStore);
     return (
       <div>
         {accounts.length ? <AccountChooser/> : <AccountCreator/>}

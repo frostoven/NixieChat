@@ -8,6 +8,7 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import { createKeyPairs, exportKeys } from '../../encryption';
+import { NixieStorage } from '../../storage/NixieStorage';
 
 class AccountCreator extends React.Component {
   static propTypes = {
@@ -17,6 +18,8 @@ class AccountCreator extends React.Component {
   static defaultProps = {
     //
   };
+
+  storage = new NixieStorage();
 
   state = {
     accountName: '',
@@ -43,7 +46,9 @@ class AccountCreator extends React.Component {
 
     const keyPairs = await createKeyPairs();
     console.log({ keyPairs });
+    console.log(await exportKeys(keyPairs));
     console.log(await exportKeys(keyPairs, 'string'));
+    this.storage.storeAccount(this.state.accountName, keyPairs, false);
   };
 
   render() {
