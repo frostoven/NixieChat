@@ -104,7 +104,7 @@ module.exports = {
           setTimeout(() => {
             const timer = setInterval(() => {
               if (Date.now() - lastBuildEnd < 5000) {
-                updateTerminalTitle(`Rebuilt \\<5s ago - NixieChat`);
+                updateTerminalTitle(`Rebuilt \\< 5s ago - NixieChat`);
               }
               else {
                 clearInterval(timer);
