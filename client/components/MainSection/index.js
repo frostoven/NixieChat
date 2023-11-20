@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Button,
   Container,
   Header,
   Icon,
@@ -18,7 +19,7 @@ const overlayStyle = {
 const Pusher = (props) => {
   const { children, sidebarItems, onPusherClick, visible } = props;
   return (
-    <Sidebar.Pushable style={overlayStyle}>
+    <Sidebar.Pushable style={{ ...overlayStyle, zIndex: 5 }}>
       <Sidebar
         as={Menu}
         animation="overlay"
@@ -31,7 +32,7 @@ const Pusher = (props) => {
       <Sidebar.Pusher
         dimmed={visible}
         onClick={onPusherClick}
-        style={overlayStyle}
+        style={{ ...overlayStyle, zIndex: 4 }}
       >
         {children || null}
       </Sidebar.Pusher>
@@ -42,26 +43,32 @@ const Pusher = (props) => {
 const NavBarContents = (props) => {
   const { onToggle, rightItems } = props;
   return (
-    <Menu fixed="top" inverted>
-      <Menu.Item onClick={onToggle}>
-        <Icon name="sidebar"/>
-      </Menu.Item>
-      <Menu.Item>
-        <Header as="h4" style={{ fontWeight: 'bold' }}>
-          NixieChat
-        </Header>
-      </Menu.Item>
-      <Menu.Menu position="right">
-        {rightItems.map((item) => (
-          <Menu.Item {...item} />
-        ))}
-      </Menu.Menu>
-    </Menu>
+    <>
+      <Menu fixed="top" inverted>
+        <Menu.Item onClick={onToggle}>
+          <Icon name="sidebar"/>
+        </Menu.Item>
+        <Menu.Item>
+          <Header as="h4" style={{ fontWeight: 'bold' }}>
+            NixieChat
+          </Header>
+        </Menu.Item>
+        <Menu.Menu position="right">
+          {rightItems.map((item) => (
+            <Menu.Item {...item} />
+          ))}
+        </Menu.Menu>
+      </Menu>
+    </>
   );
 };
 
-const NavBarChildren = (props) => (
-  <Container style={{ marginTop: '5em' }}>{props.children}</Container>
+const PageContents = (props) => (
+  <Container style={
+    { ...overlayStyle, top: 67, left: -204, zIndex: 5 }
+  }>
+    {props.children}
+  </Container>
 );
 
 class NavBar extends React.Component {
@@ -71,7 +78,6 @@ class NavBar extends React.Component {
 
   handlePusher = () => {
     const { visible } = this.state;
-
     if (visible) this.setState({ visible: false });
   };
 
@@ -81,16 +87,20 @@ class NavBar extends React.Component {
     const { children, sidebarItems, rightItems } = this.props;
     const { visible } = this.state;
 
-    const menuContents =
-      <NavBarContents
-        sidebarItems={sidebarItems}
-        onPusherClick={this.handlePusher}
-        onToggle={this.handleToggle}
-        rightItems={rightItems}
-        visible={visible}
-      >
-        <NavBarChildren>{children}</NavBarChildren>
-      </NavBarContents>;
+    const sidebar = (
+      <>
+        <NavBarContents
+          sidebarItems={sidebarItems}
+          onPusherClick={this.handlePusher}
+          onToggle={this.handleToggle}
+          rightItems={rightItems}
+          visible={visible}
+        >
+        </NavBarContents>
+        <PageContents>{children}</PageContents>
+      </>
+    );
+
 
     if (visible) {
       return (
@@ -101,12 +111,13 @@ class NavBar extends React.Component {
           rightItems={rightItems}
           visible={visible}
         >
-          {menuContents}
+          {sidebar}
         </Pusher>
       );
     }
-
-    return menuContents;
+    else {
+      return sidebar;
+    }
   }
 }
 
@@ -119,9 +130,15 @@ const rightItems = [
   { as: 'a', content: 'Button', key: 'doSomethingWithMe' },
 ];
 
-const MainSection = () => (
-  <NavBar sidebarItems={sidebarItems} rightItems={rightItems}/>
-);
+class MainSection extends React.Component {
+  render() {
+    return (
+      <NavBar sidebarItems={sidebarItems} rightItems={rightItems}>
+        <Button>Test</Button>
+      </NavBar>
+    );
+  }
+}
 
 export {
   MainSection,
