@@ -1,7 +1,5 @@
 import React from 'react';
 import {
-  Button,
-  Container,
   Header,
   Icon,
   Menu,
@@ -17,6 +15,14 @@ const overlayStyle = {
   right: 0,
 };
 
+const NixieHeader = ({ style } = {}) => {
+  return (
+    <Header as="h4" style={{ ...style, fontWeight: 'bold' }}>
+      NixieChat
+    </Header>
+  );
+};
+
 const Pusher = (props) => {
   const { children, sidebarItems, onPusherClick, visible } = props;
   return (
@@ -29,6 +35,7 @@ const Pusher = (props) => {
         items={sidebarItems}
         vertical
         visible={visible}
+        style={{ minWidth: 220 }}
       />
       <Sidebar.Pusher
         dimmed={visible}
@@ -50,9 +57,7 @@ const NavBarContents = (props) => {
           <Icon name="sidebar"/>
         </Menu.Item>
         <Menu.Item>
-          <Header as="h4" style={{ fontWeight: 'bold' }}>
-            NixieChat
-          </Header>
+          <NixieHeader/>
         </Menu.Item>
         <Menu.Menu position="right">
           {rightItems.map((item) => (
@@ -123,6 +128,13 @@ class NavBar extends React.Component {
 }
 
 const sidebarItems = [
+  {
+    as: 'div', key: 'heading', content: (
+      <NixieHeader
+        style={{ paddingTop: 7, paddingBottom: 7, textAlign: 'center' }}
+      />
+    ),
+  },
   { as: 'div', content: <b>Active account: [name]</b>, key: 'accountName' },
   { as: 'a', content: 'Switch Account', key: 'switchAccount' },
   { as: 'a', content: 'Dark Mode', key: 'darkMode' },
