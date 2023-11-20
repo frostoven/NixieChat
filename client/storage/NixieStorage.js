@@ -16,6 +16,8 @@ class NixieStorage extends StorageProxy {
       return instance;
     }
 
+    // this.accountCollectionCache = null;
+
     this.initialized = false;
   }
 

@@ -106,7 +106,6 @@ class StorageProxy {
 
     const fnName = `_createKeyIfNotExists${this.storageEngine}`;
     const writer = this[fnName];
-    console.log(this, fnName);
     if (!writer) {
       this.readOnly = true;
       console.error(`Function name ${fnName} does not exist on Storage.`);
