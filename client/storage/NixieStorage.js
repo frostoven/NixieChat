@@ -16,7 +16,12 @@ class NixieStorage extends StorageProxy {
       return instance;
     }
 
-    // this.accountCollectionCache = null;
+    this.accountCollectionCache = {
+      accountByName: {},
+      length: 0,
+      asArray: [],
+      accountNames: [],
+    };
 
     this.initialized = false;
   }
@@ -27,11 +32,28 @@ class NixieStorage extends StorageProxy {
     return this;
   }
 
+  _updateAccountCollectionCache(accountCollection) {
+    const asArray = Object.values(accountCollection);
+    this.accountCollectionCache = {
+      accountByName: accountCollection,
+      length: asArray.length,
+      asArray,
+      accountNames: Object.keys(accountCollection),
+    };
+  }
+
   async getAccountStore() {
     if (!this.initialized) {
       return console.error('NixieStorage queried before initialization.');
     }
-    return await this.getItem(NX.ACCOUNT_COLLECTION_KEY);
+    const accounts = await this.getItem(NX.ACCOUNT_COLLECTION_KEY);
+    this._updateAccountCollectionCache(accounts);
+    return accounts;
+  }
+
+  async buildAccountCollectionCache() {
+    await this.getAccountStore();
+    return this.accountCollectionCache;
   }
 
   async storeAccount(accountName, { privateKey, publicKey }, overwrite = false) {
@@ -45,6 +67,7 @@ class NixieStorage extends StorageProxy {
       accountName, privateKey, publicKey,
     };
 
+    this._updateAccountCollectionCache(accounts);
     await this.setItem(NX.ACCOUNT_COLLECTION_KEY, accounts);
   }
 }

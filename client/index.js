@@ -33,20 +33,18 @@ class RootNode extends React.Component {
   }
 
   componentDidMount() {
-    this.initAccount();
+    this.initStorage().catch(console.error);
   }
 
-  initAccount = () => {
-    this.storage.initStorage().then(async () => {
-      const accounts = await this.storage.getAccountStore();
-      console.log('--->', accounts);
-      if (!Object.values(accounts).length) {
-        return this.setState({
-          loggedIn: false,
-          booting: false,
-        });
-      }
-    });
+  initStorage = async () => {
+    await this.storage.initStorage();
+    const accounts = await this.storage.buildAccountCollectionCache();
+    if (accounts.length) {
+      return this.setState({
+        loggedIn: false,
+        booting: false,
+      });
+    }
   };
 
   setupServerListeners = () => {
