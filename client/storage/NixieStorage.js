@@ -1,4 +1,5 @@
 import { StorageProxy } from './StorageProxy';
+import { CollectionCache } from './CollectionCache';
 
 let instance = null;
 
@@ -16,12 +17,7 @@ class NixieStorage extends StorageProxy {
       return instance;
     }
 
-    this.accountCollectionCache = {
-      accountByName: {},
-      length: 0,
-      asArray: [],
-      accountNames: [],
-    };
+    this.accountCollectionCache = new CollectionCache();
 
     this.initialized = false;
   }
@@ -32,22 +28,12 @@ class NixieStorage extends StorageProxy {
     return this;
   }
 
-  _updateAccountCollectionCache(accountCollection) {
-    const asArray = Object.values(accountCollection);
-    this.accountCollectionCache = {
-      accountByName: accountCollection,
-      length: asArray.length,
-      asArray,
-      accountNames: Object.keys(accountCollection),
-    };
-  }
-
   async getAccountStore() {
     if (!this.initialized) {
       return console.error('NixieStorage queried before initialization.');
     }
     const accounts = await this.getItem(NX.ACCOUNT_COLLECTION_KEY);
-    this._updateAccountCollectionCache(accounts);
+    this.accountCollectionCache.updateCache(accounts);
     return accounts;
   }
 
@@ -67,7 +53,7 @@ class NixieStorage extends StorageProxy {
       accountName, privateKey, publicKey,
     };
 
-    this._updateAccountCollectionCache(accounts);
+    this.accountCollectionCache.updateCache(accounts);
     await this.setItem(NX.ACCOUNT_COLLECTION_KEY, accounts);
   }
 }
