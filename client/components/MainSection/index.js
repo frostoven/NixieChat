@@ -7,6 +7,7 @@ import {
   Menu,
   Sidebar,
 } from 'semantic-ui-react';
+import { ContactsAndChatGrid } from './ContactsAndChatGrid';
 
 const overlayStyle = {
   position: 'fixed',
@@ -64,11 +65,11 @@ const NavBarContents = (props) => {
 };
 
 const PageContents = (props) => (
-  <Container style={
-    { ...overlayStyle, top: 67, left: -204, zIndex: 5 }
+  <div style={
+    { ...overlayStyle, top: 67, left: 0, zIndex: 5 }
   }>
     {props.children}
-  </Container>
+  </div>
 );
 
 class NavBar extends React.Component {
@@ -134,7 +135,7 @@ class MainSection extends React.Component {
   render() {
     return (
       <NavBar sidebarItems={sidebarItems} rightItems={rightItems}>
-        <Button>Test</Button>
+        <ContactsAndChatGrid/>
       </NavBar>
     );
   }
