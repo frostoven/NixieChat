@@ -49,8 +49,6 @@ class LargeCircleIconButton extends React.Component {
   }
 }
 
-console.log({LargeCircleIconButton})
-
 export {
   LargeCircleIconButton,
 };
