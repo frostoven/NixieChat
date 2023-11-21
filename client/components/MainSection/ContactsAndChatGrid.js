@@ -22,10 +22,10 @@ class ContactsAndChatGrid extends React.Component {
 
     return (
       <Grid stretched style={{ height: '100%' }}>
-        <Grid.Column computer={6} tablet={6} mobile={16} /*style={{ backgroundColor: 'red' }}*/>
+        <Grid.Column computer={6} tablet={6} mobile={16} style={{ height: '100%' }}>
           <ContactsList/>
         </Grid.Column>
-        <Grid.Column computer={10} tablet={10} className="computer only" /*style={{ backgroundColor: 'blue' }}*/>
+        <Grid.Column computer={10} tablet={10} className="computer only" style={{ height: '100%' }}>
           // active chat here
         </Grid.Column>
       </Grid>
