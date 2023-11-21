@@ -1,5 +1,5 @@
 import EventEmitter from './EventEmitter';
-import config from './config/server';
+import config from '../config/server';
 
 const clientEmitter = new EventEmitter();
 const serverEmitter = io('ws://localhost:' + config.server.webSocket);

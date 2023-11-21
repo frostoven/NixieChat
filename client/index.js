@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './modal';
-import { serverEmitter } from './comms';
+import { clientEmitter } from './emitters/comms';
 import { NixieStorage } from './storage/NixieStorage';
 import { AccountsScreen } from './components/AccountsScreen';
 import { MainSection } from './components/MainSection';
