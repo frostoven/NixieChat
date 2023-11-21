@@ -71,7 +71,7 @@ const NavBarContents = (props) => {
 
 const PageContents = (props) => (
   <div style={
-    { ...overlayStyle, top: 67, left: 0, zIndex: 5 }
+    { ...overlayStyle, top: 63, bottom: -27, left: 0, zIndex: 5 }
   }>
     {props.children}
   </div>
