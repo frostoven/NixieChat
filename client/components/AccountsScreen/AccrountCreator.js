@@ -9,6 +9,8 @@ import {
 } from 'semantic-ui-react';
 import { createKeyPairs, exportKeys } from '../../encryption';
 import { NixieStorage } from '../../storage/NixieStorage';
+import { clientEmitter } from '../../emitters/comms';
+import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 
 class AccountCreator extends React.Component {
   static propTypes = {
@@ -63,10 +65,11 @@ class AccountCreator extends React.Component {
         buttonIcon: 'hourglass end',
         buttonText: 'Saving...',
       }, async () => {
-        // await this.storage.storeAccount(this.state.accountName, keyPairs, false);
+        await this.storage.storeAccount(this.state.accountName, keyPairs, false);
         setTimeout(() => {
           // The timeout is just so things don't move too fast and look like a
           // glitch fest.
+          clientEmitter.emit(clientEmitterAction.softReloadApp);
         }, 250);
       });
 
@@ -75,7 +78,7 @@ class AccountCreator extends React.Component {
 
   render() {
     return (
-      <Segment>
+      <Segment style={{ textAlign: 'left' }}>
         <Header>You have no accounts on this device</Header>
         <i>Note that accounts are stored only on your device and not uploaded
           to
