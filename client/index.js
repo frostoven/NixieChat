@@ -5,6 +5,7 @@ import { clientEmitter } from './emitters/comms';
 import { NixieStorage } from './storage/NixieStorage';
 import { AccountsScreen } from './components/AccountsScreen';
 import { MainSection } from './components/MainSection';
+import { clientEmitterAction } from './emitters/clientEmitterAction';
 
 /**
  * TODO list:
@@ -33,18 +34,25 @@ class RootNode extends React.Component {
   }
 
   componentDidMount() {
-    this.initStorage().catch(console.error);
+    clientEmitter.on(clientEmitterAction.softReloadApp, async () => {
+      await this.refreshStorage();
+    });
+
+    clientEmitter.on(clientEmitterAction.hardReloadApp, async () => {
+      await this.refreshStorage();
+      this.forceUpdate();
+    });
+
+    this.refreshStorage().catch(console.error);
   }
 
-  initStorage = async () => {
+  refreshStorage = async () => {
     await this.storage.initStorage();
     const accounts = await this.storage.buildAccountCollectionCache();
-    if (accounts.length) {
-      return this.setState({
-        loggedIn: false,
-        booting: false,
-      });
-    }
+    this.setState({
+      loggedIn: !!this.storage.lastActiveAccount,
+      booting: false,
+    });
   };
 
   setupServerListeners = () => {
@@ -58,12 +66,18 @@ class RootNode extends React.Component {
       return <div>Starting up...</div>;
     }
     else if (!loggedIn) {
-      return <AccountsScreen/>;
+      return (
+        <>
+          <h4 style={{ textAlign: 'center' }}>NixieChat</h4>
+          <AccountsScreen/>
+        </>
+      );
     }
-
-    return (
-      <MainSection/>
-    );
+    else {
+      return (
+        <MainSection/>
+      );
+    }
   }
 }
 
