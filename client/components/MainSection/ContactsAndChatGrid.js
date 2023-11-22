@@ -4,6 +4,23 @@ import { CreateFirstContact } from '../ContactFinder/CreateFirstContact';
 import { CreateFirstChat } from '../ChatCreator/CreateFirstChat';
 import { NixieStorage } from '../../storage/NixieStorage';
 import { OngoingChatsList } from './OngoingChatsList';
+import { ActiveChat } from './ActiveChat';
+
+const columnStyle = {
+  height: '100%',
+  paddingTop: 0,
+  paddingBottom: 0,
+};
+
+const columnLeftStyle = {
+  ...columnStyle,
+  paddingRight: 0,
+};
+
+const columnRightStyle = {
+  ...columnStyle,
+  paddingLeft: 0,
+};
 
 class ContactsAndChatGrid extends React.Component {
   storage = new NixieStorage();
@@ -21,12 +38,18 @@ class ContactsAndChatGrid extends React.Component {
     // return <CreateFirstChat/>;
 
     return (
-      <Grid stretched style={{ height: '100%' }}>
-        <Grid.Column computer={6} tablet={6} mobile={16} style={{ height: '100%' }}>
+      <Grid stretched style={columnLeftStyle}>
+        <Grid.Column
+          computer={6} tablet={6} mobile={16}
+          style={columnLeftStyle}
+        >
           <OngoingChatsList/>
         </Grid.Column>
-        <Grid.Column computer={10} tablet={10} className="computer only" style={{ height: '100%' }}>
-          // active chat here
+        <Grid.Column
+          computer={10} tablet={10} className="computer only"
+          style={columnRightStyle}
+        >
+          <ActiveChat/>
         </Grid.Column>
       </Grid>
     );
