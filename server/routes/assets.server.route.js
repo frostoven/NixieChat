@@ -47,6 +47,11 @@ router.get(
 );
 
 router.get(
+	'/assets/backgrounds/:fileName',
+	assetsController.getBackground,
+);
+
+router.get(
 	'/assets/icons/:fileName',
 	assetsController.getIcon,
 );

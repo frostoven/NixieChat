@@ -58,10 +58,18 @@ exports.getFont = (req, res) => {
   ));
 };
 
+exports.getBackground = (req, res) => {
+  res.sendFile(path.join(
+    __dirname +
+    '../../../client/assets/backgrounds/' +
+    req.params.fileName,
+  ));
+};
+
 exports.getIcon = (req, res) => {
   res.sendFile(path.join(
     __dirname +
-    '../../../assets/icons/' +
+    '../../../client/assets/icons/' +
     req.params.fileName,
   ));
 };
@@ -69,8 +77,7 @@ exports.getIcon = (req, res) => {
 exports.getImage = (req, res) => {
   res.sendFile(path.join(
     __dirname +
-    '../../../assets/img/' +
+    '../../../client/assets/img/' +
     req.params.fileName,
   ));
 };
-
