@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const contactsListStyle = {
+const chatsListStyle = {
   // borderBottom: 'thin solid grey',
   paddingLeft: 2,
   paddingTop: 12,
@@ -41,7 +41,7 @@ const taperedLineStyle = {
   margin: 'auto',
 };
 
-class ContactsList extends React.Component {
+class OngoingChatsList extends React.Component {
   static propTypes = {
     //
   };
@@ -58,6 +58,54 @@ class ContactsList extends React.Component {
         lastMessage: 'Last message shown here',
         photo: '',
       },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
+      {
+        // Example structure.
+        name: 'Name TBA',
+        lastMessage: 'Last message shown here',
+        photo: '',
+      },
     ];
 
     const contactsJsx = [];
@@ -65,7 +113,7 @@ class ContactsList extends React.Component {
     for (let i = 0, len = contacts.length; i < len; i++) {
       const { name, lastMessage } = contacts[i];
       contactsJsx.push(
-        <div key={`contacts-list-${i}`} style={contactsListStyle}>
+        <div key={`contacts-list-${i}`} style={chatsListStyle}>
 
           {/* Contact profile photo */}
           <div style={profilePhotoContainer}>
@@ -102,5 +150,5 @@ class ContactsList extends React.Component {
 }
 
 export {
-  ContactsList,
+  OngoingChatsList,
 };
