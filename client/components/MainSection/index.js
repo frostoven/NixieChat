@@ -132,7 +132,7 @@ const sidebarItems = [
     as: 'div', key: 'heading', content: (
       <NixieHeader
         style={{
-          paddingTop: 7,
+          paddingTop: 2,
           paddingBottom: 7,
           paddingLeft: 56.5,
         }}

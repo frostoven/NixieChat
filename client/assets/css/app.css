@@ -43,3 +43,13 @@
 .ui.sidebar .item {
   text-align: left !important;
 }
+
+.ui.top.fixed.menu {
+  min-height: 48px;
+  height: 48px;
+  padding-top: 2px;
+}
+
+.ui.top.fixed.menu a {
+  padding-top: 10px;
+}
