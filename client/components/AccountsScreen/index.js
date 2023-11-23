@@ -1,7 +1,7 @@
 import React from 'react';
-import { NixieStorage } from '../../storage/NixieStorage';
 import { AccountChooser } from './AccountChooser';
 import { AccountCreator } from './AccrountCreator';
+import { Accounts } from '../../storage/Accounts';
 
 const loginContainerStyle = {
   maxWidth: '400',
@@ -9,14 +9,8 @@ const loginContainerStyle = {
 };
 
 class AccountsScreen extends React.Component {
-  static defaultProps = {
-    //
-  };
-
-  storage = new NixieStorage();
-
   render() {
-    const accounts = this.storage.accountCollectionCache;
+    const accounts = Accounts.getAccounts();
     return (
       <div style={{ width: '100%', textAlign: 'center' }}>
         <div style={{ maxWidth: 640, margin: 'auto' }}>

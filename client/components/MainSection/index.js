@@ -141,7 +141,6 @@ const sidebarItems = () => {
         <NixieHeader
           style={{
             paddingTop: 1,
-            paddingBottom: 7,
             paddingLeft: 57,
           }}
         />

@@ -8,22 +8,12 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import { createKeyPairs, exportKeys } from '../../encryption';
-import { NixieStorage } from '../../storage/NixieStorage';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Settings } from '../../storage/Settings';
+import { Accounts } from '../../storage/Accounts';
 
 class AccountCreator extends React.Component {
-  static propTypes = {
-    //
-  };
-
-  static defaultProps = {
-    //
-  };
-
-  storage = new NixieStorage();
-
   state = {
     accountName: '',
     personalName: '',
@@ -66,7 +56,7 @@ class AccountCreator extends React.Component {
         buttonIcon: 'hourglass end',
         buttonText: 'Saving...',
       }, async () => {
-        await this.storage.writeAccount(this.state.accountName, keyPairs, false);
+        await Accounts.createAccount(this.state.accountName, keyPairs, false, false);
         setTimeout(() => {
           // The timeout is just so things don't move too fast and look like a
           // glitch fest.

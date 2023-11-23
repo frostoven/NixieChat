@@ -1,11 +1,9 @@
 import React from 'react';
 import { Grid } from 'semantic-ui-react';
-import { CreateFirstContact } from '../ContactFinder/CreateFirstContact';
-import { CreateFirstChat } from '../ChatCreator/CreateFirstChat';
-import { NixieStorage } from '../../storage/NixieStorage';
 import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
 import { Settings } from '../../storage/Settings';
+import { Accounts } from '../../storage/Accounts';
 
 const columnStyle = {
   height: '100%',
@@ -24,11 +22,9 @@ const columnRightStyle = {
 };
 
 class ContactsAndChatGrid extends React.Component {
-  storage = new NixieStorage();
-
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const accounts = this.storage.accountCollectionCache;
+    const accounts = Accounts.getAccounts();
     if (!accounts.length) {
       //
     }
