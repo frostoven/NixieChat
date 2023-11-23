@@ -52,12 +52,12 @@ class StorageProxy {
    * @param keyName
    * @return {*}
    */
-  async getItem(keyName) {
+  async fetchItem(keyName) {
     if (this.readOnly) {
       return console.warn('Not reading data - read-only flag set.');
     }
 
-    const fnName = `_getItem${this.storageEngine}`;
+    const fnName = `_fetchItem${this.storageEngine}`;
     const reader = this[fnName];
     if (!reader) {
       this.readOnly = true;
@@ -76,12 +76,12 @@ class StorageProxy {
    * @param value
    * @return {*}
    */
-  async setItem(keyName, value) {
+  async writeItem(keyName, value) {
     if (this.readOnly) {
       return console.warn('Not writing data - read-only flag set.');
     }
 
-    const fnName = `_setItem${this.storageEngine}`;
+    const fnName = `_writeItem${this.storageEngine}`;
     const writer = this[fnName];
     if (!writer) {
       this.readOnly = true;
@@ -122,7 +122,7 @@ class StorageProxy {
    * @param keyName
    * @return {*}
    */
-  async _getItemIndexedDb(keyName) {
+  async _fetchItemIndexedDb(keyName) {
     return await idbGet(keyName);
   }
 
@@ -131,7 +131,7 @@ class StorageProxy {
    * @param value
    * @return {*}
    */
-  async _setItemIndexedDb(keyName, value) {
+  async _writeItemIndexedDb(keyName, value) {
     await idbSet(keyName, value);
   }
 

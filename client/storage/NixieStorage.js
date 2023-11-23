@@ -21,6 +21,7 @@ class NixieStorage extends StorageProxy {
 
     this.lastActiveAccount = '';
     this.accountCollectionCache = new CollectionCache();
+    this.settingsCache = null;
 
     this.initialized = false;
   }
@@ -37,38 +38,39 @@ class NixieStorage extends StorageProxy {
     await this.createKeyIfNotExists(NX.LAST_ACTIVE_ACCOUNT_KEY, '');
     await this.createKeyIfNotExists(NX.ACCOUNT_COLLECTION_KEY, {});
     await this.buildAccountCollectionCache();
+    await this.fetchSettings();
     this.initialized = true;
     return this;
   }
 
   async _autoSetLastActiveAccount() {
-    this.lastActiveAccount = await this.getItem(NX.LAST_ACTIVE_ACCOUNT_KEY);
+    this.lastActiveAccount = await this.fetchItem(NX.LAST_ACTIVE_ACCOUNT_KEY);
     if (!this.lastActiveAccount && this.accountCollectionCache.length) {
       this.lastActiveAccount = this.accountCollectionCache.allEntryNames[0];
-      await this.setItem(NX.LAST_ACTIVE_ACCOUNT_KEY, this.lastActiveAccount);
+      await this.writeItem(NX.LAST_ACTIVE_ACCOUNT_KEY, this.lastActiveAccount);
     }
   }
 
-  async getAccountStore() {
+  async fetchAccountStore() {
     if (!this.passesChecks) {
       return null;
     }
-    const accounts = await this.getItem(NX.ACCOUNT_COLLECTION_KEY);
+    const accounts = await this.fetchItem(NX.ACCOUNT_COLLECTION_KEY);
     this.accountCollectionCache.updateCache(accounts);
     return accounts;
   }
 
   async buildAccountCollectionCache() {
-    await this.getAccountStore();
+    await this.fetchAccountStore();
     await this._autoSetLastActiveAccount();
     return this.accountCollectionCache;
   }
 
-  async storeAccount(accountName, { privateKey, publicKey }, overwrite = false) {
+  async writeAccount(accountName, { privateKey, publicKey }, overwrite = false) {
     if (!this.passesChecks) {
       return false;
     }
-    const accounts = await this.getAccountStore();
+    const accounts = await this.fetchAccountStore();
     if (accounts[accountName] && !overwrite) {
       console.error(`Account with name '${accountName}' already exists.`);
       return;
@@ -79,20 +81,22 @@ class NixieStorage extends StorageProxy {
     };
 
     this.accountCollectionCache.updateCache(accounts);
-    await this.setItem(NX.ACCOUNT_COLLECTION_KEY, accounts);
+    await this.writeItem(NX.ACCOUNT_COLLECTION_KEY, accounts);
     return true;
   }
 
-  async getAccountContacts() {
+  async fetchAccountContacts() {
     const accounts = await this.buildAccountCollectionCache();
   }
 
-  async getSettings() {
-    return await this.getItem(NX.SETTINGS_KEY) || {};
+  async fetchSettings() {
+    this.settingsCache = await this.fetchItem(NX.SETTINGS_KEY) || {};
+    return this.settingsCache;
   }
 
-  async saveSettings(settings) {
-    await this.setItem(NX.SETTINGS_KEY, settings);
+  async writeSettings(settings) {
+    this.settingsCache = settings;
+    await this.writeItem(NX.SETTINGS_KEY, settings);
   }
 }
 
