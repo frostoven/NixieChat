@@ -26,7 +26,7 @@ const NixieHeader = ({ style } = {}) => {
 const Pusher = (props) => {
   const { children, sidebarItems, onPusherClick, visible } = props;
   return (
-    <Sidebar.Pushable style={{ ...overlayStyle, zIndex: 5 }}>
+    <Sidebar.Pushable style={{ ...overlayStyle, zIndex: 5, right: -10 }}>
       <Sidebar
         as={Menu}
         animation="overlay"
