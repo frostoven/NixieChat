@@ -53,3 +53,8 @@
 .ui.top.fixed.menu a {
   padding-top: 10px;
 }
+
+.ui.grid.inverted {
+  color: black;
+  background-color: white;
+}

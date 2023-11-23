@@ -38,7 +38,7 @@ class ContactsAndChatGrid extends React.Component {
     // return <CreateFirstChat/>;
 
     return (
-      <Grid stretched style={columnLeftStyle}>
+      <Grid stretched style={columnLeftStyle} inverted>
         <Grid.Column
           computer={6} tablet={6} mobile={16}
           style={columnLeftStyle}
