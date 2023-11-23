@@ -8,6 +8,7 @@ let NX;
 class NixieStorage extends StorageProxy {
   static ACCOUNT_COLLECTION_KEY = 'account_collection';
   static LAST_ACTIVE_ACCOUNT_KEY = 'last_active_account';
+  static SETTINGS_KEY = 'settings_collection';
 
   constructor() {
     if (!instance) {
@@ -84,6 +85,14 @@ class NixieStorage extends StorageProxy {
 
   async getAccountContacts() {
     const accounts = await this.buildAccountCollectionCache();
+  }
+
+  async getSettings() {
+    return await this.getItem(NX.SETTINGS_KEY) || {};
+  }
+
+  async saveSettings(settings) {
+    await this.setItem(NX.SETTINGS_KEY, settings);
   }
 }
 
