@@ -1,11 +1,16 @@
 import React from 'react';
 import {
+  Container,
   Header,
   Icon,
   Menu,
   Sidebar,
 } from 'semantic-ui-react';
 import { ContactsAndChatGrid } from './ContactsAndChatGrid';
+import { uiGlobals } from '../../config/uiGlobals';
+import { clientEmitter } from '../../emitters/comms';
+import { clientEmitterAction } from '../../emitters/clientEmitterAction';
+import { NixieStorage } from '../../storage/NixieStorage';
 
 const overlayStyle = {
   position: 'fixed',
@@ -31,7 +36,7 @@ const Pusher = (props) => {
         as={Menu}
         animation="overlay"
         icon="labeled"
-        inverted
+        inverted={!uiGlobals.darkMode}
         items={sidebarItems}
         vertical
         visible={visible}
@@ -52,7 +57,7 @@ const NavBarContents = (props) => {
   const { onToggle, rightItems } = props;
   return (
     <>
-      <Menu fixed="top" inverted>
+      <Menu fixed="top" inverted={!uiGlobals.darkMode}>
         <Menu.Item onClick={onToggle}>
           <Icon name="sidebar"/>
         </Menu.Item>
@@ -127,30 +132,61 @@ class NavBar extends React.Component {
   }
 }
 
-const sidebarItems = [
+const sidebarItems = () => [
   {
-    as: 'div', key: 'heading', content: (
+    key: 'heading',
+    as: 'div',
+    content: (
       <NixieHeader
         style={{
-          paddingTop: 2,
+          paddingTop: 1,
           paddingBottom: 7,
-          paddingLeft: 56.5,
+          paddingLeft: 57,
         }}
       />
     ),
   },
-  { as: 'div', content: <b>Active account: [name]</b>, key: 'accountName' },
-  { as: 'a', content: 'Switch Account', key: 'switchAccount' },
-  { as: 'a', content: 'Dark Mode', key: 'darkMode' },
+  {
+    key: 'accountName',
+    as: 'div',
+    content: <b>Active account: [name]</b>,
+  },
+  {
+    key: 'switchAccount',
+    as: 'a',
+    content: (
+      <Container fluid><Icon name="at"></Icon>Switch Account</Container>
+    ),
+  },
+  {
+    key: 'darkMode',
+    as: 'a',
+    content: (
+      <Container fluid>
+        <Icon name={uiGlobals.darkMode ? 'moon outline' : 'moon'}/>Dark Mode
+        &nbsp;&nbsp;
+        <Icon name={uiGlobals.darkMode ? 'toggle on' : 'toggle off'}/>
+      </Container>
+    ),
+    onClick: async () => {
+      uiGlobals.darkMode = !uiGlobals.darkMode;
+      clientEmitter.emit(clientEmitterAction.hardReloadApp);
+      const storage = new NixieStorage();
+      const settings = await storage.getItem();
+      settings.darkMode = uiGlobals.darkMode;
+      await storage.saveSettings(settings);
+    }
+  },
 ];
-const rightItems = [
+
+const rightItems = () => [
   { as: 'a', content: 'Button', key: 'doSomethingWithMe' },
 ];
 
 class MainSection extends React.Component {
   render() {
     return (
-      <NavBar sidebarItems={sidebarItems} rightItems={rightItems}>
+      <NavBar sidebarItems={sidebarItems()} rightItems={rightItems()}>
         <ContactsAndChatGrid/>
       </NavBar>
     );

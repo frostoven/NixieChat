@@ -11,6 +11,7 @@ import { createKeyPairs, exportKeys } from '../../encryption';
 import { NixieStorage } from '../../storage/NixieStorage';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
+import { uiGlobals } from '../../config/uiGlobals';
 
 class AccountCreator extends React.Component {
   static propTypes = {
@@ -92,7 +93,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted circular/>}
+                               inverted={!uiGlobals.darkMode} circular/>}
                 content={
                   'This is for your own reference; it\'s used to tell your ' +
                   'accounts apart.'
@@ -115,7 +116,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted circular/>}
+                               inverted={!uiGlobals.darkMode} circular/>}
                 content={
                   'This is what people see after you\'ve been added as a contact.'
                 }
@@ -129,7 +130,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted circular/>}
+                               inverted={!uiGlobals.darkMode} circular/>}
                 content={
                   'If you want people to invite you to chats, you need to ' +
                   'have a public name. You can add / remove the account\'s ' +

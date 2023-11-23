@@ -131,7 +131,7 @@ class OngoingChatsList extends React.Component {
           </div>
 
         </div>,
-        <div style={taperedLineStyle}>
+        <div style={taperedLineStyle} key={`chat-separator-${i}`}>
           &nbsp;
         </div>,
       );

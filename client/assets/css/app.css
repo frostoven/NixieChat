@@ -58,3 +58,11 @@
   color: black;
   background-color: white;
 }
+
+.sidebar.icon  {
+  font-size: 12pt !important;
+}
+
+.sidebar .item {
+  color: white !important;
+}
