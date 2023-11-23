@@ -11,7 +11,7 @@ import { createKeyPairs, exportKeys } from '../../encryption';
 import { NixieStorage } from '../../storage/NixieStorage';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
-import { uiGlobals } from '../../config/uiGlobals';
+import { Settings } from '../../storage/Settings';
 
 class AccountCreator extends React.Component {
   static propTypes = {
@@ -66,7 +66,7 @@ class AccountCreator extends React.Component {
         buttonIcon: 'hourglass end',
         buttonText: 'Saving...',
       }, async () => {
-        await this.storage.storeAccount(this.state.accountName, keyPairs, false);
+        await this.storage.writeAccount(this.state.accountName, keyPairs, false);
         setTimeout(() => {
           // The timeout is just so things don't move too fast and look like a
           // glitch fest.
@@ -78,6 +78,7 @@ class AccountCreator extends React.Component {
   };
 
   render() {
+    const darkMode = Settings.isDarkModeEnabled();
     return (
       <Segment style={{ textAlign: 'left' }}>
         <Header>You have no accounts on this device</Header>
@@ -93,7 +94,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted={!uiGlobals.darkMode} circular/>}
+                               inverted={!darkMode} circular/>}
                 content={
                   'This is for your own reference; it\'s used to tell your ' +
                   'accounts apart.'
@@ -116,7 +117,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted={!uiGlobals.darkMode} circular/>}
+                               inverted={!darkMode} circular/>}
                 content={
                   'This is what people see after you\'ve been added as a contact.'
                 }
@@ -130,7 +131,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted={!uiGlobals.darkMode} circular/>}
+                               inverted={!darkMode} circular/>}
                 content={
                   'If you want people to invite you to chats, you need to ' +
                   'have a public name. You can add / remove the account\'s ' +

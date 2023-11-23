@@ -5,7 +5,7 @@ import { CreateFirstChat } from '../ChatCreator/CreateFirstChat';
 import { NixieStorage } from '../../storage/NixieStorage';
 import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
-import { uiGlobals } from '../../config/uiGlobals';
+import { Settings } from '../../storage/Settings';
 
 const columnStyle = {
   height: '100%',
@@ -27,6 +27,7 @@ class ContactsAndChatGrid extends React.Component {
   storage = new NixieStorage();
 
   render() {
+    const darkMode = Settings.isDarkModeEnabled();
     const accounts = this.storage.accountCollectionCache;
     if (!accounts.length) {
       //
@@ -39,7 +40,7 @@ class ContactsAndChatGrid extends React.Component {
     // return <CreateFirstChat/>;
 
     return (
-      <Grid stretched style={columnLeftStyle} inverted={!uiGlobals.darkMode}>
+      <Grid stretched style={columnLeftStyle} inverted={!darkMode}>
         <Grid.Column
           computer={6} tablet={6} mobile={16}
           style={columnLeftStyle}

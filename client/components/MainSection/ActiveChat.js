@@ -1,5 +1,5 @@
 import React from 'react';
-import { uiGlobals } from '../../config/uiGlobals';
+import { Settings } from '../../storage/Settings';
 
 const chatBgStyle = {
   // Generated using https://mycolor.space/gradient3?ori=to+right+bottom&hex=%23DBDDBB&hex2=%2388B884&hex3=%23D5D88D&submit=submit
@@ -25,7 +25,8 @@ const chatTextAreaStyle = {
 
 class ActiveChat extends React.Component {
   render() {
-    const bgStyle = uiGlobals.darkMode ? chatBgStyleInverted : chatBgStyle;
+    const darkMode = Settings.isDarkModeEnabled();
+    const bgStyle = darkMode ? chatBgStyleInverted : chatBgStyle;
     return (
       <>
         <div style={bgStyle}>
