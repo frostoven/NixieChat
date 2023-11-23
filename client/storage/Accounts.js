@@ -5,7 +5,7 @@ import { clientEmitterAction } from '../emitters/clientEmitterAction';
 const storage = new NixieStorage();
 
 class Accounts {
-  static getAccounts() {
+  static getAccountCollection() {
     return storage.accountCollectionCache;
   }
 

@@ -66,12 +66,7 @@ class RootNode extends React.Component {
       return <div>Starting up...</div>;
     }
     else if (!loggedIn) {
-      return (
-        <>
-          <h4 style={{ textAlign: 'center' }}>NixieChat</h4>
-          <AccountsScreen/>
-        </>
-      );
+      return <AccountsScreen/>;
     }
     else {
       return (

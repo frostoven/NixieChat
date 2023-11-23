@@ -66,3 +66,16 @@
 .sidebar .item {
   color: white !important;
 }
+
+.ui.segment.inverted,
+.ui.segment.inverted > .ui.header,
+.ui.segment.inverted > .ui.form .field > label
+{
+  color: black;
+  background-color: white;
+}
+
+.ui.segment.inverted > .ui.form .field > input {
+  color: black !important;
+  background-color: white !important;;
+}

@@ -4,6 +4,7 @@ import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
 import { Settings } from '../../storage/Settings';
 import { Accounts } from '../../storage/Accounts';
+import { CreateFirstContact } from '../ContactFinder/CreateFirstContact';
 
 const columnStyle = {
   height: '100%',
@@ -24,14 +25,16 @@ const columnRightStyle = {
 class ContactsAndChatGrid extends React.Component {
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const accounts = Accounts.getAccounts();
-    if (!accounts.length) {
-      //
-    }
+    const accounts = Accounts.getAccountCollection();
+    const a = Accounts.getActiveAccount();
 
-    // If the user has no contacts:
-    // return <CreateFirstContact/>;
-    //
+    console.log('--> last active:', Accounts.getActiveAccount());
+
+    // if (!accounts.contacts.length) {
+    //   // User has no contacts yet.
+    //   return <CreateFirstContact/>;
+    // }
+
     // If the user has no chats:
     // return <CreateFirstChat/>;
 

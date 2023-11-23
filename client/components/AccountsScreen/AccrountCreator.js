@@ -70,7 +70,7 @@ class AccountCreator extends React.Component {
   render() {
     const darkMode = Settings.isDarkModeEnabled();
     return (
-      <Segment style={{ textAlign: 'left' }}>
+      <Segment style={{ textAlign: 'left' }} inverted={!darkMode}>
         <Header>You have no accounts on this device</Header>
         <i>Note that accounts are stored only on your device and not uploaded
           to
@@ -84,7 +84,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted={!darkMode} circular/>}
+                               inverted circular/>}
                 content={
                   'This is for your own reference; it\'s used to tell your ' +
                   'accounts apart.'
@@ -107,7 +107,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted={!darkMode} circular/>}
+                               inverted circular/>}
                 content={
                   'This is what people see after you\'ve been added as a contact.'
                 }
@@ -121,7 +121,7 @@ class AccountCreator extends React.Component {
               &nbsp;
               <Popup
                 trigger={<Icon name="question" color="green" size="small"
-                               inverted={!darkMode} circular/>}
+                               inverted circular/>}
                 content={
                   'If you want people to invite you to chats, you need to ' +
                   'have a public name. You can add / remove the account\'s ' +
