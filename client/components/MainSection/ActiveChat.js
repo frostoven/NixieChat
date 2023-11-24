@@ -34,7 +34,7 @@ class ActiveChat extends React.Component {
           </div>
         </div>
         <div style={chatTextAreaStyle}>
-          // active chat
+          <div/>
         </div>
       </>
     );
