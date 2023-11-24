@@ -46,8 +46,19 @@ class AccountCreator extends React.Component {
       buttonDisabled: true,
     }, async () => {
 
-      const keyPairs = await createKeyPairs();
-      console.log({ keyPairs });
+      let keyPairs;
+      try {
+        keyPairs = await createKeyPairs();
+      }
+      catch (error) {
+        $modal.alert({
+          header: 'Error generating account',
+          body: error.toString(),
+        });
+        return this.setState({ buttonText: 'Error creating account' });
+      }
+
+      // console.log({ keyPairs });
       // console.log(await exportKeys(keyPairs));
       // console.log(await exportKeys(keyPairs, 'string'));
 
