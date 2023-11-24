@@ -8,6 +8,8 @@ class LargeCircleIconButton extends React.Component {
     icon: PropTypes.string,
     label: PropTypes.string,
     iconStyle: PropTypes.object,
+    labelStyle: PropTypes.object,
+    style: PropTypes.object,
   };
 
   static defaultProps = {
@@ -17,16 +19,20 @@ class LargeCircleIconButton extends React.Component {
     icon: 'paperclip',
     label: 'Button',
     iconStyle: {},
+    labelStyle: {},
+    style: {},
   };
 
   render() {
     return (
       <div onClick={this.createChat} style={{
+        display: 'inline-block',
         cursor: 'pointer',
         textAlign: 'center',
         width: 200,
         height: 200,
         margin: 'auto',
+        ...this.props.style,
       }}>
         <br/>
         <Button style={{
@@ -43,7 +49,7 @@ class LargeCircleIconButton extends React.Component {
           />
         </Button>
         <br/><br/>
-        <b>{this.props.label}</b>
+        <b style={this.props.labelStyle}>{this.props.label}</b>
       </div>
     );
   }
