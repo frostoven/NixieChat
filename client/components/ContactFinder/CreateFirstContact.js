@@ -1,5 +1,35 @@
 import React from 'react';
 import { LargeCircleIconButton } from '../Generic/LargeCircleIconButton';
+import { Grid, GridColumn } from 'semantic-ui-react';
+
+const containerStyle = {
+  textAlign: 'center',
+  maxWidth: 600,
+  minWidth: 225,
+};
+
+const gridStyle = {
+  paddingBottom: '25%',
+};
+
+const labelStyle = {
+  backgroundColor: 'rgba(0,0,0,0.3)',
+  padding: 4,
+  borderRadius: 4,
+};
+
+const wideLabelStyle = {
+  paddingTop: 80,
+};
+
+const separatorPcStyle = {
+  textAlign: 'center',
+  width: 200,
+};
+
+const separatorMobileStyle = {
+  textAlign: 'center',
+};
 
 class CreateFirstContact extends React.Component {
   createChat = () => {
@@ -8,19 +38,41 @@ class CreateFirstContact extends React.Component {
 
   render() {
     return (
-      <div style={{ textAlign: 'center' }}>
-        <LargeCircleIconButton
-          icon="user plus"
-          label="Add your first contact"
-        />
+      <div style={containerStyle}>
+        <Grid stackable columns={3} style={gridStyle}>
+          <GridColumn>
+            <LargeCircleIconButton
+              icon="user plus"
+              label="Add your first contact"
+              labelStyle={labelStyle}
+            />
+          </GridColumn>
 
-        <p><b>&mdash;&nbsp;&nbsp;or&nbsp;&nbsp;&mdash;</b></p>
+          <GridColumn className="computer only tablet only"
+                      style={wideLabelStyle}>
+            <div style={separatorPcStyle}>
+              <b style={labelStyle}>
+                &mdash;&nbsp;&nbsp;or&nbsp;&nbsp;&mdash;
+              </b>
+            </div>
+          </GridColumn>
 
-        <LargeCircleIconButton
-          icon="sticky note"
-          label="Create encrypted notepad"
-          iconStyle={{ paddingLeft: 15 }}
-        />
+          <GridColumn className="mobile only">
+            <div style={separatorMobileStyle}>
+              <b style={labelStyle}>
+                &mdash;&nbsp;&nbsp;or&nbsp;&nbsp;&mdash;
+              </b>
+            </div>
+          </GridColumn>
+
+          <GridColumn>
+            <LargeCircleIconButton
+              icon="sticky note"
+              label="Create encrypted notepad"
+              labelStyle={labelStyle}
+            />
+          </GridColumn>
+        </Grid>
       </div>
     );
   }
