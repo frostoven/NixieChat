@@ -6,6 +6,15 @@ import Modal from './Modal';
 const style = document.createElement('style');
 // style.type = 'text/css';
 style.innerHTML = `
+  .__kosmModalRoot {
+    overflow: auto;
+  }
+
+  .kosm-modal {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
   .kosm-modal-actions {
     text-align: right;
     padding-bottom: 4px;

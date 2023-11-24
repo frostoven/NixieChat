@@ -17,6 +17,7 @@ const accountsScreenStyle = {
   top: 0, bottom: 0, left: 0, right: 0,
   textAlign: 'center',
   margin: 0,
+  overflow: 'auto',
 };
 
 const chatBgStyle = {
@@ -32,8 +33,9 @@ const chatBgStyleInverted = {
 
 const themeButtonStyle = {
   position: 'fixed',
-  right: 0,
-  top: 4,
+  right: 8,
+  top: 12,
+  fontSize: '75%',
 };
 
 class AccountsScreen extends React.Component {
