@@ -6,6 +6,7 @@ const containerStyle = {
   textAlign: 'center',
   maxWidth: 600,
   minWidth: 225,
+  margin: 'auto',
 };
 
 const gridStyle = {

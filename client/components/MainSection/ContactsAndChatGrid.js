@@ -12,7 +12,7 @@ const newAccountOptionsStyle = {
   width: '100%',
   height: '100%',
   paddingLeft: '25%',
-  paddingRight: '37.5%',
+  paddingRight: '25%',
   zIndex: 6,
   overflow: 'auto',
 };
