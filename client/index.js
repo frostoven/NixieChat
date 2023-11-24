@@ -20,6 +20,25 @@ import { clientEmitterAction } from './emitters/clientEmitterAction';
  *  * create a SHA-256 address of the person's public key.
  */
 
+if (
+  location.protocol === 'http:' &&
+  ![ 'localhost', '127.0.0.1' ].includes(location.hostname)
+) {
+  $modal.alert({
+    header: 'Cryptographic Error',
+    body: (
+      <div>
+        This page was loaded over HTTP. Most browsers block cryptographic
+        functions under HTTP.
+        <br/>
+        <br/>
+        If account creation and loading refuses to run, you'll either need to
+        switch to HTTPS or download the NixieChat app.
+      </div>
+    ),
+  });
+}
+
 class RootNode extends React.Component {
   static defaultState = {
     booting: true,
