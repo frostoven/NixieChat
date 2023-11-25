@@ -1,5 +1,5 @@
 import { StorageProxy } from './StorageProxy';
-import { CollectionCache } from './CollectionCache';
+import { CollectionCache } from './types/CollectionCache';
 
 let instance = null;
 
