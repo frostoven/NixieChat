@@ -2,8 +2,8 @@ import React from 'react';
 import { Grid } from 'semantic-ui-react';
 import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
-import { Settings } from '../../storage/Settings';
-import { Accounts } from '../../storage/Accounts';
+import { Settings } from '../../storage/cacheFrontends/Settings';
+import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { CreateFirstContact } from '../ContactFinder/CreateFirstContact';
 
 /** @type React.CSSProperties */

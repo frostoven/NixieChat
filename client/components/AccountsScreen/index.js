@@ -1,8 +1,8 @@
 import React from 'react';
 import { AccountChooser } from './AccountChooser';
 import { AccountCreator } from './AccrountCreator';
-import { Accounts } from '../../storage/Accounts';
-import { Settings } from '../../storage/Settings';
+import { Accounts } from '../../storage/cacheFrontends/Accounts';
+import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Button } from 'semantic-ui-react';
 
 const headerStyle = {

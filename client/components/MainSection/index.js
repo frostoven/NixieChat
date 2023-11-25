@@ -7,7 +7,7 @@ import {
   Sidebar,
 } from 'semantic-ui-react';
 import { ContactsAndChatGrid } from './ContactsAndChatGrid';
-import { Settings } from '../../storage/Settings';
+import { Settings } from '../../storage/cacheFrontends/Settings';
 
 const overlayStyle = {
   position: 'fixed',

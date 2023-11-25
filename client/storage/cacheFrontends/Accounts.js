@@ -1,6 +1,6 @@
-import { NixieStorage } from './NixieStorage';
-import { clientEmitter } from '../emitters/comms';
-import { clientEmitterAction } from '../emitters/clientEmitterAction';
+import { NixieStorage } from '../NixieStorage';
+import { clientEmitter } from '../../emitters/comms';
+import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 
 const storage = new NixieStorage();
 

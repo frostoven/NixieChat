@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings } from '../../storage/Settings';
+import { Settings } from '../../storage/cacheFrontends/Settings';
 
 const chatBgStyle = {
   // Generated using https://mycolor.space/gradient3?ori=to+right+bottom&hex=%23DBDDBB&hex2=%2388B884&hex3=%23D5D88D&submit=submit

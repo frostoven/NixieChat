@@ -10,8 +10,8 @@ import {
 import { createKeyPairs, exportKeys } from '../../encryption';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
-import { Settings } from '../../storage/Settings';
-import { Accounts } from '../../storage/Accounts';
+import { Settings } from '../../storage/cacheFrontends/Settings';
+import { Accounts } from '../../storage/cacheFrontends/Accounts';
 
 class AccountCreator extends React.Component {
   state = {
