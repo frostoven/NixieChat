@@ -1,5 +1,6 @@
 import { StorageProxy } from './StorageProxy';
 import { CollectionCache } from './types/CollectionCache';
+import { sha256 } from '../utils';
 
 let instance = null;
 
@@ -19,6 +20,7 @@ class NixieStorage extends StorageProxy {
       return instance;
     }
 
+    this.lastKnownDeviceTag = null;
     this.lastActiveAccount = '';
     this.accountCollectionCache = new CollectionCache();
     this.settingsCache = null;
@@ -35,10 +37,15 @@ class NixieStorage extends StorageProxy {
   }
 
   async initStorage() {
+    // Ensure all root keys exist upfront.
     await this.createKeyIfNotExists(NX.LAST_ACTIVE_ACCOUNT_KEY, '');
     await this.createKeyIfNotExists(NX.ACCOUNT_COLLECTION_KEY, {});
+
+    // Set up default values.
     await this.buildAccountCollectionCache();
     await this.fetchSettings();
+
+    // Conclude.
     this.initialized = true;
     return this;
   }
@@ -66,7 +73,13 @@ class NixieStorage extends StorageProxy {
     return this.accountCollectionCache;
   }
 
-  async writeAccount(accountName, { privateKey, publicKey }, overwrite = false) {
+  async writeAccount({
+    accountName,
+    personalName,
+    publicName,
+    keyPair: { privateKey, publicKey },
+    overwrite = false,
+  }) {
     if (!this.passesChecks) {
       return false;
     }
@@ -76,8 +89,21 @@ class NixieStorage extends StorageProxy {
       return;
     }
 
+    // This is a way of uniquely identifying the account without needing the
+    // crazy big sizes of the actual keys. The modulus is a public number that
+    // uniquely identifies key pairs; we just shorten it a tad using SHA-256.
+    const modulusHash = await sha256((await crypto.subtle.exportKey(
+      'jwk', publicKey,
+    )).n);
+
     accounts[accountName] = {
-      accountName, privateKey, publicKey, contacts: new CollectionCache(),
+      accountName,
+      personalName,
+      publicName,
+      publicKey,
+      privateKey,
+      modulusHash,
+      contacts: new CollectionCache(),
     };
 
     this.accountCollectionCache.updateCache(accounts);

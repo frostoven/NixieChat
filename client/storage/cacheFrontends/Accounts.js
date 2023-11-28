@@ -26,8 +26,21 @@ class Accounts {
     return Accounts.getAccountCollection().entryByName[lastActiveAccount];
   }
 
-  static async createAccount(accountName, keyPairs, overwrite = false, updateUi = false) {
-    await storage.writeAccount(accountName, keyPairs, overwrite);
+  static async createAccount({
+    accountName,
+    personalName,
+    publicName,
+    keyPair,
+    overwrite = false,
+    updateUi = false,
+  }) {
+    await storage.writeAccount({
+      accountName,
+      personalName,
+      publicName,
+      keyPair,
+      overwrite,
+    });
     if (updateUi) {
       clientEmitter.emit(clientEmitterAction.hardReloadApp);
     }
