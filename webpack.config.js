@@ -15,7 +15,7 @@ module.exports = {
   output: {
     path: __dirname + '/client/.build',
     publicPath: 'client/.build/',
-    filename: '[name].js'
+    filename: '[name].js',
   },
 
   module: {
@@ -24,31 +24,34 @@ module.exports = {
         test: /\.js?$/,
         loader: 'babel-loader',
         options: {
-          presets: ['@babel/preset-react'],
+          presets: [ '@babel/preset-react' ],
           plugins: [
+            // New features:
             '@babel/plugin-proposal-optional-chaining',
             '@babel/plugin-proposal-class-properties',
             '@babel/plugin-transform-nullish-coalescing-operator',
-          ]
-        }
-      },
-      {
-        test: /\.css$/,
-        loader: ExtractTextPlugin.extract({
-          loader: 'css-loader',
-          options: {
-            modules: true
-          }
-        })
+            // All the below needed for very old phones:
+            '@babel/plugin-proposal-object-rest-spread',
+            '@babel/plugin-transform-arrow-functions',
+            '@babel/plugin-transform-parameters', // if 'let' is not supported, add: @babel/plugin-transform-block-scoping
+            '@babel/plugin-transform-block-scoping',
+            '@babel/plugin-transform-exponentiation-operator',
+            '@babel/plugin-transform-destructuring',
+            '@babel/plugin-transform-async-to-generator',
+            '@babel/plugin-transform-classes',
+            '@babel/plugin-transform-runtime',
+            'transform-es2017-object-entries',
+          ],
+        },
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
         loader: 'file-loader',
         query: {
-          name: '[name].[ext]?[hash]'
-        }
-      }
-    ]
+          name: '[name].[ext]?[hash]',
+        },
+      },
+    ],
   },
 
   plugins: [
@@ -113,8 +116,8 @@ module.exports = {
             }, 2000);
           }, 250);
         });
-      }
-    }
+      },
+    },
   ],
 
   resolve: {
