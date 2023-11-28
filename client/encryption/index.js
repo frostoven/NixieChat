@@ -1,7 +1,7 @@
 import {
   exportRsaPrivateKey,
   exportRsaPublicKey,
-  generateRsaKey,
+  generateRsaSigningKey,
 } from './rsa';
 import * as WebCrypto from 'easy-web-crypto';
 
@@ -11,9 +11,9 @@ import * as WebCrypto from 'easy-web-crypto';
  * 'rsa'; 'ecdsa' is supported but not currently used.
  * @returns {Promise<{rsa, ecdsa}>}
  */
-async function createKeyPairs(type = 'rsa') {
+async function createSigningKeyPair(type = 'rsa') {
   if (type === 'rsa') {
-    return await generateRsaKey();
+    return await generateRsaSigningKey();
   }
   else {
     return await WebCrypto.genKeyPair();
@@ -36,6 +36,6 @@ async function exportKeys(keyPair, format = 'raw') {
 }
 
 export {
-  createKeyPairs,
+  createSigningKeyPair,
   exportKeys,
 };

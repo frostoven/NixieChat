@@ -7,7 +7,7 @@ import {
   Popup,
   Segment,
 } from 'semantic-ui-react';
-import { createKeyPairs, exportKeys } from '../../encryption';
+import { createSigningKeyPair } from '../../encryption';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Settings } from '../../storage/cacheFrontends/Settings';
@@ -48,7 +48,7 @@ class AccountCreator extends React.Component {
 
       let keyPairs;
       try {
-        keyPairs = await createKeyPairs();
+        keyPair = await createSigningKeyPair();
       }
       catch (error) {
         $modal.alert({

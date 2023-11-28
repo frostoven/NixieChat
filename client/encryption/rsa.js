@@ -214,8 +214,14 @@ const rsaEncryptAlgorithm = {
 //   },
 // };
 
-function generateRsaKey() {
+/** Generates a 4096 bit RSA-OAEP encryption key with SHA-384 hashing. */
+function generateRsaEncryptionKey() {
   return generateKey(rsaEncryptAlgorithm, [ 'encrypt', 'decrypt' ]);
+}
+
+/** Generates a 4096 bit RSASSA-PKCS1-v1_5 signing key with SHA-384 hashing. */
+function generateRsaSigningKey() {
+  return generateKey(rsaSignAlgorithm, [ 'sign', 'verify' ]);
 }
 
 function signDataRsa(keyPair, data) {
@@ -247,7 +253,8 @@ function exportPrivateKey(keys, format = 'raw') {
 }
 
 export {
-  generateRsaKey,
+  generateRsaEncryptionKey,
+  generateRsaSigningKey,
   signDataRsa,
   exportPemKeys as exportRsaPemKeys,
   importPublicKey as importRsaPublicKey,
