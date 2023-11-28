@@ -12,6 +12,7 @@ import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
+import { getSafeRandomIntInclusive, sha256 } from '../../utils';
 
 class AccountCreator extends React.Component {
   state = {
@@ -30,7 +31,7 @@ class AccountCreator extends React.Component {
         'An account name is required. Would you like one randomly generated?',
         (shouldCreateAccount) => {
           if (shouldCreateAccount) {
-            let accountNumber = `${Math.random()}`.slice(-3);
+            let accountNumber = `${getSafeRandomIntInclusive(100, 999)}`;
             const accountName = `Account${accountNumber}`;
             this.setState({ accountName });
           }
@@ -46,7 +47,7 @@ class AccountCreator extends React.Component {
       buttonDisabled: true,
     }, async () => {
 
-      let keyPairs;
+      let keyPair;
       try {
         keyPair = await createSigningKeyPair();
       }
@@ -58,16 +59,30 @@ class AccountCreator extends React.Component {
         return this.setState({ buttonText: 'Error creating account' });
       }
 
-      // console.log({ keyPairs });
-      // console.log(await exportKeys(keyPairs));
-      // console.log(await exportKeys(keyPairs, 'string'));
+      // console.log({ keyPair });
+      // console.log(await exportKeys(keyPair));
+      // console.log(await exportKeys(keyPair, 'string'));
 
 
       this.setState({
         buttonIcon: 'hourglass end',
         buttonText: 'Saving...',
       }, async () => {
-        await Accounts.createAccount(this.state.accountName, keyPairs, false, false);
+        const { accountName, personalName, publicName } = this.state;
+
+        const fullPublicName =
+          publicName ?
+            `${publicName}#${getSafeRandomIntInclusive(1000, 9999)}` :
+            '';
+
+        await Accounts.createAccount({
+          accountName,
+          personalName,
+          publicName: fullPublicName,
+          keyPair,
+          overwrite: false,
+          updateUi: false,
+        });
         setTimeout(() => {
           // The timeout is just so things don't move too fast and look like a
           // glitch fest.
@@ -79,6 +94,10 @@ class AccountCreator extends React.Component {
   };
 
   render() {
+    const {
+      accountError, accountName, buttonText, buttonIcon, buttonDisabled,
+    } = this.state;
+
     const darkMode = Settings.isDarkModeEnabled();
     return (
       <Segment style={{ textAlign: 'left' }} inverted={!darkMode}>
@@ -104,8 +123,8 @@ class AccountCreator extends React.Component {
             </label>
             <input
               autoFocus
-              placeholder={this.state.accountError || 'Account Name'}
-              value={this.state.accountName}
+              placeholder={accountError || 'Account Name'}
+              value={accountName}
               onChange={(event) => {
                 this.setState({ accountName: event.target.value });
               }}
@@ -124,7 +143,12 @@ class AccountCreator extends React.Component {
                 }
               />
             </label>
-            <input placeholder="Personal Name"/>
+            <input
+              placeholder="Personal Name"
+              onChange={(event) => {
+                this.setState({ personalName: event.target.value });
+              }}
+            />
           </Form.Field>
           <Form.Field>
             <label>
@@ -142,7 +166,12 @@ class AccountCreator extends React.Component {
                 }
               />
             </label>
-            <input placeholder="Public Name"/>
+            <input
+              placeholder="Public Name"
+              onChange={(event) => {
+                this.setState({ publicName: event.target.value });
+              }}
+            />
           </Form.Field>
 
           {/* TODO: make this optional later. Will require extra auth like
@@ -156,10 +185,10 @@ class AccountCreator extends React.Component {
             type="submit"
             labelPosition="left"
             onClick={this.create}
-            disabled={this.state.buttonDisabled}
+            disabled={buttonDisabled}
           >
-            <Icon name={this.state.buttonIcon}/>
-            {this.state.buttonText}
+            <Icon name={buttonIcon}/>
+            {buttonText}
           </Button>
         </Form>
       </Segment>
