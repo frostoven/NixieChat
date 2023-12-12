@@ -1,6 +1,6 @@
 let config = {
 	server: Object.freeze({
-		webSocket: 42069
+		//
 	}),
 };
 
