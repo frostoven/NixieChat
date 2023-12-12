@@ -2,15 +2,14 @@ import React from 'react';
 import {
   Button,
   Form,
-  Icon,
   Message,
-  Popup,
   Segment,
 } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { sharedConfig } from '../../../shared/config';
+import { ContextualHelp } from '../Generic/ContextualHelp';
 
 // Used to pick a server error message at random. The reason we randomise them
 // is that they all look pretty, and all look like valid error message
@@ -133,22 +132,14 @@ class ContactFinder extends React.Component {
             <label>
               Your name
               &nbsp;
-              <Popup
-                trigger={
-                  <Icon
-                    name="question" color="green" size="small"
-                    inverted circular
-                  />
-                }
-                content={
-                  <div>
-                    The name you want the contact to see in the invitation.
-                    <br/><br/>
-                    This name will be displayed in their contacts list if they
-                    choose to accept your invitation.
-                  </div>
-                }
-              />
+              <ContextualHelp>
+                <div>
+                  The name you want the contact to see in the invitation.
+                  <br/><br/>
+                  This name will be displayed in their contacts list if they
+                  choose to accept your invitation.
+                </div>
+              </ContextualHelp>
             </label>
             <input
               placeholder={'Shown in Invite'}
@@ -163,20 +154,12 @@ class ContactFinder extends React.Component {
             <label>
               Contact Public Name
               &nbsp;
-              <Popup
-                trigger={
-                  <Icon
-                    name="question" color="green" size="small"
-                    inverted circular
-                  />
-                }
-                content={(
-                  <div>
-                    You can only find contacts if they have a public name.
-                    Their public names are visible only while they are online.
-                  </div>
-                )}
-              />
+              <ContextualHelp>
+                <div>
+                  You can only find contacts if they have a public name. Their
+                  public names are visible only while they are online.
+                </div>
+              </ContextualHelp>
             </label>
             <input
               autoFocus
@@ -192,18 +175,12 @@ class ContactFinder extends React.Component {
             <label>
               Greeting
               &nbsp;
-              <Popup
-                trigger={
-                  <Icon
-                    name="question" color="green" size="small"
-                    inverted circular
-                  />
-                }
-                content={
-                  'Optional message you want them to see when they receive ' +
-                  'the invite.'
-                }
-              />
+              <ContextualHelp>
+                <div>
+                  Optional message you want them to see when they receive the
+                  invite
+                </div>
+              </ContextualHelp>
             </label>
             <input
               placeholder={'Optional Greeting'}

@@ -4,7 +4,6 @@ import {
   Form,
   Header,
   Icon,
-  Popup,
   Segment,
 } from 'semantic-ui-react';
 import { createSigningKeyPair } from '../../encryption';
@@ -13,6 +12,7 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { getSafeRandomIntInclusive } from '../../utils';
+import { ContextualHelp } from '../Generic/ContextualHelp';
 
 class AccountCreator extends React.Component {
   state = {
@@ -112,14 +112,10 @@ class AccountCreator extends React.Component {
             <label>
               Account Name (only you can see this)
               &nbsp;
-              <Popup
-                trigger={<Icon name="question" color="green" size="small"
-                               inverted circular/>}
-                content={
-                  'This is for your own reference; it\'s used to tell your ' +
-                  'accounts apart.'
-                }
-              />
+              <ContextualHelp>
+                This is for your own reference; it's used to tell your accounts
+                apart.
+              </ContextualHelp>
             </label>
             <input
               autoFocus
@@ -135,13 +131,9 @@ class AccountCreator extends React.Component {
             <label>
               Personal Name (only contacts can see this)
               &nbsp;
-              <Popup
-                trigger={<Icon name="question" color="green" size="small"
-                               inverted circular/>}
-                content={
-                  'This is what people see after you\'ve been added as a contact.'
-                }
-              />
+              <ContextualHelp>
+                This is what people see after you've been added as a contact.
+              </ContextualHelp>
             </label>
             <input
               placeholder="Personal Name"
@@ -154,21 +146,16 @@ class AccountCreator extends React.Component {
             <label>
               Optional Public Name
               &nbsp;
-              <Popup
-                trigger={<Icon name="question" color="green" size="small"
-                               inverted circular/>}
-                content={
+              <ContextualHelp>
                 <div>
-                  If you want people to invite you to chats, you need to
-                  have a public name. You can add / remove the account's
-                  public name at any time. When you remove your name,
-                  existing chats will not be affected and you will no
-                  longer be searchable.
+                  If you want people to invite you to chats, you need to have a
+                  public name. You can add / remove the account's public name
+                  at any time. When you remove your name, existing chats will
+                  not be affected and you will no longer be searchable.
                   <br/><br/>
                   This field is automatically suffixed with a random number.
                 </div>
-                }
-              />
+              </ContextualHelp>
             </label>
             <input
               placeholder="Public Name"
