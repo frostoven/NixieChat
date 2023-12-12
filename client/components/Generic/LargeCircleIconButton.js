@@ -25,7 +25,7 @@ class LargeCircleIconButton extends React.Component {
 
   render() {
     return (
-      <div onClick={this.createChat} style={{
+      <div onClick={this.props.onClick} style={{
         display: 'inline-block',
         cursor: 'pointer',
         textAlign: 'center',
