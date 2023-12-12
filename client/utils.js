@@ -8,6 +8,25 @@ function arrayBufferToString(ab) {
   return new Uint8Array(ab).reduce((p, c) => p + String.fromCharCode(c), '');
 }
 
+function uint8ArrayToHexString(uint8Array) {
+  return Array.from(uint8Array).map(
+    b => b.toString(16).padStart(2, '0'),
+  ).join('');
+}
+
+// Intended purpose: Ephemeral message IDs.
+// Returns a 256 bit string, or the equivalent Uint8Array if `false` is passed in.
+function get256RandomBits(returnAsString = true) {
+  const uint8Array = new Uint8Array(32);
+  const rng = crypto.getRandomValues(uint8Array);
+  if (returnAsString) {
+    return uint8ArrayToHexString(rng);
+  }
+  else {
+    return rng;
+  }
+}
+
 // This function under the MIT license. Taken from:
 // https://github.com/chancejs/chancejs/issues/232#issuecomment-182500222
 // https://stackoverflow.com/questions/18230217/javascript-generate-a-random-number-within-a-range-using-crypto-getrandomvalues
@@ -39,6 +58,7 @@ async function sha256(string) {
 export {
   stringToArrayBuffer,
   arrayBufferToString,
+  get256RandomBits,
   getSafeRandomIntInclusive,
   sha256,
 };
