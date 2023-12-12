@@ -4,9 +4,15 @@ const { clearInterval } = require('node:timers');
 const exec = require('child_process').exec;
 
 module.exports = {
-  watch: true,
+  watch: process.env.NODE_ENV !== 'production',
   target: 'web',
   devtool: 'source-map',
+
+  // This drastically increases bundle size. The reason we do this is so that
+  // people can easily inspect our source to look for malicious intent.
+  optimization: {
+    minimize: false,
+  },
 
   entry: {
     'NixieChat-v0': './client/index.js',
@@ -58,6 +64,10 @@ module.exports = {
     // Update the terminal title with build info.
     {
       apply: (compiler) => {
+        if (process.env.NODE_ENV === 'production') {
+          return;
+        }
+
         function updateTerminalTitle(string) {
           const command =
             `echo -n '\\033k${string}\\033\\\\' > /dev/null && ` +
@@ -121,6 +131,6 @@ module.exports = {
   ],
 
   resolve: {
-    extensions: ['.js', '.json', '.jsx']
+    extensions: [ '.js', '.json', '.jsx' ],
   },
 };
