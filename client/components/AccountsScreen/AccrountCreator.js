@@ -12,7 +12,7 @@ import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
-import { getSafeRandomIntInclusive, sha256 } from '../../utils';
+import { getSafeRandomIntInclusive } from '../../utils';
 
 class AccountCreator extends React.Component {
   state = {
@@ -158,11 +158,15 @@ class AccountCreator extends React.Component {
                 trigger={<Icon name="question" color="green" size="small"
                                inverted circular/>}
                 content={
-                  'If you want people to invite you to chats, you need to ' +
-                  'have a public name. You can add / remove the account\'s ' +
-                  'public name at any time. When you remove your name, ' +
-                  'existing chats will not be affected and you will no ' +
-                  'longer be searchable.'
+                <div>
+                  If you want people to invite you to chats, you need to
+                  have a public name. You can add / remove the account's
+                  public name at any time. When you remove your name,
+                  existing chats will not be affected and you will no
+                  longer be searchable.
+                  <br/><br/>
+                  This field is automatically suffixed with a random number.
+                </div>
                 }
               />
             </label>
