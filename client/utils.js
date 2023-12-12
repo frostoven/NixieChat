@@ -8,6 +8,11 @@ function arrayBufferToString(ab) {
   return new Uint8Array(ab).reduce((p, c) => p + String.fromCharCode(c), '');
 }
 
+// Encodes a string as UTF-8 and then returns it in Uint8Array form.
+function stringToUtf8Uint8Array(string) {
+  return new TextEncoder().encode(string);
+}
+
 function uint8ArrayToHexString(uint8Array) {
   return Array.from(uint8Array).map(
     b => b.toString(16).padStart(2, '0'),
@@ -32,7 +37,7 @@ function get256RandomBits(returnAsString = true) {
 // https://stackoverflow.com/questions/18230217/javascript-generate-a-random-number-within-a-range-using-crypto-getrandomvalues
 function getSafeRandomIntInclusive(min, max) {
   const randomBuffer = new Uint32Array(1);
-  window.crypto.getRandomValues(randomBuffer);
+  crypto.getRandomValues(randomBuffer);
   let randomNumber = randomBuffer[0] / (0xffffffff + 1);
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -40,24 +45,38 @@ function getSafeRandomIntInclusive(min, max) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
-async function sha256(string) {
-  // encode as UTF-8
-  const msgBuffer = new TextEncoder().encode(string);
+async function sha256(stringOrBuffer, returnAsString = true) {
+  let msgBuffer;
+  if (typeof stringOrBuffer === 'string') {
+    // encode as UTF-8
+    msgBuffer = stringToUtf8Uint8Array(stringOrBuffer);
+  }
+  else if (stringOrBuffer instanceof Uint8Array) {
+    msgBuffer = stringOrBuffer;
+  }
+  else {
+    const message = `[sha256] Unsupported type ${typeof stringOrBuffer}`;
+    console.error(message);
+    throw message;
+  }
 
   // hash the message
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
 
-  // convert ArrayBuffer to Array
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-
-  // convert bytes to hex string
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  if (returnAsString) {
+    // convert ArrayBuffer to hex string
+    return uint8ArrayToHexString(new Uint8Array(hashBuffer));
+  }
+  else {
+    return new Uint8Array(hashBuffer);
+  }
 }
 
 
 export {
   stringToArrayBuffer,
   arrayBufferToString,
+  uint8ArrayToHexString,
   get256RandomBits,
   getSafeRandomIntInclusive,
   sha256,
