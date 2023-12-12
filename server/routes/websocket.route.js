@@ -12,9 +12,9 @@ module.exports = function ioCallback(socket) {
   sendServerReadyNoticeToClient({ socket });
 
   for (let i = 0, len = canRespondTo.length; i < len; i++) {
-    const request = canRespondTo[i];
+    const functionExport = canRespondTo[i];
 
-    if (request === 'socketEvent') {
+    if (functionExport === 'socketEvent') {
       // socketEvent is an internal export and should not be exposed to the
       // client.
       continue;
@@ -22,6 +22,8 @@ module.exports = function ioCallback(socket) {
 
     // Middleware would go here in future. All routes share the same middleware
     // in this case.
-    socket.on(request, (data) => socketController[request](socket, data));
+    socket.on(functionExport, (data, callback) => socketController[functionExport](
+      socket, data, callback,
+    ));
   }
 };
