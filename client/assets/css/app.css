@@ -59,7 +59,7 @@
   background-color: white;
 }
 
-.sidebar.icon  {
+.sidebar.icon {
   font-size: 12pt !important;
 }
 
@@ -69,8 +69,7 @@
 
 .ui.segment.inverted,
 .ui.segment.inverted > .ui.header,
-.ui.segment.inverted > .ui.form .field > label
-{
+.ui.segment.inverted > .ui.form .field > label {
   color: black;
   background-color: white;
 }
@@ -78,4 +77,18 @@
 .ui.segment.inverted > .ui.form .field > input {
   color: black !important;
   background-color: white !important;;
+}
+
+.accordion.ui.inverted, .accordion.ui.inverted > .title {
+  color: #000 !important;
+}
+
+.ui.dimmer {
+  background-color: rgb(0 0 0 / 50%);
+}
+
+/* Work around for unresolved semantic bug (#6267) where modals get cut off at
+   the top. */
+.ui.scrolling.modal {
+  transform: translateY(-11%);
 }
