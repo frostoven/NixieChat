@@ -442,10 +442,11 @@ export default class Modal extends React.Component {
 
     const selected = this.state.selectionIndex || 0;
     const modalCountText = this._getModalCountText();
+    const darkMode = Settings.isDarkModeEnabled();
 
     return (
       <SemanticModal
-        className={`kosm-modal`}
+        className={`kosm-modal${darkMode ? '' : ' inverted'}`}
         open={!!this._modalQueue.length}
       >
         <SemanticModal.Header>

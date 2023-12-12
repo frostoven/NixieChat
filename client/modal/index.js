@@ -15,6 +15,18 @@ style.innerHTML = `
     transform: translateY(-50%);
   }
 
+  .kosm-modal.inverted,
+  .kosm-modal.inverted .content,
+  .kosm-modal.inverted .header
+  {
+    color: #000;
+    background-color: #fff;
+  }
+
+  .kosm-modal.inverted .header {
+    background-color: #a4f2ac;
+  }
+
   .kosm-modal-actions {
     text-align: right;
     padding-bottom: 4px;
