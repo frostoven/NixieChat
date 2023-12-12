@@ -155,6 +155,20 @@ export default class Modal extends React.Component {
       modalCount: this._modalQueue.length - 1,
       highestRecentCount: this.state.highestRecentCount + 1,
       selectionIndex: 0,
+    }, () => {
+      // It's unfortunate just how hard semantic makes it to interact with
+      // dimmers if you don't copy their examples line by line. A simple
+      // onDimmerClick would have been really fucking nice.
+      const dimmers = document.getElementsByClassName('ui dimmer');
+      for (let i = 0, len = dimmers.length; i < len; i++) {
+        /** @type HTMLDivElement */
+        const dimmer = dimmers[i];
+        dimmer.onclick = (event) => {
+          if (event.target === dimmer) {
+              this.deactivateModal();
+          }
+        };
+      }
     });
   };
 
