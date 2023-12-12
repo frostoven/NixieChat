@@ -1,3 +1,7 @@
+/**
+ * This file released by Frostoven under the MIT License.
+ */
+
 import React from 'react';
 import { Input, Modal as SemanticModal } from 'semantic-ui-react';
 import { Button } from 'semantic-ui-react';
