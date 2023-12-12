@@ -7,6 +7,7 @@ let instance = null;
 let NX;
 
 class NixieStorage extends StorageProxy {
+  static DEVICE_TAG_KEY = 'device_tag';
   static ACCOUNT_COLLECTION_KEY = 'account_collection';
   static LAST_ACTIVE_ACCOUNT_KEY = 'last_active_account';
   static SETTINGS_KEY = 'settings_collection';
@@ -20,6 +21,8 @@ class NixieStorage extends StorageProxy {
       return instance;
     }
 
+    // TODO: consider whether or not we need this. It could maybe be used as a
+    //  persistent salt, but it really seems pointless at this stage.
     this.lastKnownDeviceTag = null;
     this.lastActiveAccount = '';
     this.accountCollectionCache = new CollectionCache();
@@ -38,10 +41,12 @@ class NixieStorage extends StorageProxy {
 
   async initStorage() {
     // Ensure all root keys exist upfront.
+    await this.createKeyIfNotExists(NX.DEVICE_TAG_KEY, null);
     await this.createKeyIfNotExists(NX.LAST_ACTIVE_ACCOUNT_KEY, '');
     await this.createKeyIfNotExists(NX.ACCOUNT_COLLECTION_KEY, {});
 
     // Set up default values.
+    await this.setupDeviceTag();
     await this.buildAccountCollectionCache();
     await this.fetchSettings();
 
@@ -65,6 +70,20 @@ class NixieStorage extends StorageProxy {
     const accounts = await this.fetchItem(NX.ACCOUNT_COLLECTION_KEY);
     this.accountCollectionCache.updateCache(accounts);
     return accounts;
+  }
+
+  async setupDeviceTag() {
+    const tag = await this.fetchItem(NX.DEVICE_TAG_KEY);
+    if (!tag) {
+      // The device tag is 64 bits (8 bytes).
+      const byteArray = new Uint8Array(8);
+      const deviceTag = crypto.getRandomValues(byteArray);
+      this.lastKnownDeviceTag = deviceTag;
+      await this.writeItem(NX.DEVICE_TAG_KEY, deviceTag);
+    }
+    else {
+      this.lastKnownDeviceTag = tag;
+    }
   }
 
   async buildAccountCollectionCache() {
@@ -94,7 +113,7 @@ class NixieStorage extends StorageProxy {
     // uniquely identifies key pairs; we just shorten it a tad using SHA-256.
     const modulusHash = await sha256((await crypto.subtle.exportKey(
       'jwk', publicKey,
-    )).n);
+    )).n, false);
 
     accounts[accountName] = {
       accountName,
