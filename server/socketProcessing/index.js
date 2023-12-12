@@ -1,14 +1,21 @@
 const { socketEvent } = require('../controllers/websocket.controller');
-const { sendErrorToClient } = require('./outboundMessages');
+const { Socket } = require('socket.io');
+const {
+  sendMessageToClient,
+} = require('./outboundMessages');
+const { MessageVersion } = require('../../shared/MessageVersion');
+const { Emitter } = require('@socket.io/postgres-emitter');
+const { sharedConfig } = require('../../shared/config');
+
+const nop = () => {
+};
 
 // --- Boot section --- //
 
-function bootServer() {
-  socketEvent.ping.addListener(({ socket } = {}) => {
-    return sendErrorToClient({
-      message: 'Received.', socket,
-    });
-  });
+/**
+ * @param {Emitter} clusterEmitter
+ */
+function bootServer(clusterEmitter) {
   socketEvent.ping.addListener(
     /**
      * @param {Object} payload
@@ -66,6 +73,42 @@ function bootServer() {
       }
 
       callback({ rejected });
+    });
+
+  socketEvent.findContact.addListener(
+    /**
+     * @param {Object} payload
+     * @param {Socket} payload.socket
+     * @param {Object} payload.options
+     * @param {Function} payload.callback
+     */
+    ({ socket, options = {}, callback = nop } = {}) => {
+      console.log(`=> socket.id: ${socket.id}`);
+      const { source, target, greeting, pubKey, time, v } = options;
+      console.log(`[findContact] socket.id: ${socket.id}, v: ${v}, source: ${source}, target: ${target}`);
+      if (v !== MessageVersion.findContactV1 || !source || !target) {
+        callback({
+          error: '[findContact] Unsupported options or version.',
+        });
+        return;
+      }
+
+      if (greeting.length > sharedConfig.greetingLimit) {
+        callback({
+          error: '[findContact] Greeting character limit exceeded.',
+        });
+        return;
+      }
+
+      clusterEmitter.emit(target, {
+        requestId: socket.id,
+        source,
+        greeting,
+        pubKey,
+        time,
+      });
+
+      callback({ status: 'test' });
     });
 }
 

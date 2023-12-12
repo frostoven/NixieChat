@@ -3,6 +3,7 @@ const { generateEventSignaller } = require('../socketProcessing/generateEventSig
 const socketEvent = {
   ping: generateEventSignaller(),
   makeDiscoverable: generateEventSignaller(),
+  findContact: generateEventSignaller(),
 };
 
 function ping(socket) {
@@ -15,8 +16,15 @@ function makeDiscoverable(socket, options, callback) {
   }
 }
 
+function findContact(socket, options, callback) {
+  if (socket) {
+    socketEvent.findContact.trigger({ socket, options, callback });
+  }
+}
+
 module.exports = {
   socketEvent,
   ping,
   makeDiscoverable,
+  findContact,
 };
