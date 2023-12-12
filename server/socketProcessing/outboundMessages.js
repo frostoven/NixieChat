@@ -10,21 +10,20 @@
  */
 
 // Sends a generic message to the client.
+const { PlainMessageType } = require('../../shared/PlainMessageType');
+
 function sendMessageToClient({ message, color = null, socket } = {}) {
-  const commsType = 'messageFromServer';
-  socket.emit(commsType, { commsType, message, color });
+  socket.emit(PlainMessageType.message, { message, color });
 }
 
 // Sends a generic error to the client.
 function sendErrorToClient({ message, socket } = {}) {
-  const commsType = 'errorFromServer';
-  socket.emit(commsType, { commsType, message });
+  socket.emit(PlainMessageType.error, { message });
 }
 
 // Tells the client that the server has rebooted.
 function sendServerReadyNoticeToClient({ socket }) {
-  const commsType = 'notifyServerReady';
-  socket.emit(commsType, { commsType });
+  socket.emit(PlainMessageType.notifyServerReady);
 }
 
 module.exports = {
