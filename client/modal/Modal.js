@@ -50,7 +50,7 @@ export default class Modal extends React.Component {
     if (++totalInstances > 1) {
       console.warn(
         'More than one modal component has been mounted. This will likely ' +
-        'cause bugs. Please investigate.'
+        'cause bugs. Please investigate.',
       );
     }
 
@@ -160,9 +160,18 @@ export default class Modal extends React.Component {
    */
   buildModal = (
     {
-      header='Message', body='', actions, unskippable=false, prioritise=false,
-      tag, inline=false, renderCustomDialog=null, onForceClose=()=>{},
-    }
+      header = 'Message',
+      body = '',
+      actions,
+      unskippable = false,
+      prioritise = false,
+      tag,
+      inline = false,
+      renderCustomDialog = null,
+      hideStackCounter = false,
+      onDimmerClick = null,
+      onForceClose = nop,
+    },
   ) => {
     Modal.allowExternalListeners = false;
 
@@ -170,7 +179,7 @@ export default class Modal extends React.Component {
       this._forceCloseListener = onForceClose;
     }
     else {
-      this._forceCloseListener = () => {};
+      this._forceCloseListener = nop;
     }
 
     this._registerKeyListeners();
@@ -183,8 +192,8 @@ export default class Modal extends React.Component {
     this._activateModal();
 
     const options = {
-      header, body, actions, unskippable, prioritise, tag,
-      deactivated: false, inline, renderCustomDialog,
+      header, body, actions, unskippable, prioritise, tag, hideStackCounter,
+      deactivated: false, inline, renderCustomDialog, onDimmerClick,
     };
 
     options.id = `${++totalModalsCreated}`;
@@ -211,11 +220,19 @@ export default class Modal extends React.Component {
         const dimmer = dimmers[i];
         dimmer.onclick = (event) => {
           if (event.target === dimmer) {
+            const activeItem = this._modalQueue[0];
+            if (typeof activeItem.onDimmerClick === 'function') {
+              activeItem.onDimmerClick();
+            }
+            else {
               this.deactivateModal();
+            }
           }
         };
       }
     });
+
+    return options;
   };
 
   _hide = (optionalCallback) => {
@@ -304,12 +321,30 @@ export default class Modal extends React.Component {
 
   _getModalCountText() {
     const modalCount = this._modalQueue.length;
+    if (this._modalQueue.hideStackCounter && modalCount < 20) {
+      // We cap this at 20 in case legit spam happens.
+      return ''
+    }
+    if (modalCount <= 1) {
+      return '';
+    }
     let modalCountText = '';
     const { currentClosedCount, highestRecentCount } = this.state;
     if (modalCount > 1 || currentClosedCount > 0) {
       modalCountText = `(${currentClosedCount + 1}/${highestRecentCount}) `;
     }
     return modalCountText;
+  }
+
+  /**
+   * Force $modal to redraw its top-most dialog.
+   * @param callback
+   */
+  invalidate(callback) {
+    if (typeof callback !== 'function') {
+      callback = nop;
+    }
+    this.forceUpdate(callback);
   }
 
   /**
@@ -342,13 +377,13 @@ export default class Modal extends React.Component {
           name: 'OK',
           onSelect: () => {
             this.deactivateModal(() => optionalCallback(true));
-          }
+          },
         },
       ];
     }
 
     options.onForceClose = optionalCallback;
-    this.buildModal(options);
+    return this.buildModal(options);
   };
 
   /**
@@ -377,19 +412,19 @@ export default class Modal extends React.Component {
           name: options.yesText ? options.yesText : 'Yes',
           onSelect: () => {
             this.deactivateModal(() => callback(true));
-          }
+          },
         },
         {
           name: options.noText ? options.noText : 'No',
           onSelect: () => {
             this.deactivateModal(() => callback(false));
-          }
+          },
         },
       ];
     }
 
     options.onForceClose = callback;
-    this.buildModal(options);
+    return this.buildModal(options);
   };
 
   /**
@@ -402,24 +437,24 @@ export default class Modal extends React.Component {
    * @param {undefined|JSX.Element} options.actions
    * @param callback
    */
-  buttonPrompt = (options={}, callback) => {
+  buttonPrompt = (options = {}, callback) => {
     if (typeof callback !== 'function') {
       callback = () => console.warn('No callbacks passed to buttonPrompt.');
     }
 
     if (!options.actions) {
-      options.actions = [{ name: 'Default', value: 0 }];
+      options.actions = [ { name: 'Default', value: 0 } ];
     }
 
     options.actions.forEach((item) => {
       item.onSelect = () => {
         this.deactivateModal(() => callback(item));
-      }
+      };
     });
 
     options.inline = true;
     if (typeof options.body !== 'string') {
-        options.body = 'Please select an option:';
+      options.body = 'Please select an option:';
     }
 
     options.onForceClose = callback;
@@ -472,13 +507,13 @@ export default class Modal extends React.Component {
           name: 'Submit',
           onSelect: () => {
             this.deactivateModal(() => callback(recordedText));
-          }
+          },
         },
         {
           name: 'Cancel',
           onSelect: () => {
             this.deactivateModal(() => callback(null));
-          }
+          },
         },
       ];
     }
