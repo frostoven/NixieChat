@@ -55,8 +55,9 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environment variables and secrets files
 .env
+.secrets.json
 
 # IntelliJ
 .idea
