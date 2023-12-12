@@ -2,6 +2,10 @@ import { serverEmitter } from '../emitters/comms';
 import { CryptoMessageType as Socket } from '../../shared/CryptoMessageType';
 import { MessageVersion } from '../../shared/MessageVersion';
 import { Accounts } from '../storage/cacheFrontends/Accounts';
+import { exportRsaPublicKey } from '../encryption/rsa';
+
+const nop = () => {
+};
 
 class RemoteCrypto {
   /**
@@ -73,7 +77,38 @@ class RemoteCrypto {
     );
   }
 
-  static async findContact() {
+  static async findContact(source, target, greeting, callback = nop) {
+    const activeAccount = Accounts.getActiveAccount();
+
+    const options = {
+      source,
+      target,
+      greeting,
+      pubKey: await exportRsaPublicKey({ publicKey: activeAccount.publicKey }),
+      time: Date.now(),
+      v: MessageVersion.findContactV1,
+    };
+    console.log('[findContact] Sending:', options);
+
+    // TODO: set to correct value once dev work concludes.
+    // serverEmitter.timeout(120000).emit(
+    serverEmitter.timeout(1500).emit(
+      Socket.findContact,
+      options,
+      (socketError, { error, results = [] } = {}) => {
+        if (socketError) {
+          console.error('Socket error:', socketError);
+          callback('Socket error:' + socketError.toString());
+        }
+        else if (error) {
+          console.error('Error:', error);
+          callback('Error:' + error);
+        }
+        else {
+          callback(null, results);
+        }
+      },
+    );
   }
 
   static async receiveInvite() {
