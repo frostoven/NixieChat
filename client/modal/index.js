@@ -1,6 +1,7 @@
 import * as ReactDOM from 'react-dom';
 import React from 'react';
 import Modal from './Modal';
+import './nixieDialogs';
 
 // Add CSS style tag.
 const style = document.createElement('style');
