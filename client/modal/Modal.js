@@ -5,6 +5,7 @@
 import React from 'react';
 import { Input, Modal as SemanticModal } from 'semantic-ui-react';
 import { Button } from 'semantic-ui-react';
+import { Settings } from '../storage/cacheFrontends/Settings';
 
 // Unique name used to identify modals.
 const thisMenu = 'modal';
@@ -14,7 +15,14 @@ export const icons = {
   number: 'numbered list',
 };
 
+// Used to detect bad recreations.
 let totalInstances = 0;
+// Used to generate modal IDs.
+let totalModalsCreated = 0;
+
+const nop = () => {
+  //
+};
 
 export default class Modal extends React.Component {
   static allowExternalListeners = true;
@@ -32,6 +40,7 @@ export default class Modal extends React.Component {
     this.state = Modal.defaultState;
     this._currentMenu = null;
     this._modalQueue = [];
+    this.modalById = {};
     // Used specifically to listen for the user pressing escape. This is
     // overwritten by buildModal whenever a new dialog is shown.
     this._forceCloseListener = null;
@@ -84,8 +93,42 @@ export default class Modal extends React.Component {
     });
   };
 
+  /**
+   * Deactivate the top-most (i.e. visible) modal.
+   * @param optionalCallback
+   */
   deactivateModal = (optionalCallback) => {
+    if (typeof optionalCallback !== 'function') {
+      optionalCallback = nop;
+    }
+    if (!this._modalQueue.length) {
+      console.warn('Cannot deactivate modal - none exist.');
+      return;
+    }
+
+    const modalId = this._modalQueue[0].id;
+    delete this.modalById[modalId];
     this._modalQueue.shift();
+    this._reprocessQueue(optionalCallback);
+  };
+
+  /**
+   * Deactivates modal based on its id.
+   * @param modalId
+   * @param optionalCallback
+   */
+  deactivateModalById = (modalId, optionalCallback) => {
+    if (typeof optionalCallback !== 'function') {
+      optionalCallback = nop;
+    }
+    delete this.modalById[modalId];
+    for (let i = 0, len = this._modalQueue.length; i < len; i++) {
+      const options = this._modalQueue[i];
+      if (options.id === modalId) {
+        this._modalQueue.splice(i, 1);
+        break;
+      }
+    }
     this._reprocessQueue(optionalCallback);
   };
 
@@ -143,6 +186,9 @@ export default class Modal extends React.Component {
       header, body, actions, unskippable, prioritise, tag,
       deactivated: false, inline, renderCustomDialog,
     };
+
+    options.id = `${++totalModalsCreated}`;
+    this.modalById[options.id] = options;
 
     if (prioritise) {
       this._modalQueue.unshift(options);
@@ -442,20 +488,23 @@ export default class Modal extends React.Component {
   };
 
   /**
-   * Changes the contents of the modal currently visible.
-   * @param modalOptions
+   * Changes the contents of the specified modal.
+   * @param {number} modalId
+   * @param {object} newOptions
    */
-  modifyModal = (modalOptions) => {
-    if (!this._modalQueue.length) {
+  modifyModal = (modalId, newOptions) => {
+    const options = this.modalById[modalId];
+    if (!options) {
+      console.warn(`Modal with id ${modalId} not found.`);
       return;
     }
-    this._modalQueue[0] = modalOptions;
+    this.modalById[modalId] = newOptions;
     this.forceUpdate();
   };
 
   render() {
     const activeModal = this.getActiveModal() || {};
-    const { inline, renderCustomDialog } = activeModal;
+    const { renderCustomDialog } = activeModal;
 
     if (renderCustomDialog) {
       return renderCustomDialog();
@@ -475,12 +524,12 @@ export default class Modal extends React.Component {
           {activeModal.header}
         </SemanticModal.Header>
         <SemanticModal.Content>
-            {activeModal.body}
+          {activeModal.body}
         </SemanticModal.Content>
         <div
           {...this.props}
         >
-          <div className='kosm-modal-actions'>
+          <div className="kosm-modal-actions">
             {activeModal?.actions?.map((menuEntry, index) => {
               // React element was passed in instead of regular object.
               if (React.isValidElement(menuEntry)) {
