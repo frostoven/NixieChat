@@ -2,7 +2,12 @@ import EventEmitter from './EventEmitter';
 import config from '../config/server';
 
 const clientEmitter = new EventEmitter();
-const serverEmitter = io('ws://localhost:' + config.server.webSocket);
+/** @type Socket */
+const serverEmitter = io(`ws://${location.host}`);
+
+serverEmitter.on('connect', () => {
+  console.log('WebSocket ID:', serverEmitter.id);
+});
 
 export {
   clientEmitter,
