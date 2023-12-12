@@ -232,6 +232,9 @@ export default class Modal extends React.Component {
       return;
     }
     const action = activeModal.actions[selected];
+    if (action.disabled) {
+      return;
+    }
 
     const callback = action.onSelect;
     if (typeof callback === 'function') {
@@ -474,6 +477,7 @@ export default class Modal extends React.Component {
                 <Button
                   key={`ModalButton-${index}`}
                   primary={selected === index}
+                  disabled={menuEntry.disabled || false}
                   onClick={() => {
                     this.setState({ selectionIndex: index }, () => {
                       this._select(index);
@@ -482,7 +486,7 @@ export default class Modal extends React.Component {
                 >
                   {menuEntry.name}
                 </Button>
-              )
+              );
             })}
             {activeModal?.actions?.length === 0 ? (<><br/><br/></>) : null}
           </div>
