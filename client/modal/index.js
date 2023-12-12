@@ -31,6 +31,14 @@ style.innerHTML = `
     text-align: right;
     padding-bottom: 4px;
   }
+
+  .inverted .kosm-modal-actions .ui.primary.button {
+    background-color: #53ad39;
+  }
+
+  .inverted .kosm-modal-actions .ui.secondary.button {
+    background-color: #53ad39;
+  }
 `;
 document.getElementsByTagName('head')[0].appendChild(style);
 
