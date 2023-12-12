@@ -89,18 +89,24 @@ function convertPemToBinary(pem) {
   return base64StringToArrayBuffer(encoded);
 }
 
-function importPublicKey(pemKey) {
+function importPublicKey(pemKey, sourceFormat = 'pem') {
+  if (sourceFormat === 'pem') {
+    pemKey = convertPemToBinary(pemKey);
+  }
   return new Promise(function(resolve) {
-    var importer = crypto.subtle.importKey('spki', convertPemToBinary(pemKey), signAlgorithm, true, [ 'verify' ]);
+    var importer = crypto.subtle.importKey('spki', pemKey, rsaSignAlgorithm, true, [ 'verify' ]);
     importer.then(function(key) {
       resolve(key);
     });
   });
 }
 
-function importPrivateKey(pemKey) {
+function importPrivateKey(pemKey, sourceFormat = 'pem') {
+  if (sourceFormat === 'pem') {
+    pemKey = convertPemToBinary(pemKey);
+  }
   return new Promise(function(resolve) {
-    var importer = crypto.subtle.importKey('pkcs8', convertPemToBinary(pemKey), signAlgorithm, true, [ 'sign' ]);
+    var importer = crypto.subtle.importKey('pkcs8', pemKey, rsaSignAlgorithm, true, [ 'sign' ]);
     importer.then(function(key) {
       resolve(key);
     });
@@ -144,12 +150,17 @@ function exportPemKeys(keys) {
   });
 }
 
-function signData(key, data) {
-  return window.crypto.subtle.sign(signAlgorithm, key, textToArrayBuffer(data));
+async function signData(key, data) {
+  if (typeof data === 'string') {
+    data = textToArrayBuffer(data);
+  }
+  return await window.crypto.subtle.sign(
+    rsaSignAlgorithm, key, data,
+  );
 }
 
 function testVerifySig(pub, sig, data) {
-  return crypto.subtle.verify(signAlgorithm, pub, sig, data);
+  return crypto.subtle.verify(rsaSignAlgorithm, pub, sig, data);
 }
 
 function encryptData(vector, key, data) {
@@ -224,15 +235,15 @@ function generateRsaSigningKey() {
   return generateKey(rsaSignAlgorithm, [ 'sign', 'verify' ]);
 }
 
-function signDataRsa(keyPair, data) {
-  return signData(keyPair.private, data);
+function signDataRsa(privateKey, data) {
+  return signData(privateKey, data);
 }
 
 function exportPublicKey(keys, format = 'raw') {
   if (format === 'raw') {
     return exportPublicKeyRaw(keys);
   }
-  else if (format === 'string' || !format) {
+  else if (format === 'pem' || !format) {
     return exportPublicKeyString(keys);
   }
   else {
@@ -244,7 +255,7 @@ function exportPrivateKey(keys, format = 'raw') {
   if (format === 'raw') {
     return exportPrivateKeyRaw(keys);
   }
-  else if (format === 'string' || !format) {
+  else if (format === 'pem' || !format) {
     return exportPrivateKeyString(keys);
   }
   else {
