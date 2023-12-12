@@ -465,6 +465,11 @@ export default class Modal extends React.Component {
         >
           <div className='kosm-modal-actions'>
             {activeModal?.actions?.map((menuEntry, index) => {
+              // React element was passed in instead of regular object.
+              if (React.isValidElement(menuEntry)) {
+                return menuEntry;
+              }
+
               return (
                 <Button
                   key={`ModalButton-${index}`}
