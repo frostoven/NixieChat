@@ -92,7 +92,7 @@ else if (worldPermission >= 2) {
   process.exit(1);
 }
 
-console.log('===============================================================');
+console.log('=================================================================');
 const pg = secretsFile.pgConnection;
 console.log(
   `Initiating PG connection: ${pg.user}@${pg.host}:${pg.port}/${pg.database}`,
@@ -118,12 +118,14 @@ app.use(require('./routes/default.server.route'));
 app.use(require('./routes/error.server.route'));
 
 // Show boot message.
-console.log('===============================================================');
+console.log('=================================================================');
 console.log('Client can be accessed at:\n',
   `http://localhost:${config.server.listeningPort}`,
 );
-console.log('Note: WebPack will need a bit of time to finish booting.');
-console.log('===============================================================');
+if (process.env.NODE_ENV === 'development') {
+  console.log('Note: WebPack will need a bit of time to finish booting.');
+}
+console.log('=================================================================');
 
 // Readies the websocket listeners.
 bootServer(emitter);
