@@ -13,6 +13,8 @@ class Accounts {
   /**
    * @returns {{
    *   accountName: string,
+   *   personalName: string,
+   *   publicName: string,
    *   contacts: CollectionCache,
    *   privateKey: CryptoKey,
    *   publicKey: CryptoKey
