@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import randomart from 'randomart';
 import { Accordion, Button, Icon, Segment } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 
@@ -64,6 +65,76 @@ class ReceiveInvitation extends React.Component {
   };
 
   genRsaPreview = ({ visible }) => {
+    if (!visible) {
+      return;
+    }
+
+    const { pubKey, pemKey } = this.props;
+    const charWidth = 68;
+    const charHeight = 36;
+    const pixelSquared = 8;
+
+    return (
+      <>
+        <pre style={{
+          display: 'inline-block',
+          border: 'thin solid grey',
+          opacity: 0.6,
+          borderRadius: 4,
+          width: 'fit-content',
+          lineHeight: 0.53,
+          letterSpacing: 0.5,
+          padding: 4,
+          marginRight: 2,
+        }}>
+          <code style={{
+            fontSize: pixelSquared,
+          }}>
+            {randomart(pubKey, {
+              bounds: {
+                width: charWidth,
+                height: charHeight,
+              },
+              symbols: {
+                '-2': '╡', // end
+                '-1': '╟', // start
+                '0': ' ',
+                '1': '░',
+                '2': '▒',
+                '3': '▓',
+                '4': '╪',
+                '5': '╤',
+                '6': '■',
+                '7': '╔',
+                '8': '═',
+                '9': 'X',
+                '10': '█',
+                '11': '▄',
+                '12': '▌',
+                '13': '┼',
+                '14': '@'
+              }
+            })}
+          </code>
+        </pre>
+
+        <pre style={{
+          display: 'inline-block',
+          border: 'thin solid grey',
+          opacity: 0.6,
+          borderRadius: 4,
+          width: 'fit-content',
+          padding: 5,
+          verticalAlign: 'top',
+        }}>
+          <code style={{
+            fontSize: pixelSquared,
+          }}>
+            {pemKey}
+          </code>
+        </pre>
+      </>
+    );
   };
 
   render() {
