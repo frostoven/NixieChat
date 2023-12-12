@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const express = require('express');
 const config = require('./config/server');
 const { bootServer } = require('./socketProcessing');
@@ -20,7 +21,6 @@ const io = require('socket.io')(server);
 // const io = require('socket.io');
 
 const { Emitter } = require('@socket.io/postgres-emitter');
-const { Server } = require('socket.io');
 const { createAdapter } = require('@socket.io/postgres-adapter');
 const { Pool } = require('pg');
 
@@ -30,15 +30,37 @@ const { Pool } = require('pg');
 // transports: [ 'websocket' ], // or [ "websocket", "polling" ] (the order matters)
 // });
 
+let secretsFile = {
+  pgConnection: {
+    host: null,
+    user: null,
+    database: null,
+    password: null,
+    port: null,
+  },
+};
 
-const pool = new Pool({
-  // TODO: Create a .secrets.json file to read this from.
-  host: '127.0.0.1',
-  user: 'YOUR_USER_HERE',
-  database: 'YOUR_DB_HERE',
-  password: 'YOUR_PASS_HERE',
-  port: 5432,
-});
+try {
+  const data = fs.readFileSync('./.secrets.json');
+  secretsFile = JSON.parse(data);
+}
+catch (error) {
+  console.error(error.toString());
+  console.error();
+  console.error(
+    'Could not read secrets file. Please save a copy of ' +
+    '".secrets.example.json" as ".secrets.json" and modify it as needed.',
+  );
+  // TODO: make db-based connections optional.
+  process.exit(1);
+}
+
+console.log('===============================================================');
+const pg = secretsFile.pgConnection;
+console.log(
+  `Initiating PG connection: ${pg.user}@${pg.host}:${pg.port}/${pg.database}`,
+);
+const pool = new Pool(secretsFile.pgConnection);
 
 pool.query(`
   CREATE TABLE IF NOT EXISTS socket_io_attachments (
@@ -59,12 +81,12 @@ app.use(require('./routes/default.server.route'));
 app.use(require('./routes/error.server.route'));
 
 // Show boot message.
-console.log('=============================================================');
+console.log('===============================================================');
 console.log('Client can be accessed at:\n',
   `http://localhost:${config.server.listeningPort}`,
 );
 console.log('Note: WebPack will need a bit of time to finish booting.');
-console.log('=============================================================');
+console.log('===============================================================');
 
 // Readies the websocket listeners.
 bootServer(emitter);
