@@ -1,6 +1,7 @@
 import React from 'react';
 import { LargeCircleIconButton } from '../Generic/LargeCircleIconButton';
 import { Grid, GridColumn } from 'semantic-ui-react';
+import { showAddContactDialog } from '../../modal/nixieDialogs';
 
 const containerStyle = {
   textAlign: 'center',
@@ -46,6 +47,7 @@ class CreateFirstContact extends React.Component {
               icon="user plus"
               label="Add your first contact"
               labelStyle={labelStyle}
+              onClick={showAddContactDialog}
             />
           </GridColumn>
 
@@ -71,6 +73,7 @@ class CreateFirstContact extends React.Component {
               icon="sticky note"
               label="Create encrypted notepad"
               labelStyle={labelStyle}
+              onClick={() => alert('notepad')}
             />
           </GridColumn>
         </Grid>

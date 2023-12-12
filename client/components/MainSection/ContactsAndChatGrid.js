@@ -4,7 +4,7 @@ import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
-import { CreateFirstContact } from '../ContactFinder/CreateFirstContact';
+import { CreateFirstContact } from '../ContactComponents/CreateFirstContact';
 
 /** @type React.CSSProperties */
 const newAccountOptionsStyle = {
