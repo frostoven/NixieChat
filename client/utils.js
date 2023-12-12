@@ -72,6 +72,17 @@ async function sha256(stringOrBuffer, returnAsString = true) {
   }
 }
 
+try {
+  window.NixieDebugUtils = {
+    get256RandomBits,
+    getSafeRandomIntInclusive,
+    sha256,
+  };
+}
+catch (error) {
+  // This will crash if on the server. We don't need this on the server;
+  // do nothing.
+}
 
 export {
   stringToArrayBuffer,
