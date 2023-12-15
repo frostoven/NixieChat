@@ -576,6 +576,7 @@ export default class Modal extends React.Component {
                   key={`ModalButton-${index}`}
                   primary={selected === index}
                   disabled={menuEntry.disabled || false}
+                  style={menuEntry.style || null}
                   onClick={() => {
                     this.setState({ selectionIndex: index }, () => {
                       this._select(index);
