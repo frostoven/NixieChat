@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+// const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const { clearInterval } = require('node:timers');
 const exec = require('child_process').exec;
 
@@ -30,6 +30,8 @@ module.exports = {
         test: /\.js?$/,
         loader: 'babel-loader',
         options: {
+          // Reduces output by around 1MB at the time of writing.
+          comments: process.env.NODE_ENV !== 'production',
           presets: [ '@babel/preset-react' ],
           plugins: [
             // New features:
@@ -48,13 +50,6 @@ module.exports = {
             '@babel/plugin-transform-runtime',
             'transform-es2017-object-entries',
           ],
-        },
-      },
-      {
-        test: /\.(png|jpg|gif|svg)$/,
-        loader: 'file-loader',
-        query: {
-          name: '[name].[ext]?[hash]',
         },
       },
     ],
