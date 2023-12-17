@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import randomart from 'randomart';
 import { Accordion, Button, Icon, Segment } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
+import { InvitationResponse } from '../../../shared/InvitiationResponse';
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
@@ -12,27 +13,53 @@ class ReceiveInvitation extends React.Component {
     greeting: PropTypes.string.isRequired,
     pubKey: PropTypes.any.isRequired,
     time: PropTypes.number.isRequired,
+    onSelectChoice: PropTypes.func,
+  };
+
+  static defaultProps = {
+    onSelectChoice: () => {
+    },
   };
 
   state = {
     showAdvancedInfo: false,
   };
 
+  // All these buttons are disabled at first to give the user time to respond
+  // to
   actions = [
     {
       name: 'Reject Invite',
-      onSelect: $modal.deactivateModal,
+      onSelect: () => {
+        $modal.deactivateModal();
+        this.props.onSelectChoice(InvitationResponse.reject);
+      },
       disabled: true,
     },
     {
       name: 'Block Account',
-      onSelect: $modal.deactivateModal,
+      onSelect: () => {
+        $modal.deactivateModal();
+        this.props.onSelectChoice(InvitationResponse.block);
+      },
+      disabled: true,
+    },
+    {
+      name: 'Ask Me Later',
+      onSelect: () => {
+        $modal.deactivateModal();
+        this.props.onSelectChoice(InvitationResponse.postpone);
+      },
       disabled: true,
     },
     {
       name: 'Accept Invite',
-      onSelect: $modal.deactivateModal,
+      onSelect: () => {
+        $modal.deactivateModal();
+        this.props.onSelectChoice(InvitationResponse.accept);
+      },
       disabled: true,
+      style: { marginLeft: 16 },
     },
   ];
 
@@ -112,8 +139,8 @@ class ReceiveInvitation extends React.Component {
                 '11': '▄',
                 '12': '▌',
                 '13': '┼',
-                '14': '@'
-              }
+                '14': '@',
+              },
             })}
           </code>
         </pre>
@@ -163,7 +190,8 @@ class ReceiveInvitation extends React.Component {
               Advanced Info
             </Accordion.Title>
             <Accordion.Content active={showAdvancedInfo}>
-              The prospective contact's RSA-4096 digital signature is as follows:
+              The prospective contact's RSA-4096 digital signature is as
+              follows:
               <br/>
               {this.genRsaPreview({ visible: showAdvancedInfo })}
             </Accordion.Content>
