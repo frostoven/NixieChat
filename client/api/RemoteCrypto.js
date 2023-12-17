@@ -138,7 +138,6 @@ class RemoteCrypto {
       ownName, requestId, source, greeting, pubKey, time,
     });
 
-    // serverCallback(response);
     // Find the account associated with the requested public name.
     let receivingAccount = null;
     const accounts = Accounts.getAccountCollection().asArray;
@@ -206,6 +205,47 @@ class RemoteCrypto {
     }
   }
 
+  // Called when we send out an invitation and got a response.
+  static async receiveInviteResponse({
+    resp,
+    sourceId,
+    contactName,
+    pubKey,
+  } = {}) {
+    // TODO: save these in a global log.
+    if (sourceId !== serverEmitter.id) {
+      return console.warn('Ignoring RSVP to invalid id', sourceId);
+    }
+    else if (!RemoteCrypto.namesPendingInvites[contactName]) {
+      return console.warn('Ignoring RSVP from uninvited guest', contactName);
+    }
+    else if (!(pubKey instanceof ArrayBuffer)) {
+      return console.warn('Ignoring RSVP from guest with weird public key:', {
+        pubKey,
+      });
+    }
+
+    // Ticket used up; forget.
+    delete RemoteCrypto.namesPendingInvites[contactName];
+
+    // The server sends us the public key as an ArrayBuffer, convert to a view.
+    pubKey = new Uint8Array(pubKey);
+
+    console.log('=> got invite response:', {
+      resp,
+      sourceId,
+      contactName,
+      pubKey,
+    });
+
+    const bob = getDiffieHellman(KeyStrength.messagingModGroup);
+    console.log(`Generating ${KeyStrength.messagingModGroup} DH keys.`);
+    // bob.generateKeys();
+    // console.log(`DH key generation complete.`);
+    // console.log(`Generating DH secret.`);
+    // const bobSecret = bob.computeSecret(pubKey);
+    console.log(`DH secret generation complete.`);
+    console.log({ bobSecret });
   }
 }
 
