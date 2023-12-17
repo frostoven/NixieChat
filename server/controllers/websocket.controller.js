@@ -4,6 +4,7 @@ const socketEvent = {
   ping: generateEventSignaller(),
   makeDiscoverable: generateEventSignaller(),
   findContact: generateEventSignaller(),
+  respondToInvite: generateEventSignaller(),
 };
 
 function ping(socket) {
@@ -22,9 +23,16 @@ function findContact(socket, options, callback) {
   }
 }
 
+function respondToInvite(socket, options, callback) {
+  if (socket) {
+    socketEvent.respondToInvite.trigger({ socket, options, callback });
+  }
+}
+
 module.exports = {
   socketEvent,
   ping,
   makeDiscoverable,
   findContact,
+  respondToInvite,
 };

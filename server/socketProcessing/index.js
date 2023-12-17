@@ -29,12 +29,6 @@ function bootServer(clusterEmitter) {
       });
     });
 
-  /**
-   * @param {Object} payload
-   * @param {Socket} payload.socket
-   * @param {Object} payload.options
-   * @param {Function} payload.callback
-   */
   socketEvent.makeDiscoverable.addListener(
     /**
      * @param {Object} payload
@@ -100,7 +94,24 @@ function bootServer(clusterEmitter) {
         return;
       }
 
-      clusterEmitter.emit(target, {
+      // It's important to know how we use socket.id because we actually use
+      // it for many different things simultaneously. Socket.io automatically
+      // creates a room for each id, meaning it's there and ready to use. We
+      // use it here as a reply address. At the same time, once we've
+      // broadcast the id, anyone listening on that public name now knows how
+      // to find us, which is a privacy issue (especially if the contact we're
+      // actually trying to reach shares the id). We could instead create
+      // temporary rooms and use those as reply addresses, but that introduces
+      // a lot of complexity as we'd then need to keep track of room expiration
+      // across clusters (which, far as I can tell, Socket.io does not support
+      // natively). Instead, once the contact accepts the invite (or the invite
+      // times out), the client triggers generation of a new socket id by
+      // closing the current connection and establishing a new one (after
+      // waiting a small but random amount of time). This allows us to fully
+      // utilize built-ins but still have a different reply address with each
+      // new invite. This also drives home the idea that ids should not be
+      // relied on for permanence, as per Socket.io docs recommendation.
+      clusterEmitter.to(target).emit(target, {
         requestId: socket.id,
         source,
         greeting,
@@ -108,7 +119,26 @@ function bootServer(clusterEmitter) {
         time,
       });
 
-      callback({ status: 'test' });
+      callback({ status: 'received' });
+    },
+  );
+
+  socketEvent.respondToInvite.addListener(
+    /**
+     * @param {Object} payload
+     * @param {Socket} payload.socket
+     * @param {Object} payload.options
+     * @param {Function} payload.callback
+     */
+    ({ socket, options = {}, callback = nop } = {}) => {
+      console.log('====> receiveInviteResponse:', options);
+      const { target, resp, ownName, pubKey } = options;
+      clusterEmitter.to(target).emit(target, {
+        resp,
+        sourceId: target,
+        contactName: ownName,
+        pubKey,
+      });
     });
 }
 
