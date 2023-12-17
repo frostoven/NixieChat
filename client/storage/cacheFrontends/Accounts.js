@@ -9,7 +9,6 @@ class Accounts {
     return storage.accountCollectionCache;
   }
 
-
   /**
    * @returns {{
    *   accountName: string,
