@@ -1,9 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import randomart from 'randomart';
-import { Accordion, Button, Icon, Segment } from 'semantic-ui-react';
+import {
+  Accordion,
+  Button,
+  Form,
+  Icon,
+  Input,
+  Segment,
+} from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { InvitationResponse } from '../../../shared/InvitiationResponse';
+import { ContextualHelp } from '../Generic/ContextualHelp';
+import { Accounts } from '../../storage/cacheFrontends/Accounts';
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
@@ -23,6 +32,8 @@ class ReceiveInvitation extends React.Component {
 
   state = {
     showAdvancedInfo: false,
+    greetingName: '',
+    greetingMessage: '',
   };
 
   // All these buttons are disabled at first to give the user time to respond
@@ -32,7 +43,7 @@ class ReceiveInvitation extends React.Component {
       name: 'Reject Invite',
       onSelect: () => {
         $modal.deactivateModal();
-        this.props.onSelectChoice(InvitationResponse.reject);
+        this.props.onSelectChoice({ answer: InvitationResponse.reject });
       },
       disabled: true,
     },
@@ -40,7 +51,7 @@ class ReceiveInvitation extends React.Component {
       name: 'Block Account',
       onSelect: () => {
         $modal.deactivateModal();
-        this.props.onSelectChoice(InvitationResponse.block);
+        this.props.onSelectChoice({ answer: InvitationResponse.block });
       },
       disabled: true,
     },
@@ -48,7 +59,7 @@ class ReceiveInvitation extends React.Component {
       name: 'Ask Me Later',
       onSelect: () => {
         $modal.deactivateModal();
-        this.props.onSelectChoice(InvitationResponse.postpone);
+        this.props.onSelectChoice({ answer: InvitationResponse.postpone });
       },
       disabled: true,
     },
@@ -56,7 +67,11 @@ class ReceiveInvitation extends React.Component {
       name: 'Accept Invite',
       onSelect: () => {
         $modal.deactivateModal();
-        this.props.onSelectChoice(InvitationResponse.accept);
+        this.props.onSelectChoice({
+          answer: InvitationResponse.accept,
+          greetingName: this.state.greetingName,
+          greetingMessage: this.state.greetingMessage,
+        });
       },
       disabled: true,
       style: { marginLeft: 16 },
@@ -64,6 +79,11 @@ class ReceiveInvitation extends React.Component {
   ];
 
   componentDidMount() {
+    this.setupDialog();
+    this.setupPersonalName();
+  }
+
+  setupDialog = () => {
     const dialog = this.props.dialog;
     dialog.actions = [
       ...this.actions,
@@ -85,7 +105,24 @@ class ReceiveInvitation extends React.Component {
       this.props.dialog.actions = this.actions;
       $modal.invalidate();
     }, 3000);
-  }
+  };
+
+  setupPersonalName = () => {
+    const { ownName } = this.props;
+
+    let replyingAccount = Accounts.findAccountByPublicName({
+      publicName: ownName,
+    });
+
+    console.log('replyingAccount:', replyingAccount);
+
+    if (replyingAccount === null) {
+      this.setState({ greetingName: ownName });
+    }
+    else {
+      this.setState({ greetingName: replyingAccount.personalName });
+    }
+  };
 
   toggleAdvancedInfo = () => {
     this.setState({ showAdvancedInfo: !this.state.showAdvancedInfo });
@@ -165,7 +202,7 @@ class ReceiveInvitation extends React.Component {
   };
 
   render() {
-    const { showAdvancedInfo } = this.state;
+    const { showAdvancedInfo, greetingName, greetingMessage } = this.state;
     const { source, ownName } = this.props;
     const darkMode = Settings.isDarkModeEnabled();
 
@@ -179,6 +216,42 @@ class ReceiveInvitation extends React.Component {
         the invitation at any time (unless you block them).
         <br/><br/>
         This invite expires in 120 seconds.
+
+        <Segment inverted={!darkMode}>
+          <Form>
+            <Form.Field>
+              <label>
+                Name shown if you accept
+                &nbsp;
+                <ContextualHelp>
+                  The name displayed if you accept their invite.
+                  <br/><br/>
+                  Names and greetings are not shown to the other person if you
+                  reject, block, or postpone the invite.
+                </ContextualHelp>
+              </label>
+              <input
+                autoFocus
+                value={greetingName}
+                onChange={(event) => {
+                  this.setState({ greetingName: event.target.value });
+                }}
+              />
+            </Form.Field>
+            <Form.Field>
+              <label>
+                Greeting shown if you accept
+              </label>
+              <input
+                autoFocus
+                value={greetingMessage}
+                onChange={(event) => {
+                  this.setState({ greetingMessage: event.target.value });
+                }}
+              />
+            </Form.Field>
+          </Form>
+        </Segment>
 
         <Segment inverted={!darkMode}>
           <Accordion inverted={!darkMode}>

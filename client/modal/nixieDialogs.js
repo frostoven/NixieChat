@@ -78,7 +78,9 @@ async function showInvitationDialog({
         pubKey={pubKey}
         pemKey={pemKey}
         time={time}
-        onSelectChoice={resolve}
+        onSelectChoice={(answer) => {
+          resolve(answer);
+        }}
       />
     );
 

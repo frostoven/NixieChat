@@ -128,7 +128,6 @@ class RemoteCrypto {
     pubKey,
     time,
   }) {
-    console.log({ requestId, source, greeting });
     // TODO: toast that invite was received, in case user is in another modal.
 
     console.log('[invite]', {
@@ -140,15 +139,9 @@ class RemoteCrypto {
     });
 
     // Find the account associated with the requested public name.
-    let receivingAccount = null;
-    const accounts = Accounts.getAccountCollection().asArray;
-    for (let i = 0, len = accounts.length; i < len; i++) {
-      const account = accounts[i];
-      if (account.publicName === ownName) {
-        receivingAccount = account;
-        break;
-      }
-    }
+    const receivingAccount = Accounts.findAccountByPublicName({
+      publicName: ownName,
+    });
 
     if (!receivingAccount) {
       return $modal.alert({
@@ -159,26 +152,29 @@ class RemoteCrypto {
       });
     }
 
+    const { answer } = response;
+
     const { block, reject, postpone, accept } = InvitationResponse;
-    if (response === block || response === reject) {
+    if (answer === block || answer === reject) {
       // Do not reply; this means a malicious party won't know whether or not
       // this account is online.
       // TODO: Handle block. Save block info in removeEventListener account
       //  only.
       console.log('Not replying to invite.');
     }
-    else if (response === postpone) {
+    else if (answer === postpone) {
       // Send rain check without acceptance extras.
       console.log(`Sending postponement to ${requestId}.`);
       serverEmitter.emit(Socket.respondToInvite, {
         target: requestId,
-        resp: response,
-        ownName,
+        answer,
       });
     }
-    else if (response === accept) {
+    else if (answer === accept) {
       // The server sends us the public key as an ArrayBuffer, convert to view.
       pubKey = new Uint8Array(pubKey);
+
+      const { greetingName, greetingMessage } = response;
 
       // Seeing as someone sent us an invitation, and we've indicated we want
       // to connect, we may as well do DH now and respond.
@@ -197,8 +193,10 @@ class RemoteCrypto {
       console.log(`Sending response ${response} to ${requestId}.`);
       serverEmitter.emit(Socket.respondToInvite, {
         target: requestId,
-        resp: response,
+        answer,
         ownName,
+        greetingName,
+        greetingMessage,
         pubKey: await exportRsaPublicKey({
           publicKey: receivingAccount.publicKey,
         }),
@@ -208,9 +206,11 @@ class RemoteCrypto {
 
   // Called when we send out an invitation and got a response.
   static async receiveInviteResponse({
-    resp,
+    answer,
     sourceId,
     publicName,
+    greetingName,
+    greetingMessage,
     pubKey,
   } = {}) {
     // TODO: save these in a global log.
@@ -233,7 +233,7 @@ class RemoteCrypto {
     pubKey = new Uint8Array(pubKey);
 
     console.log('=> got invite response:', {
-      resp,
+      answer,
       sourceId,
       publicName,
       pubKey,
@@ -249,7 +249,7 @@ class RemoteCrypto {
     // console.log({ bobSecret });
 
     clientEmitter.emit(ClientMessageType.receiveRsvpResponse, {
-      response: resp,
+      answer,
       sourceId,
       publicName,
       publicKey: pubKey,

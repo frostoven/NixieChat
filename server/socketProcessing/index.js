@@ -132,11 +132,15 @@ function bootServer(clusterEmitter) {
      */
     ({ socket, options = {}, callback = nop } = {}) => {
       console.log('====> receiveInviteResponse:', options);
-      const { target, resp, ownName, pubKey } = options;
+      const {
+        target, answer, ownName, greetingName, greetingMessage, pubKey,
+      } = options;
       clusterEmitter.to(target).emit(target, {
-        resp,
+        answer,
         sourceId: target,
         publicName: ownName,
+        greetingName,
+        greetingMessage,
         pubKey,
       });
     });

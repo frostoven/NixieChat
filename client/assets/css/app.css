@@ -90,5 +90,5 @@
 /* Work around for unresolved semantic bug (#6267) where modals get cut off at
    the top. */
 .ui.scrolling.modal {
-  transform: translateY(-11%);
+  transform: translateY(-3%);
 }

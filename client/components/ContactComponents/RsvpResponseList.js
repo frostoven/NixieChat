@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { InvitationResponse } from '../../../shared/InvitiationResponse';
-import { Form, Header, Icon, List } from 'semantic-ui-react';
+import { Button, Form, Header, Icon, List } from 'semantic-ui-react';
 
 /** @type React.CSSProperties */
 const columnStyle = {
@@ -63,6 +63,10 @@ class RsvpResponseList extends React.Component {
     this.setState({
       selected: index,
     });
+  };
+
+  startVerification = () => {
+    //
   };
 
   render() {
@@ -132,11 +136,16 @@ class RsvpResponseList extends React.Component {
             <div>
               Contact has <b>accepted</b> your invitation.
               <br/><br/>
-              Please verify that the number and color below precisely match
-              what your contact sees on their screen. Once confirmed, click
-              'confirm.' Otherwise, this is not the correct person.
+              Click 'Verify' to start the verification process. Please beware
+              that this takes some time.
+              {/*Please verify that the number and color below precisely match*/}
+              {/*what your contact sees on their screen. Once confirmed, click*/}
+              {/*'Confirm Verification.' Otherwise, this is not the correct person.*/}
+              {/*<br/><br/>*/}
               <br/><br/>
-              [details tba]
+              <Button style={{ float: 'right' }}>
+                Verify
+              </Button>
             </div>
           </div>,
         );
