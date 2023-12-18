@@ -5,8 +5,24 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 const storage = new NixieStorage();
 
 class Accounts {
+  /**
+   * @return {CollectionCache}
+   */
   static getAccountCollection() {
     return storage.accountCollectionCache;
+  }
+
+  // Returns the first local account matching the specified public name, or
+  // null if the requested name does not exist.
+  static findAccountByPublicName({ publicName }) {
+    const accounts = Accounts.getAccountCollection().asArray;
+    for (let i = 0, len = accounts.length; i < len; i++) {
+      const account = accounts[i];
+      if (account.publicName === publicName) {
+        return account;
+      }
+    }
+    return null;
   }
 
   /**
