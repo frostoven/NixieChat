@@ -116,6 +116,10 @@ class ContactFinder extends React.Component {
   };
 
   render() {
+    if (this.rsvpResponses.length) {
+      return <RsvpResponseList responses={this.rsvpResponses}/>
+    }
+
     const darkMode = Settings.isDarkModeEnabled();
     const {
       localName,
