@@ -45,6 +45,7 @@ class ContactFinder extends React.Component {
     buttonDisabled: false,
     buttonText: 'Search',
     errorMessage: '',
+    showSearchWindow: false,
   };
 
   constructor(props) {
@@ -69,6 +70,7 @@ class ContactFinder extends React.Component {
       buttonDisabled: true,
       buttonText: 'Searching...',
       errorMessage: '',
+      showSearchWindow: true,
     }, async () => {
       const source = this.state.localName || '(No name specified)';
       const { targetName: target, greeting } = this.state;
@@ -116,7 +118,7 @@ class ContactFinder extends React.Component {
   };
 
   render() {
-    if (this.rsvpResponses.length) {
+    if (this.state.showSearchWindow) {
       return <RsvpResponseList responses={this.rsvpResponses}/>
     }
 

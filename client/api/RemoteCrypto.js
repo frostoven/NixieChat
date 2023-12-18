@@ -176,20 +176,6 @@ class RemoteCrypto {
 
       const { greetingName, greetingMessage } = response;
 
-      // Seeing as someone sent us an invitation, and we've indicated we want
-      // to connect, we may as well do DH now and respond.
-      // TODO: benchmark on old devices, make sure that there's enough time. If
-      //  not, we'll need an additional reply step. Maybe simply ping the other
-      //  device telling it to stall its timer, and then start.
-      const alice = getDiffieHellman(KeyStrength.messagingModGroup);
-      // console.log(`Generating ${KeyStrength.messagingModGroup} DH keys.`);
-      // alice.generateKeys();
-      // console.log(`DH key generation complete.`);
-      // console.log(`Generating DH secret.`);
-      // const aliceSecret = alice.computeSecret(pubKey);
-      // console.log(`DH secret generation complete.`);
-      // console.log({ aliceSecret });
-
       console.log(`Sending response ${response} to ${requestId}.`);
       serverEmitter.emit(Socket.respondToInvite, {
         target: requestId,
