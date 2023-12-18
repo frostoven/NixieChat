@@ -12,7 +12,7 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { getSafeRandomIntInclusive } from '../../utils';
-import { ContextualHelp } from '../Generic/ContextualHelp';
+import { NxField } from '../Generic/NxField';
 
 class AccountCreator extends React.Component {
   state = {
@@ -108,62 +108,46 @@ class AccountCreator extends React.Component {
         <br/>
         <br/>
         <Form>
-          <Form.Field>
-            <label>
-              Account Name (only you can see this)
-              &nbsp;
-              <ContextualHelp>
-                This is for your own reference; it's used to tell your accounts
-                apart.
-              </ContextualHelp>
-            </label>
-            <input
-              autoFocus
-              placeholder={accountError || 'Account Name'}
-              value={accountName}
-              onChange={(event) => {
-                this.setState({ accountName: event.target.value });
-              }}
-            />
-          </Form.Field>
 
-          <Form.Field>
-            <label>
-              Personal Name (only contacts can see this)
-              &nbsp;
-              <ContextualHelp>
-                This is what people see after you've been added as a contact.
-              </ContextualHelp>
-            </label>
-            <input
-              placeholder="Personal Name"
-              onChange={(event) => {
-                this.setState({ personalName: event.target.value });
-              }}
-            />
-          </Form.Field>
-          <Form.Field>
-            <label>
-              Optional Public Name
-              &nbsp;
-              <ContextualHelp>
-                <div>
-                  If you want people to invite you to chats, you need to have a
-                  public name. You can add / remove the account's public name
-                  at any time. When you remove your name, existing chats will
-                  not be affected and you will no longer be searchable.
-                  <br/><br/>
-                  This field is automatically suffixed with a random number.
-                </div>
-              </ContextualHelp>
-            </label>
-            <input
-              placeholder="Public Name"
-              onChange={(event) => {
-                this.setState({ publicName: event.target.value });
-              }}
-            />
-          </Form.Field>
+          <NxField
+            label="Account Name (only you can see this)"
+            help={
+              'This is for your own reference; it\'s used to tell your accounts apart.'
+            }
+            autoFocus
+            placeholder={accountError || 'Account Name'}
+            value={accountName}
+            onChange={(event) => {
+              this.setState({ accountName: event.target.value });
+            }}
+          />
+
+          <NxField
+            label="Personal Name (only contacts can see this)"
+            help={'This is what people see after you\'ve been added as a contact.'}
+            placeholder="Personal Name"
+            onChange={(event) => {
+              this.setState({ personalName: event.target.value });
+            }}
+          />
+
+          <NxField
+            label='Optional Public Name'
+            help={
+              <div>
+                If you want people to invite you to chats, you need to have a
+                public name. You can add / remove the account's public name
+                at any time. When you remove your name, existing chats will
+                not be affected and you will no longer be searchable.
+                <br/><br/>
+                This field is automatically suffixed with a random number.
+              </div>
+            }
+            placeholder="Public Name"
+            onChange={(event) => {
+              this.setState({ publicName: event.target.value });
+            }}
+          />
 
           {/* TODO: make this optional later. Will require extra auth like
                email or whatever. */}
