@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { InvitationResponse } from '../../../shared/InvitiationResponse';
-import { Button, Form, Header, Icon, List } from 'semantic-ui-react';
+import { Button, Form, Header, Icon, List, Loader } from 'semantic-ui-react';
+import { Settings } from '../../storage/cacheFrontends/Settings';
 
 /** @type React.CSSProperties */
 const columnStyle = {
@@ -28,6 +29,13 @@ const leftColStyle = {
 /** @type React.CSSProperties */
 const responseLoaderAnimation = {
   overflow: 'hidden',
+};
+
+
+/** @type React.CSSProperties */
+const loaderIconStyle = {
+  paddingLeft: 24,
+  paddingBottom: 18,
 };
 
 /** @type React.CSSProperties */
@@ -70,6 +78,7 @@ class RsvpResponseList extends React.Component {
   };
 
   render() {
+    const darkMode = Settings.isDarkModeEnabled();
     const { responses } = this.props;
     const { selected } = this.state;
     const leftSide = [
@@ -177,11 +186,21 @@ class RsvpResponseList extends React.Component {
       }
     }
 
+    let loaderMessage;
+    if (!responses.length) {
+      loaderMessage = 'Waiting for replies...';
+    }
+    else {
+    loaderMessage = 'Awaiting further replies...';
+    }
     leftSide.push(
       <div key="ResponseLoaderAnimation" style={responseLoaderAnimation}>
-        <Icon loading name="circle notch"/> Awaiting further replies...
+        <Loader
+          size="mini" active inline inverted={!darkMode}
+          style={loaderIconStyle}
+        /> {loaderMessage}
         <hr/>
-      </div>
+      </div>,
     );
 
     return (
