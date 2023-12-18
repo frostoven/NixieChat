@@ -4,6 +4,7 @@ const InvitationResponse = {
   reject: 2,
   postpone: 3,
   block: 4,
+  verification: 5,
 };
 
 export {
