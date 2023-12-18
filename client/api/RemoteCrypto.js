@@ -5,7 +5,7 @@ import { MessageVersion } from '../../shared/MessageVersion';
 import { Accounts } from '../storage/cacheFrontends/Accounts';
 import { exportRsaPublicKey } from '../encryption/rsa';
 import { showInvitationDialog } from '../modal/nixieDialogs';
-import { InvitationResponse } from '../../shared/InvitiationResponse';
+import { InvitationResponse } from '../../shared/InvitationResponse';
 import { getDiffieHellman } from 'diffie-hellman';
 import { KeyStrength } from '../../shared/KeyStrength';
 import { ClientMessageType } from '../emitters/ClientMessageType';

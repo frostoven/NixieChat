@@ -9,7 +9,7 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
-import { InvitationResponse } from '../../../shared/InvitiationResponse';
+import { InvitationResponse } from '../../../shared/InvitationResponse';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { NxField } from '../Generic/NxField';
 
