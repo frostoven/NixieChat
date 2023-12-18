@@ -209,15 +209,15 @@ class RemoteCrypto {
   static async receiveInviteResponse({
     resp,
     sourceId,
-    contactName,
+    publicName,
     pubKey,
   } = {}) {
     // TODO: save these in a global log.
     if (sourceId !== serverEmitter.id) {
       return console.warn('Ignoring RSVP to invalid id', sourceId);
     }
-    else if (!RemoteCrypto.namesPendingInvites[contactName]) {
-      return console.warn('Ignoring RSVP from uninvited guest', contactName);
+    else if (!RemoteCrypto.namesPendingInvites[publicName]) {
+      return console.warn('Ignoring RSVP from uninvited guest', publicName);
     }
     else if (!(pubKey instanceof ArrayBuffer)) {
       return console.warn('Ignoring RSVP from guest with weird public key:', {
@@ -226,7 +226,7 @@ class RemoteCrypto {
     }
 
     // Ticket used up; forget.
-    delete RemoteCrypto.namesPendingInvites[contactName];
+    delete RemoteCrypto.namesPendingInvites[publicName];
 
     // The server sends us the public key as an ArrayBuffer, convert to a view.
     pubKey = new Uint8Array(pubKey);

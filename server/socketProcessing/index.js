@@ -136,7 +136,7 @@ function bootServer(clusterEmitter) {
       clusterEmitter.to(target).emit(target, {
         resp,
         sourceId: target,
-        contactName: ownName,
+        publicName: ownName,
         pubKey,
       });
     });
