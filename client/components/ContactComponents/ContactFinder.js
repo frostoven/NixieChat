@@ -9,10 +9,10 @@ import { Settings } from '../../storage/cacheFrontends/Settings';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { sharedConfig } from '../../../shared/config';
-import { ContextualHelp } from '../Generic/ContextualHelp';
 import { clientEmitter } from '../../emitters/comms';
 import { ClientMessageType } from '../../emitters/ClientMessageType';
 import { RsvpResponseList } from './RsvpResponseList';
+import { NxField } from '../Generic/NxField';
 
 // Used to pick a server error message at random. The reason we randomise them
 // is that they all look pretty, and all look like valid error message
@@ -144,69 +144,53 @@ class ContactFinder extends React.Component {
         want to become your contact.
         <br/><br/>
         <Form>
+          <NxField
+            label='Your name'
+            help={(
+              <div>
+                The name you want the contact to see in the invitation.
+                <br/><br/>
+                This name will be displayed in their contacts list if they
+                choose to accept your invitation.
+              </div>
+            )}
+            placeholder='Shown in Invite'
+            value={localName}
+            onChange={(event) => {
+              this.setState({ localName: event.target.value });
+            }}
+          />
 
-          <Form.Field>
-            <label>
-              Your name
-              &nbsp;
-              <ContextualHelp>
-                <div>
-                  The name you want the contact to see in the invitation.
-                  <br/><br/>
-                  This name will be displayed in their contacts list if they
-                  choose to accept your invitation.
-                </div>
-              </ContextualHelp>
-            </label>
-            <input
-              placeholder={'Shown in Invite'}
-              value={localName}
-              onChange={(event) => {
-                this.setState({ localName: event.target.value });
-              }}
-            />
-          </Form.Field>
+          <NxField
+            label='Contact Public Name'
+            autoFocus
+            placeholder={'Contact\'s Public Name'}
+            help={(
+              <div>
+                You can only find contacts if they have a public name. Their
+                public names are visible only while they are online.
+              </div>
+            )}
+            value={targetName}
+            onChange={(event) => {
+              this.setState({ targetName: event.target.value });
+            }}
+          />
 
-          <Form.Field>
-            <label>
-              Contact Public Name
-              &nbsp;
-              <ContextualHelp>
-                <div>
-                  You can only find contacts if they have a public name. Their
-                  public names are visible only while they are online.
-                </div>
-              </ContextualHelp>
-            </label>
-            <input
-              autoFocus
-              placeholder={'Contact\'s Public Name'}
-              value={targetName}
-              onChange={(event) => {
-                this.setState({ targetName: event.target.value });
-              }}
-            />
-          </Form.Field>
-
-          <Form.Field>
-            <label>
-              Greeting
-              &nbsp;
-              <ContextualHelp>
-                <div>
-                  Optional message you want them to see when they receive the
-                  invite
-                </div>
-              </ContextualHelp>
-            </label>
-            <input
-              placeholder={'Optional Greeting'}
-              value={greeting}
-              onChange={(event) => {
-                this.setState({ greeting: event.target.value });
-              }}
-            />
-          </Form.Field>
+          <NxField
+            label='Greeing'
+            help={(
+              <div>
+                Optional message you want them to see when they receive the
+                invite
+              </div>
+            )}
+            placeholder='Optional Greeting'
+            value={greeting}
+            onChange={(event) => {
+              this.setState({ greeting: event.target.value });
+            }}
+          />
 
           {this.greetingLimitNotice()}
 
