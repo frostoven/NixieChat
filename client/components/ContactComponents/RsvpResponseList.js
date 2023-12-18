@@ -204,7 +204,7 @@ class RsvpResponseList extends React.Component {
     );
 
     return (
-      <Form>
+      <Form inverted={!darkMode}>
         <Form.Group widths="equal">
           <Form.Field style={leftColStyle}>
             {leftSide}

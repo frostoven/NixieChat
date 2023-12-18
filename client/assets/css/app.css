@@ -87,6 +87,20 @@
   background-color: rgb(0 0 0 / 50%);
 }
 
+/* Dark mode fix. */
+.inverted .ui.loader:before {
+  border-color: #e0e0e0 !important;
+}
+
+.inverted .ui.loader:after {
+  border-color: #212121 transparent transparent !important;
+}
+
+/* Slow the default down loader, which is quite frantic. */
+.ui.loader:after {
+  animation: loader 6.25s linear infinite;
+}
+
 /* Work around for unresolved semantic bug (#6267) where modals get cut off at
    the top. */
 .ui.scrolling.modal {
