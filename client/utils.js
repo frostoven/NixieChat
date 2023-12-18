@@ -84,6 +84,12 @@ catch (error) {
   // do nothing.
 }
 
+function setPromiseTimeout(delay) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
+}
+
 export {
   stringToArrayBuffer,
   arrayBufferToString,
@@ -91,4 +97,5 @@ export {
   get256RandomBits,
   getSafeRandomIntInclusive,
   sha256,
+  setPromiseTimeout,
 };
