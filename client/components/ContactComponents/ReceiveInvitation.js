@@ -6,13 +6,12 @@ import {
   Button,
   Form,
   Icon,
-  Input,
   Segment,
 } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { InvitationResponse } from '../../../shared/InvitiationResponse';
-import { ContextualHelp } from '../Generic/ContextualHelp';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
+import { NxField } from '../Generic/NxField';
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
@@ -219,37 +218,31 @@ class ReceiveInvitation extends React.Component {
 
         <Segment inverted={!darkMode}>
           <Form>
-            <Form.Field>
-              <label>
-                Name shown if you accept
-                &nbsp;
-                <ContextualHelp>
+            <NxField
+              label="Name shown if you accept"
+              help={
+                <div>
                   The name displayed if you accept their invite.
                   <br/><br/>
                   Names and greetings are not shown to the other person if you
                   reject, block, or postpone the invite.
-                </ContextualHelp>
-              </label>
-              <input
-                autoFocus
-                value={greetingName}
-                onChange={(event) => {
-                  this.setState({ greetingName: event.target.value });
-                }}
-              />
-            </Form.Field>
-            <Form.Field>
-              <label>
-                Greeting shown if you accept
-              </label>
-              <input
-                autoFocus
-                value={greetingMessage}
-                onChange={(event) => {
-                  this.setState({ greetingMessage: event.target.value });
-                }}
-              />
-            </Form.Field>
+                </div>
+              }
+              autoFocus
+              value={greetingName}
+              onChange={(event) => {
+                this.setState({ greetingName: event.target.value });
+              }}
+            />
+
+            <NxField
+              label='Greeting shown if you accept'
+              autoFocus
+              value={greetingMessage}
+              onChange={(event) => {
+                this.setState({ greetingMessage: event.target.value });
+              }}
+            />
           </Form>
         </Segment>
 
