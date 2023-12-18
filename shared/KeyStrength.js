@@ -4,6 +4,11 @@ const KeyStrength = {
   messagingModGroup: 'modp18',
 };
 
+const KeyStrengthFriendly = {
+  'modp18': '8192-bit',
+};
+
 module.exports = {
   KeyStrength,
+  KeyStrengthFriendly,
 };
