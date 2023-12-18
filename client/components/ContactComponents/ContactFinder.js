@@ -10,6 +10,9 @@ import { RemoteCrypto } from '../../api/RemoteCrypto';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { sharedConfig } from '../../../shared/config';
 import { ContextualHelp } from '../Generic/ContextualHelp';
+import { clientEmitter } from '../../emitters/comms';
+import { ClientMessageType } from '../../emitters/ClientMessageType';
+import { RsvpResponseList } from './RsvpResponseList';
 
 // Used to pick a server error message at random. The reason we randomise them
 // is that they all look pretty, and all look like valid error message
@@ -48,7 +51,17 @@ class ContactFinder extends React.Component {
     super(props);
     const acc = Accounts.getActiveAccount();
     console.log('active account:', acc);
-    this.state.localName = acc.publicName || acc.personalName || randomLocalName();
+    this.state.localName = acc.publicName || randomLocalName();
+    this.rsvpResponses = [];
+  }
+
+  componentDidMount() {
+    clientEmitter.on(ClientMessageType.receiveRsvpResponse, (rsvp) => {
+      // To avoid concurrency issues, we use a simple array with force update
+      // instead of setState.
+      this.rsvpResponses.push(rsvp);
+      this.forceUpdate();
+    });
   }
 
   findContact = () => {

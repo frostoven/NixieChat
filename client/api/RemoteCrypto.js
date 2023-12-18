@@ -1,5 +1,5 @@
 import React from 'react';
-import { serverEmitter } from '../emitters/comms';
+import { clientEmitter, serverEmitter } from '../emitters/comms';
 import { CryptoMessageType as Socket } from '../../shared/CryptoMessageType';
 import { MessageVersion } from '../../shared/MessageVersion';
 import { Accounts } from '../storage/cacheFrontends/Accounts';
@@ -8,6 +8,7 @@ import { showInvitationDialog } from '../modal/nixieDialogs';
 import { InvitationResponse } from '../../shared/InvitiationResponse';
 import { getDiffieHellman } from 'diffie-hellman';
 import { KeyStrength } from '../../shared/KeyStrength';
+import { ClientMessageType } from '../emitters/ClientMessageType';
 
 const nop = () => {
 };
@@ -96,8 +97,8 @@ class RemoteCrypto {
     };
     console.log('[findContact] Sending:', options);
 
-    // Keep track of pending invite names. If we receive an RSVP from someone
-    // we didn't send an invitation to, then we want to treat them as spam.
+    // Keep track of pending invite names. If we receive an RSVP response from
+    // someone we didn't send an invitation to then treat them as spam.
     RemoteCrypto.namesPendingInvites[target] = { name: target };
 
     serverEmitter.timeout(120000).emit(
@@ -185,8 +186,8 @@ class RemoteCrypto {
       //  not, we'll need an additional reply step. Maybe simply ping the other
       //  device telling it to stall its timer, and then start.
       const alice = getDiffieHellman(KeyStrength.messagingModGroup);
-      console.log(`Generating ${KeyStrength.messagingModGroup} DH keys.`);
-      alice.generateKeys();
+      // console.log(`Generating ${KeyStrength.messagingModGroup} DH keys.`);
+      // alice.generateKeys();
       // console.log(`DH key generation complete.`);
       // console.log(`Generating DH secret.`);
       // const aliceSecret = alice.computeSecret(pubKey);
@@ -234,18 +235,25 @@ class RemoteCrypto {
     console.log('=> got invite response:', {
       resp,
       sourceId,
-      contactName,
+      publicName,
       pubKey,
     });
 
     const bob = getDiffieHellman(KeyStrength.messagingModGroup);
-    console.log(`Generating ${KeyStrength.messagingModGroup} DH keys.`);
+    // console.log(`Generating ${KeyStrength.messagingModGroup} DH keys.`);
     // bob.generateKeys();
     // console.log(`DH key generation complete.`);
     // console.log(`Generating DH secret.`);
     // const bobSecret = bob.computeSecret(pubKey);
-    console.log(`DH secret generation complete.`);
-    console.log({ bobSecret });
+    // console.log(`DH secret generation complete.`);
+    // console.log({ bobSecret });
+
+    clientEmitter.emit(ClientMessageType.receiveRsvpResponse, {
+      response: resp,
+      sourceId,
+      publicName,
+      publicKey: pubKey,
+    });
   }
 }
 
