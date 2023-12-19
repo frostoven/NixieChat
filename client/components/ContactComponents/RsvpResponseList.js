@@ -112,11 +112,11 @@ class RsvpResponseList extends React.Component {
     await setPromiseTimeout(500);
     const alice = getDiffieHellman(modGroup);
 
-    await refreshStatus(`(2/3) Generating ${groupFriendly} DH keys...`, 20);
+    await refreshStatus(`(2/3) Generating ${groupFriendly} ephemeral key pair...`, 20);
     alice.generateKeys();
     console.log(`DH key generation complete...`);
 
-    await refreshStatus(`(3/3) Generating DH secret...`, 60);
+    await refreshStatus(`(3/3) Computing shared secret...`, 60);
     const aliceSecret = alice.computeSecret(bobPublicKey);
     console.log(`DH secret generation complete:`, { aliceSecret });
 
@@ -215,7 +215,6 @@ class RsvpResponseList extends React.Component {
               {/*what your contact sees on their screen. Once confirmed, click*/}
               {/*'Confirm Verification.' Otherwise, this is not the correct person.*/}
               {/*<br/><br/>*/}
-              {/*[710 59-2 B]*/}
               <br/><br/>
               <InitHandshake/>
             </div>
