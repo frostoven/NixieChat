@@ -58,11 +58,6 @@ const selectedNameStyle = {
   fontWeight: 'bold',
 };
 
-/** @type React.CSSProperties */
-const connectButton = {
-  // float: 'right',
-};
-
 class RsvpResponseList extends React.Component {
   static propTypes = {
     responses: PropTypes.array,
@@ -188,7 +183,6 @@ class RsvpResponseList extends React.Component {
         <Button
           fluid
           disabled={this.connectText.get(i) !== 'Connect'}
-          style={connectButton}
           onClick={() => this.startVerification(i, pubKey)}
         >
           {this.connectText.get(i)}
