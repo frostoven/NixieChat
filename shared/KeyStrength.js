@@ -5,7 +5,11 @@ const KeyStrength = {
 };
 
 const KeyStrengthFriendly = {
-  'modp18': '8192-bit',
+  modp14: '2048-bit',
+  modp15: '3072-bit',
+  modp16: '4096-bit',
+  modp17: '6144-bit',
+  modp18: '8192-bit',
 };
 
 module.exports = {
