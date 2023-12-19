@@ -1,17 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import randomart from 'randomart';
-import {
-  Accordion,
-  Button,
-  Form,
-  Icon,
-  Segment,
-} from 'semantic-ui-react';
+import { Button, Form, Segment } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { InvitationResponse } from '../../../shared/InvitationResponse';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { NxField } from '../Generic/NxField';
+import { RsaPreview } from '../Generic/RsaPreview';
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
@@ -30,7 +24,6 @@ class ReceiveInvitation extends React.Component {
   };
 
   state = {
-    showAdvancedInfo: false,
     greetingName: '',
     greetingMessage: '',
   };
@@ -113,7 +106,7 @@ class ReceiveInvitation extends React.Component {
       publicName: ownName,
     });
 
-    console.log('replyingAccount:', replyingAccount);
+    console.log('=> replyingAccount:', replyingAccount);
 
     if (replyingAccount === null) {
       this.setState({ greetingName: ownName });
@@ -123,86 +116,9 @@ class ReceiveInvitation extends React.Component {
     }
   };
 
-  toggleAdvancedInfo = () => {
-    this.setState({ showAdvancedInfo: !this.state.showAdvancedInfo });
-  };
-
-  genRsaPreview = ({ visible }) => {
-    if (!visible) {
-      return;
-    }
-
-    const { pubKey, pemKey } = this.props;
-    const charWidth = 68;
-    const charHeight = 36;
-    const pixelSquared = 8;
-
-    return (
-      <>
-        <pre style={{
-          display: 'inline-block',
-          border: 'thin solid grey',
-          opacity: 0.6,
-          borderRadius: 4,
-          width: 'fit-content',
-          lineHeight: 0.53,
-          letterSpacing: 0.5,
-          padding: 4,
-          marginRight: 2,
-        }}>
-          <code style={{
-            fontSize: pixelSquared,
-          }}>
-            {randomart(pubKey, {
-              bounds: {
-                width: charWidth,
-                height: charHeight,
-              },
-              symbols: {
-                '-2': '╡', // end
-                '-1': '╟', // start
-                '0': ' ',
-                '1': '░',
-                '2': '▒',
-                '3': '▓',
-                '4': '╪',
-                '5': '╤',
-                '6': '■',
-                '7': '╔',
-                '8': '═',
-                '9': 'X',
-                '10': '█',
-                '11': '▄',
-                '12': '▌',
-                '13': '┼',
-                '14': '@',
-              },
-            })}
-          </code>
-        </pre>
-
-        <pre style={{
-          display: 'inline-block',
-          border: 'thin solid grey',
-          opacity: 0.6,
-          borderRadius: 4,
-          width: 'fit-content',
-          padding: 5,
-          verticalAlign: 'top',
-        }}>
-          <code style={{
-            fontSize: pixelSquared,
-          }}>
-            {pemKey}
-          </code>
-        </pre>
-      </>
-    );
-  };
-
   render() {
-    const { showAdvancedInfo, greetingName, greetingMessage } = this.state;
-    const { source, ownName } = this.props;
+    const { greetingName, greetingMessage } = this.state;
+    const { source, ownName, pubKey, pemKey } = this.props;
     const darkMode = Settings.isDarkModeEnabled();
 
     return (
@@ -236,7 +152,7 @@ class ReceiveInvitation extends React.Component {
             />
 
             <NxField
-              label='Greeting shown if you accept'
+              label="Greeting shown if you accept"
               autoFocus
               value={greetingMessage}
               onChange={(event) => {
@@ -245,24 +161,7 @@ class ReceiveInvitation extends React.Component {
             />
           </Form>
         </Segment>
-
-        <Segment inverted={!darkMode}>
-          <Accordion inverted={!darkMode}>
-            <Accordion.Title
-              active={showAdvancedInfo}
-              onClick={this.toggleAdvancedInfo}
-            >
-              <Icon name="dropdown"/>
-              Advanced Info
-            </Accordion.Title>
-            <Accordion.Content active={showAdvancedInfo}>
-              The prospective contact's RSA-4096 digital signature is as
-              follows:
-              <br/>
-              {this.genRsaPreview({ visible: showAdvancedInfo })}
-            </Accordion.Content>
-          </Accordion>
-        </Segment>
+        <RsaPreview pubKey={pubKey} pemKey={pemKey}/>
       </div>
     );
   }
