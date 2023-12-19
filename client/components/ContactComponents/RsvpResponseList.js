@@ -13,6 +13,7 @@ import { Settings } from '../../storage/cacheFrontends/Settings';
 import { getDiffieHellman } from 'diffie-hellman';
 import { KeyStrength, KeyStrengthFriendly } from '../../../shared/KeyStrength';
 import { setPromiseTimeout } from '../../utils';
+import { RsaPreview } from '../Generic/RsaPreview';
 
 /** @type React.CSSProperties */
 const columnStyle = {
@@ -144,7 +145,8 @@ class RsvpResponseList extends React.Component {
         sourceId,
         publicName,
         personalName,
-        publicKey,
+        pubKey,
+        pemKey,
       } = responseOptions;
 
       let name;
@@ -187,7 +189,7 @@ class RsvpResponseList extends React.Component {
           fluid
           disabled={this.connectText.get(i) !== 'Connect'}
           style={connectButton}
-          onClick={() => this.startVerification(i, publicKey)}
+          onClick={() => this.startVerification(i, pubKey)}
         >
           {this.connectText.get(i)}
         </Button>
@@ -208,7 +210,9 @@ class RsvpResponseList extends React.Component {
             <h3>Invitation to {publicName}</h3>
             <div>
               Contact {name} has <b>accepted</b> your invitation.
-              <br/><br/>
+
+              <RsaPreview pubKey={pubKey} pemKey={pemKey}/>
+
               Click 'Connect' to start the connection process. Please beware
               that this takes some time.
               {/*Please verify that the number and color below precisely match*/}

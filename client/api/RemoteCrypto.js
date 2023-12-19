@@ -1,9 +1,8 @@
-import React from 'react';
 import { clientEmitter, serverEmitter } from '../emitters/comms';
 import { CryptoMessageType as Socket } from '../../shared/CryptoMessageType';
 import { MessageVersion } from '../../shared/MessageVersion';
 import { Accounts } from '../storage/cacheFrontends/Accounts';
-import { exportRsaPublicKey } from '../encryption/rsa';
+import { exportRsaPublicKey, importRsaPublicKey } from '../encryption/rsa';
 import { showInvitationDialog } from '../modal/nixieDialogs';
 import { InvitationResponse } from '../../shared/InvitationResponse';
 import { getDiffieHellman } from 'diffie-hellman';
@@ -218,6 +217,10 @@ class RemoteCrypto {
     // The server sends us the public key as an ArrayBuffer, convert to a view.
     pubKey = new Uint8Array(pubKey);
 
+    // Used for visualizations.
+    let pemKey = await importRsaPublicKey(pubKey, 'raw');
+    pemKey = await exportRsaPublicKey({ publicKey: pemKey }, 'pem');
+
     console.log('=> got invite response:', {
       answer,
       sourceId,
@@ -238,7 +241,8 @@ class RemoteCrypto {
       answer,
       sourceId,
       publicName,
-      publicKey: pubKey,
+      pubKey,
+      pemKey,
     });
   }
 }
