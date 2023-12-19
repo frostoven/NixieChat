@@ -23,6 +23,13 @@ class ReceiveInvitation extends React.Component {
     },
   };
 
+  constructor(props) {
+    super(props);
+
+    this.dialog = props.dialog;
+    this.setupDialog(props.dialog);
+  }
+
   state = {
     greetingName: '',
     greetingMessage: '',
@@ -34,31 +41,65 @@ class ReceiveInvitation extends React.Component {
     {
       name: 'Reject Invite',
       onSelect: () => {
-        $modal.deactivateModal();
-        this.props.onSelectChoice({ answer: InvitationResponse.reject });
+        $modal.confirm({
+          prioritise: true,
+          header: 'Reject Invite',
+          body: 'Are you sure you want to reject this contact? They will ' +
+            'not be informed that you have rejected their invite.',
+        }, (confirmedBlock) => {
+          if (confirmedBlock) {
+            $modal.deactivateModalById(this.dialog.id);
+            this.props.onSelectChoice({ answer: InvitationResponse.reject });
+          }
+        });
       },
       disabled: true,
     },
     {
       name: 'Block Account',
       onSelect: () => {
-        $modal.deactivateModal();
-        this.props.onSelectChoice({ answer: InvitationResponse.block });
+        $modal.confirm({
+          prioritise: true,
+          header: 'Permanent Block',
+          body: 'Are you sure you want to block this contact? They will not ' +
+            'be informed that you have blocked them.',
+        }, (confirmedBlock) => {
+          if (confirmedBlock) {
+            $modal.deactivateModalById(this.dialog.id);
+            console.log('TODO: block RSA key.');
+            this.props.onSelectChoice({ answer: InvitationResponse.block });
+          }
+        });
       },
       disabled: true,
     },
     {
       name: 'Ask Me Later',
       onSelect: () => {
-        $modal.deactivateModal();
-        this.props.onSelectChoice({ answer: InvitationResponse.postpone });
+        $modal.confirm({
+          prioritise: true,
+          header: 'Postpone',
+          body: (
+            <div>
+              The person who sent the invite will be informed that you wish for
+              them to send you another invite at a later time.
+              <br/><br/>
+              Proceed?
+            </div>
+          ),
+        }, (confirmedPostpone) => {
+          if (confirmedPostpone) {
+            $modal.deactivateModalById(this.dialog.id);
+            this.props.onSelectChoice({ answer: InvitationResponse.postpone });
+          }
+        });
       },
       disabled: true,
     },
     {
       name: 'Accept Invite',
       onSelect: () => {
-        $modal.deactivateModal();
+        $modal.deactivateModalById(this.dialog.id);
         this.props.onSelectChoice({
           answer: InvitationResponse.accept,
           greetingName: this.state.greetingName,
@@ -71,12 +112,10 @@ class ReceiveInvitation extends React.Component {
   ];
 
   componentDidMount() {
-    this.setupDialog();
     this.setupPersonalName();
   }
 
-  setupDialog = () => {
-    const dialog = this.props.dialog;
+  setupDialog = (dialog) => {
     dialog.actions = [
       ...this.actions,
       <Button key="invite" disabled
@@ -94,7 +133,7 @@ class ReceiveInvitation extends React.Component {
       this.actions.forEach((action) => {
         action.disabled = false;
       });
-      this.props.dialog.actions = this.actions;
+      dialog.actions = this.actions;
       $modal.invalidate();
     }, 3000);
   };
