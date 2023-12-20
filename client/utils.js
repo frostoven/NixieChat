@@ -1,3 +1,5 @@
+const { ceil, floor, max, min } = Math;
+
 // https://stackoverflow.com/questions/39725716/how-to-convert-javascript-array-to-binary-data-and-back-for-websocket
 function stringToArrayBuffer(str) {
   return new Uint8Array(str.split('').map(c => c.charCodeAt(0)));
@@ -39,9 +41,9 @@ function getSafeRandomIntInclusive(min, max) {
   const randomBuffer = new Uint32Array(1);
   crypto.getRandomValues(randomBuffer);
   let randomNumber = randomBuffer[0] / (0xffffffff + 1);
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(randomNumber * (max - min + 1)) + min;
+  min = ceil(min);
+  max = floor(max);
+  return floor(randomNumber * (max - min + 1)) + min;
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
@@ -84,6 +86,34 @@ catch (error) {
   // do nothing.
 }
 
+/**
+ * Merges multiple instances of Uint8Array into a single Uint8Array.
+ * @param {Uint8Array[]} arrayOfArrays - An array that contains uint8 arrays.
+ * @return {Uint8Array}
+ */
+function mergeUint8Arrays(arrayOfArrays) {
+  let totalLength = 0;
+  let offset = 0;
+
+  // Unsure if there's a way of doing without looping twice, seeing as we need
+  // total length upfront. Looping this way is fast anyhow.
+  for (let i = 0, len = arrayOfArrays.length; i < len; i++) {
+    totalLength += arrayOfArrays[i].length
+  }
+
+  // Will contain all our other arrays' contents.
+  const mergedArray = new Uint8Array(totalLength);
+
+  // Merge all arrays into mergedArray.
+  for (let i = 0, len = arrayOfArrays.length; i < len; i++) {
+    const uint8array = arrayOfArrays[i];
+    mergedArray.set(uint8array, offset);
+    offset += uint8array.length;
+  }
+
+  return mergedArray;
+}
+
 function setPromiseTimeout(delay) {
   return new Promise((resolve) => {
     setTimeout(resolve, delay);
@@ -97,5 +127,6 @@ export {
   get256RandomBits,
   getSafeRandomIntInclusive,
   sha256,
+  mergeUint8Arrays,
   setPromiseTimeout,
 };
