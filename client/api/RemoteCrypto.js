@@ -87,10 +87,14 @@ class RemoteCrypto {
     const activeAccount = Accounts.getActiveAccount();
     const time = Date.now();
 
+    source = source.trim();
+    target = target.trim();
+    greeting = greeting.trim();
+
     const options = {
-      source: source.trim(),
-      target: target.trim(),
-      greeting: greeting.trim(),
+      source,
+      target,
+      greeting,
       pubKey: await exportRsaPublicKey({ publicKey: activeAccount.publicKey }),
       time,
       v: MessageVersion.findContactV1,
