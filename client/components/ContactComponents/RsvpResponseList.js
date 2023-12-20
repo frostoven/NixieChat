@@ -14,6 +14,7 @@ import { getDiffieHellman } from 'diffie-hellman';
 import { KeyStrength, KeyStrengthFriendly } from '../../../shared/KeyStrength';
 import { setPromiseTimeout } from '../../utils';
 import { RsaPreview } from '../Generic/RsaPreview';
+import { SharedPin } from '../Generic/SharedPin';
 
 /** @type React.CSSProperties */
 const columnStyle = {
@@ -61,6 +62,7 @@ const selectedNameStyle = {
 class RsvpResponseList extends React.Component {
   static propTypes = {
     responses: PropTypes.array,
+    ownName: PropTypes.string.isRequired,
   };
 
   static defaultProps = {
@@ -72,6 +74,7 @@ class RsvpResponseList extends React.Component {
     selected: 0,
     // Set to true once Diffie-Hellman secret and keys have been generated.
     dhGenerated: false,
+    sharedSecret: null,
   };
 
   connectText = new Map();
@@ -116,14 +119,21 @@ class RsvpResponseList extends React.Component {
     const aliceSecret = alice.computeSecret(bobPublicKey);
     console.log(`DH secret generation complete:`, { aliceSecret });
 
-    await refreshStatus(`Done`, 100);
-    this.setState({ dhGenerated: true });
+    await refreshStatus(`Connection Ready`, 100);
+    this.setState({
+      dhGenerated: true,
+      sharedSecret: aliceSecret,
+    });
+  };
+
+  saveContact = ({ pubKey, initialSharedSecret }) => {
+    //
   };
 
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const { responses } = this.props;
-    const { selected } = this.state;
+    const { responses, ownName } = this.props;
+    const { selected, sharedSecret } = this.state;
     const leftSide = [
       <h3 key="ResponseHead">
         Responses
@@ -208,14 +218,33 @@ class RsvpResponseList extends React.Component {
 
               <RsaPreview pubKey={pubKey} pemKey={pemKey}/>
 
-              Click 'Connect' to start the connection process. Please beware
-              that this takes some time.
-              {/*Please verify that the number and color below precisely match*/}
-              {/*what your contact sees on their screen. Once confirmed, click*/}
-              {/*'Confirm Verification.' Otherwise, this is not the correct person.*/}
-              {/*<br/><br/>*/}
-              <br/><br/>
+              {!sharedSecret && <>
+                Click 'Connect' to start the connection process. Please beware
+                that this takes some time.
+                <br/><br/>
+              </>}
+
               <InitHandshake/>
+
+              {sharedSecret && <>
+                <br/>
+                Please verify that the number and color below precisely match
+                what your contact sees on their screen. Once confirmed, click
+                'Add Contact.' Otherwise, this is not the correct person.
+
+                <br/><br/>
+                <SharedPin
+                  sharedSecret={sharedSecret}
+                  initiatorName={ownName}
+                  receiverName={publicName}
+                  time={time}
+                />
+                <br/><br/>
+
+                <Button fluid onClick={this.saveContact}>
+                  Add Contact
+                </Button>
+              </>}
             </div>
           </div>,
         );
