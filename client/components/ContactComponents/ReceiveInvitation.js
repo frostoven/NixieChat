@@ -36,7 +36,7 @@ class ReceiveInvitation extends React.Component {
   };
 
   // All these buttons are disabled at first to give the user time to respond
-  // to
+  // to read the request.
   actions = [
     {
       name: 'Reject Invite',
@@ -135,7 +135,7 @@ class ReceiveInvitation extends React.Component {
       });
       dialog.actions = this.actions;
       $modal.invalidate();
-    }, 3000);
+    }, 3);
   };
 
   setupPersonalName = () => {
