@@ -142,6 +142,7 @@ class RsvpResponseList extends React.Component {
         personalName,
         pubKey,
         pemKey,
+        time,
       } = responseOptions;
 
       let name;

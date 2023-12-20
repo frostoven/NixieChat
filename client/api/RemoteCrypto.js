@@ -85,20 +85,21 @@ class RemoteCrypto {
   // Sends an invitation to someone.
   static async findContact(source, target, greeting, callback = nop) {
     const activeAccount = Accounts.getActiveAccount();
+    const time = Date.now();
 
     const options = {
       source,
       target,
       greeting,
       pubKey: await exportRsaPublicKey({ publicKey: activeAccount.publicKey }),
-      time: Date.now(),
+      time,
       v: MessageVersion.findContactV1,
     };
     console.log('[findContact] Sending:', options);
 
     // Keep track of pending invite names. If we receive an RSVP response from
     // someone we didn't send an invitation to then treat them as spam.
-    RemoteCrypto.namesPendingInvites[target] = { name: target };
+    RemoteCrypto.namesPendingInvites[target] = { name: target, time };
 
     serverEmitter.timeout(120000).emit(
       Socket.findContact,
@@ -211,8 +212,21 @@ class RemoteCrypto {
       });
     }
 
+    const time = RemoteCrypto.namesPendingInvites[publicName].time;
+
     // Ticket used up; forget.
     delete RemoteCrypto.namesPendingInvites[publicName];
+
+    if (isNaN(time) || !time) {
+      console.log('Invalid time:', time);
+      $modal.alert({
+        prioritise: true,
+        header: 'Error',
+        body: 'An error occurred while processing the response - invalid time',
+      });
+      return;
+    }
+
 
     // The server sends us the public key as an ArrayBuffer, convert to a view.
     pubKey = new Uint8Array(pubKey);
@@ -243,6 +257,7 @@ class RemoteCrypto {
       publicName,
       pubKey,
       pemKey,
+      time,
     });
   }
 }
