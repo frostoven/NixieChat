@@ -119,7 +119,12 @@ class ContactFinder extends React.Component {
 
   render() {
     if (this.state.showSearchWindow) {
-      return <RsvpResponseList responses={this.rsvpResponses}/>
+      return (
+        <RsvpResponseList
+          responses={this.rsvpResponses}
+          ownName={this.state.localName}
+        />
+      );
     }
 
     const darkMode = Settings.isDarkModeEnabled();
@@ -147,7 +152,7 @@ class ContactFinder extends React.Component {
         <br/><br/>
         <Form>
           <NxField
-            label='Your name'
+            label="Your name"
             help={(
               <div>
                 The name you want the contact to see in the invitation.
@@ -156,7 +161,7 @@ class ContactFinder extends React.Component {
                 choose to accept your invitation.
               </div>
             )}
-            placeholder='Shown in Invite'
+            placeholder="Shown in Invite"
             value={localName}
             onChange={(event) => {
               this.setState({ localName: event.target.value });
@@ -164,7 +169,7 @@ class ContactFinder extends React.Component {
           />
 
           <NxField
-            label='Contact Public Name'
+            label="Contact Public Name"
             autoFocus
             placeholder={'Contact\'s Public Name'}
             help={(
@@ -180,14 +185,14 @@ class ContactFinder extends React.Component {
           />
 
           <NxField
-            label='Greeing'
+            label="Greeing"
             help={(
               <div>
                 Optional message you want them to see when they receive the
                 invite
               </div>
             )}
-            placeholder='Optional Greeting'
+            placeholder="Optional Greeting"
             value={greeting}
             onChange={(event) => {
               this.setState({ greeting: event.target.value });
