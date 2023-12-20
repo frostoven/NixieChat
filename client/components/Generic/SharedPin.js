@@ -1,7 +1,14 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { mergeUint8Arrays, sha256, stringToArrayBuffer } from '../../utils';
+import {
+  mergeUint8Arrays,
+  sha256,
+  stringToArrayBuffer,
+  uint8ArrayToHexString,
+} from '../../utils';
+import { Segment } from 'semantic-ui-react';
+import { Settings } from '../../storage/cacheFrontends/Settings';
 
 // We specifically choose 32 characters here to make modulo 256 return a clean
 // bias. Vowels were chosen for omission as it's rather easy to end up with
@@ -169,6 +176,17 @@ const pinStyle = {
   border: '2px solid grey',
 };
 
+/** @type React.CSSProperties */
+const fullPinStyle = {
+  ...pinStyle,
+  cursor: 'pointer',
+  fontSize: '11pt',
+  display: 'block',
+  padding: 4,
+  marginTop: 8,
+  backgroundColor: 'rgba(128, 128, 128, 0.25)',
+};
+
 /**
  * React component that generates a shared pin following a Diffie-Hellman
  * exchange, SHA-256 hashing, and additional parameters.
@@ -191,6 +209,13 @@ class SharedPin extends React.Component {
   };
 
   pinHash = null;
+  pinShortText = null;
+  pinColor = 'grey';
+  pinBgColor = 'grey';
+
+  state = {
+    showFullPin: false,
+  };
 
   componentDidMount() {
     const { sharedSecret, time, initiatorName, receiverName } = this.props;
@@ -204,6 +229,23 @@ class SharedPin extends React.Component {
       stringToArrayBuffer(receiverName),
     ]), false).then((result) => {
       this.pinHash = result;
+
+      const { chars, color } = char255toPinGroup(this.pinHash);
+
+      const [ r, g, b ] = color;
+      const confirmationColor = `rgb(${r} ${g} ${b})`;
+      let inverseColor;
+      if ((r + g + b) / 3 > 128) {
+        inverseColor = '#000';
+      }
+      else {
+        inverseColor = '#fff';
+      }
+
+      this.pinShortText = chars;
+      this.pinColor = inverseColor;
+      this.pinBgColor = confirmationColor;
+
       this.forceUpdate();
     }).catch((error) => {
       console.error(error);
@@ -216,6 +258,38 @@ class SharedPin extends React.Component {
     });
   }
 
+  genFullPin = () => {
+    const darkMode = Settings.isDarkModeEnabled() || false;
+    let text = 'Show Full Pin';
+    const style = { ...fullPinStyle };
+
+    // This makes the button a full-width hash as needed.
+    if (this.state.showFullPin && this.pinHash) {
+      text = uint8ArrayToHexString(this.pinHash);
+      style.cursor = 'text';
+      style.borderColor = this.pinBgColor;
+      style.width = 'unset';
+
+      // Allow text to break at predefined points.
+      const quarterPoint = Math.floor(text.length * 0.25);
+      text =
+        text.slice(0, quarterPoint) + ' ' +
+        text.slice(quarterPoint, quarterPoint * 2) + ' ' +
+        text.slice(quarterPoint * 2, quarterPoint * 3) + ' ' +
+        text.slice(quarterPoint * 3);
+    }
+
+    return (
+      <Segment
+        inverted={!darkMode}
+        style={style}
+        onClick={() => this.setState({ showFullPin: true })}
+      >
+        {text}
+      </Segment>
+    );
+  };
+
   render() {
     if (!this.pinHash) {
       return (
@@ -225,27 +299,20 @@ class SharedPin extends React.Component {
       );
     }
 
-    const { chars, color } = char255toPinGroup(this.pinHash);
-
-    const [ r, g, b ] = color;
-    const confirmationColor = `rgb(${r} ${g} ${b})`;
-    let inverseColor;
-    if ((r + g + b) / 3 > 128) {
-      inverseColor = '#000';
-    }
-    else {
-      inverseColor = '#fff';
-    }
-
     return (
-      <div style={pinStyle}>
-        <div>{chars}</div>
-        <div style={{ backgroundColor: confirmationColor }}>
-          <b style={{ color: inverseColor }}>
-            Color
-          </b>
+      <>
+        <div style={pinStyle}>
+          <div>{this.pinShortText}</div>
+          <div style={{ backgroundColor: this.pinBgColor }}>
+            <b style={{ color: this.pinColor }}>
+              Color
+            </b>
+          </div>
         </div>
-      </div>
+
+
+        {this.genFullPin()}
+      </>
     );
   }
 }
