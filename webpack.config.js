@@ -63,13 +63,23 @@ module.exports = {
           return;
         }
 
+        let linebreakCount = 0;
+
         function updateTerminalTitle(string) {
           const command =
             `echo -n '\\033k${string}\\033\\\\' > /dev/null && ` +
             `echo -n '\\033]2;'${string}'\\007'`;
           exec(command, (err, stdout, stderr) => {
-            if (stdout) process.stdout.write(stdout);
-            if (stderr) process.stderr.write(stderr);
+            stdout && process.stdout.write(stdout);
+            stderr && process.stderr.write(stderr);
+          });
+        }
+
+        function printf(string) {
+          const command = `printf ${string}`;
+          exec(command, (err, stdout, stderr) => {
+            stdout && process.stdout.write(stdout);
+            stderr && process.stderr.write(stderr);
           });
         }
 
@@ -120,6 +130,12 @@ module.exports = {
               }
             }, 2000);
           }, 250);
+
+          // Echo a different amount of line breaks each build so that it's
+          // more obvious that something has changed.
+          const linebreaks = Array(linebreakCount++).fill('\n').join('');
+          printf(`'${linebreaks}'`);
+          linebreakCount >= 2 && (linebreakCount = 0);
         });
       },
     },
