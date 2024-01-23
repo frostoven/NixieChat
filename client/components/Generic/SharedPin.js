@@ -198,6 +198,10 @@ class SharedPin extends React.Component {
     initiatorName: PropTypes.string.isRequired,
     // Used as a salt.
     receiverName: PropTypes.string.isRequired,
+    // Used as a salt.
+    initiatorId: PropTypes.string.isRequired,
+    // Used as a salt.
+    receiverId: PropTypes.string.isRequired,
   };
 
   pinHash = null;
@@ -210,7 +214,9 @@ class SharedPin extends React.Component {
   };
 
   componentDidMount() {
-    const { sharedSecret, time, initiatorName, receiverName } = this.props;
+    const {
+      sharedSecret, time, initiatorName, initiatorId, receiverName, receiverId,
+    } = this.props;
 
     // This takes our shared secret, salts it with some public data, and then
     // performs a SHA-256 hash on the result.
@@ -218,7 +224,9 @@ class SharedPin extends React.Component {
       sharedSecret,
       stringToArrayBuffer(`${time}`),
       stringToArrayBuffer(initiatorName),
+      stringToArrayBuffer(initiatorId),
       stringToArrayBuffer(receiverName),
+      stringToArrayBuffer(receiverId),
     ]), false).then((result) => {
       this.pinHash = result;
 

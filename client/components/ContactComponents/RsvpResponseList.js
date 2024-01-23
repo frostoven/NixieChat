@@ -132,7 +132,9 @@ class RsvpResponseList extends React.Component {
         time,
         rsvpAnswer,
         initiatorName,
+        initiatorSocketId,
         receiverName,
+        receiverSocketId,
         contactPublicName,
         contactGreetingName,
         contactPubKey,
@@ -223,7 +225,9 @@ class RsvpResponseList extends React.Component {
                 <SharedPin
                   sharedSecret={sharedSecret}
                   initiatorName={initiatorName}
+                  initiatorId={initiatorSocketId}
                   receiverName={receiverName}
+                  receiverId={receiverSocketId}
                   time={time}
                 />
                 <br/><br/>
@@ -288,7 +292,9 @@ class RsvpResponseList extends React.Component {
                 <SharedPin
                   sharedSecret={sharedSecret}
                   initiatorName={initiatorName}
+                  initiatorId={initiatorSocketId}
                   receiverName={receiverName}
+                  receiverId={receiverSocketId}
                   time={time}
                 />
                 <br/><br/>
