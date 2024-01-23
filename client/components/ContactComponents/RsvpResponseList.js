@@ -1,20 +1,14 @@
-import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { InvitationResponse } from '../../../shared/InvitationResponse';
-import {
-  Button,
-  Form,
-  List,
-  Loader,
-  Progress,
-} from 'semantic-ui-react';
+import { Button, Form, List, Loader } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
-import { getDiffieHellman } from 'diffie-hellman';
-import { KeyStrength, KeyStrengthFriendly } from '../../../shared/KeyStrength';
-import { setPromiseTimeout } from '../../utils';
 import { RsaPreview } from '../Generic/RsaPreview';
 import { SharedPin } from '../Generic/SharedPin';
+import { clientEmitter } from '../../emitters/comms';
+import { clientEmitterAction } from '../../emitters/clientEmitterAction';
+import { ContactCreator } from '../../api/ContactCreator';
+import { RemoteCrypto } from '../../api/RemoteCrypto';
 
 /** @type React.CSSProperties */
 const columnStyle = {
@@ -61,23 +55,37 @@ const selectedNameStyle = {
 
 class RsvpResponseList extends React.Component {
   static propTypes = {
-    responses: PropTypes.array,
-    ownName: PropTypes.string.isRequired,
+    /** @type ContactCreatorStats[] */
+    invitationIds: PropTypes.array,
+    // The message to show on the left of the responses screen.
+    overrideLoaderMessage: PropTypes.string,
   };
 
   static defaultProps = {
-    responses: [],
+    invitationIds: [],
+    overrideLoaderMessage: 'Waiting for replies...',
   };
 
   state = {
     // Currently selected contact, ordered to bottom by time received.
     selected: 0,
     // Set to true once Diffie-Hellman secret and keys have been generated.
-    dhGenerated: false,
-    sharedSecret: null,
   };
 
-  connectText = new Map();
+  // What text is shown in statuses and buttons depends on which contact it
+  // belongs to (we have a dynamic list of them). Each button and status can
+  // have a different state and its text modified by updateDhStatus().
+  // connectButtonText = new Map();
+
+  componentDidMount() {
+    clientEmitter.on(clientEmitterAction.updateDhStatus, this.updateDhStatus);
+  }
+
+  componentWillUnmount() {
+    clientEmitter.removeListener(
+      clientEmitterAction.updateDhStatus, this.updateDhStatus,
+    );
+  }
 
   selectName = (index) => {
     this.setState({
@@ -85,55 +93,29 @@ class RsvpResponseList extends React.Component {
     });
   };
 
-  startVerification = async (contactIndex, bobPublicKey) => {
-    // Crypto appears to hijack the thread before the UI can do status updates;
-    // this gives is a bit of breathing room. The status update has a small
-    // chance of failing anyway, which is fine seeing as status updates are not
-    // security critical in this case.
-    let start = Date.now();
-    const refreshStatus = (stage, percent) => {
-      console.log(Date.now() - start, 'ms passed since last update.');
-      return new Promise(resolve => {
-        this.connectText.set(contactIndex, (
-          <Progress percent={percent}>{stage}</Progress>
-        ));
-        console.log(stage);
-        this.forceUpdate(() => _.defer(resolve));
-        start = Date.now();
-      });
-    };
+  /**
+   * @param {ContactCreatorStats} stats
+   * @return {Promise<void>}
+   */
+  startVerification = async (stats) => {
+    await RemoteCrypto.startVerification({ creatorId: stats.id });
+  };
 
-    const modGroup = KeyStrength.messagingModGroup;
-    const groupFriendly = KeyStrengthFriendly[modGroup];
-
-    await refreshStatus(`(1/3) Loading ${modGroup} group...`, 1);
-    // Give some breathing room so that it doesn't look too glitched.
-    await setPromiseTimeout(500);
-    const alice = getDiffieHellman(modGroup);
-
-    await refreshStatus(`(2/3) Generating ${groupFriendly} ephemeral key pair...`, 20);
-    alice.generateKeys();
-    console.log(`DH key generation complete...`);
-
-    await refreshStatus(`(3/3) Computing shared secret...`, 60);
-    const aliceSecret = alice.computeSecret(bobPublicKey);
-    console.log(`DH secret generation complete:`, { aliceSecret });
-
-    await refreshStatus(`Connection Ready`, 100);
-    this.setState({
-      dhGenerated: true,
-      sharedSecret: aliceSecret,
-    });
+  /** @param {ContactCreatorStats} stats */
+  updateDhStatus = (stats) => {
+    this.forceUpdate();
   };
 
   saveContact = ({ pubKey, initialSharedSecret }) => {
-    //
+    console.log('tbd');
   };
 
   render() {
+    /** @type ContactCreatorStats[] */
+    const invitationIds = this.props.invitationIds;
     const darkMode = Settings.isDarkModeEnabled();
-    const { responses, ownName } = this.props;
-    const { selected, sharedSecret } = this.state;
+
+    const { selected } = this.state;
     const leftSide = [
       <h3 key="ResponseHead">
         Responses
@@ -141,26 +123,31 @@ class RsvpResponseList extends React.Component {
     ];
     const rightSide = [];
 
-    for (let i = 0, len = responses.length; i < len; i++) {
-      const responseOptions = responses[i];
+    for (let i = 0, len = invitationIds.length; i < len; i++) {
+      let responseOptions = ContactCreator.getStatsById(invitationIds[i]);
       const isSelected = selected === i;
 
       const {
-        answer,
-        sourceId,
-        publicName,
-        personalName,
-        pubKey,
-        pemKey,
+        id,
         time,
+        rsvpAnswer,
+        initiatorName,
+        receiverName,
+        contactPublicName,
+        contactGreetingName,
+        contactPubKey,
+        contactPemKey,
+        dhPrepPercentage,
+        dhPrepStatusMessage,
+        sharedSecret,
       } = responseOptions;
 
       let name;
-      if (personalName) {
-        name = `${personalName} (${publicName})`;
+      if (contactGreetingName && contactGreetingName !== contactPublicName) {
+        name = `${contactGreetingName} (${contactPublicName})`;
       }
       else {
-        name = publicName;
+        name = contactPublicName;
       }
 
       leftSide.push(
@@ -182,21 +169,20 @@ class RsvpResponseList extends React.Component {
         continue;
       }
 
-      // What each button shows which contact it belongs to. Each button can
-      // have a different state and its text modified by startVerification().
-      if (!this.connectText.get(i)) {
-        this.connectText.set(i, 'Connect');
-      }
       const { accept, postpone, reject, verification } = InvitationResponse;
+
+      // 0.5 means the exchange has paused and is now waiting for user
+      // to authorize computing the DH secret (which takes some time).
+      const readyToConnect = dhPrepPercentage === 0.5;
 
       // Used to generate the Diffie-Hellman secret.
       const InitHandshake = () => (
         <Button
           fluid
-          disabled={this.connectText.get(i) !== 'Connect'}
-          onClick={() => this.startVerification(i, pubKey)}
+          disabled={!readyToConnect}
+          onClick={() => this.startVerification(responseOptions)}
         >
-          {this.connectText.get(i)}
+          {readyToConnect ? 'Connect' : dhPrepStatusMessage}
         </Button>
       );
 
@@ -204,7 +190,7 @@ class RsvpResponseList extends React.Component {
       // always send a response. For example, we don't respond when blocking a
       // contact, because that would immediately tell the sender that the
       // person blocking them is online, which is a privacy issue.
-      if (answer === accept) {
+      if (rsvpAnswer === accept) {
         // An 8-char password with an (at-most) 14 color visual is something
         // of a joke compared to the actual massive text glob that DH
         // produces, but hey, any more complex than that and the layman just
@@ -212,11 +198,11 @@ class RsvpResponseList extends React.Component {
         // advanced view.
         rightSide.push(
           <div key={`RsvpResponseAccepted${i}`}>
-            <h3>Invitation to {publicName}</h3>
+            <h3>Invitation to {contactPublicName}</h3>
             <div>
               Contact {name} has <b>accepted</b> your invitation.
 
-              <RsaPreview pubKey={pubKey} pemKey={pemKey}/>
+              <RsaPreview pubKey={contactPubKey} pemKey={contactPemKey}/>
 
               {!sharedSecret && <>
                 Click 'Connect' to start the connection process. Please beware
@@ -235,8 +221,8 @@ class RsvpResponseList extends React.Component {
                 <br/><br/>
                 <SharedPin
                   sharedSecret={sharedSecret}
-                  initiatorName={ownName}
-                  receiverName={publicName}
+                  initiatorName={initiatorName}
+                  receiverName={receiverName}
                   time={time}
                 />
                 <br/><br/>
@@ -249,10 +235,10 @@ class RsvpResponseList extends React.Component {
           </div>,
         );
       }
-      else if (answer === postpone) {
+      else if (rsvpAnswer === postpone) {
         rightSide.push(
           <div key={`RsvpResponsePostponed${i}`}>
-            <h3>Invitation to {publicName}</h3>
+            <h3>Invitation to {contactPublicName}</h3>
             <div>
               Contact has asked that you resend the invitation at another
               time.
@@ -262,45 +248,73 @@ class RsvpResponseList extends React.Component {
           </div>,
         );
       }
-      else if (answer === reject) {
+      else if (rsvpAnswer === reject) {
         // Note: the client has the option to not send this, in which case
         // we'll simply time out.
         rightSide.push(
           <div key={`RsvpResponseRejected${i}`}>
-            <h3>Invitation to {publicName}</h3>
+            <h3>Invitation to {contactPublicName}</h3>
             <div>
               Contact has declined your invitation.
             </div>
           </div>,
         );
       }
-      else if (answer === verification) {
+      else if (rsvpAnswer === verification) {
         rightSide.push(
           <div key={`RsvpResponseLocal${i}`}>
-            <h3>Adding [nnn] as a contact.</h3>
+            <h3>Adding {name} as a contact.</h3>
             <div>
-              To establish communication, an end-to-end exchange must be
-              completed.
-              <br/><br/>
-              Click 'Connect' to start the connection process. Please beware
-              that this takes some time.
-              <br/><br/>
+              {!sharedSecret && <>
+                To establish communication, an end-to-end exchange must be
+                completed.
+                <br/><br/>
+                Click 'Connect' to start the connection process. Please beware
+                that this takes some time.
+              </>}
+
+              <RsaPreview pubKey={contactPubKey} pemKey={contactPemKey}/>
+
               <InitHandshake/>
+
+              {sharedSecret && <>
+                <br/>
+                Please verify that the number and color below precisely match
+                what your contact sees on their screen. Once confirmed, click
+                'Add Contact.' Otherwise, this is not the correct person.
+
+                <br/><br/>
+                <SharedPin
+                  sharedSecret={sharedSecret}
+                  initiatorName={initiatorName}
+                  receiverName={receiverName}
+                  time={time}
+                />
+                <br/><br/>
+
+                <Button fluid onClick={this.saveContact}>
+                  Add Contact
+                </Button>
+              </>}
             </div>
           </div>,
         );
       }
       else {
-        return (
-          <div>
-            Unknown invitation response type: {answer}
-          </div>
+        rightSide.push(
+          <div key={`RsvpInvalidResponse${i}`}>
+            <h3>Could not add contact</h3>
+            Unknown invitation response type: {`${rsvpAnswer}`}
+          </div>,
         );
       }
     }
 
     let loaderMessage;
-    if (!responses.length) {
+    if (this.props.overrideLoaderMessage) {
+      loaderMessage = this.props.overrideLoaderMessage;
+    }
+    else if (!invitationIds.length) {
       loaderMessage = 'Waiting for replies...';
     }
     else {
