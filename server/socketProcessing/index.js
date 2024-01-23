@@ -12,6 +12,42 @@ const { AssertReject } = require('../../shared/AssertReject');
 const nop = () => {
 };
 
+// Some basic anonymous stats so we have an idea of how many active users we
+// have per server.
+const runtimeStats = {
+  // pings: 0,
+  makeDiscoverable: 0,
+  sendInvitation: 0,
+  respondToInvite: 0,
+  sendDhPubKey: 0,
+  usageErrors: {},
+};
+
+// TODO: Expose as API instead, perhaps Prometheus style.
+// Log stats every 60 seconds, but only if it's changed.
+let _previousStats = JSON.stringify(runtimeStats);
+setInterval(() => {
+  const statsStringified = JSON.stringify(runtimeStats);
+  if (statsStringified === _previousStats) {
+    return;
+  }
+  _previousStats = statsStringified;
+  console.log('Runtime stats:', runtimeStats);
+}, 60000);
+
+// Used to auto-gen error responses.
+const assertReject = new AssertReject((logTitle, failedCheck, onError) => {
+  if (runtimeStats.usageErrors[logTitle]) {
+    runtimeStats.usageErrors[logTitle]++;
+  }
+  else {
+    runtimeStats.usageErrors[logTitle] = 1;
+  }
+
+  onError({ error: `${logTitle} ${failedCheck}` });
+  return false;
+});
+
 // --- Boot section --- //
 
 /**
@@ -37,6 +73,7 @@ function bootServer(clusterEmitter) {
      * @param {Function} payload.callback
      */
     ({ socket, options = {}, callback = nop } = {}) => {
+      runtimeStats.makeDiscoverable++;
       if (!options) {
         return callback({ error: '[makeDiscoverable] Malformed options.' });
       }
@@ -81,6 +118,7 @@ function bootServer(clusterEmitter) {
      * @param {Function} payload.callback
      */
     ({ socket, options = {}, callback = nop } = {}) => {
+      runtimeStats.sendInvitation++;
       if (!options) {
         return callback({ error: '[sendInvitation] Malformed options.' });
       }
@@ -144,7 +182,7 @@ function bootServer(clusterEmitter) {
      * @param {Function} payload.callback
      */
     ({ socket, options = {}, callback = nop } = {}) => {
-      console.log('====> receiveInviteResponse:', options);
+      runtimeStats.respondToInvite++;
       if (!options) {
         return callback({ error: '[respondToInvite] Malformed options.' });
       }
@@ -172,6 +210,7 @@ function bootServer(clusterEmitter) {
      * @param {Function} payload.callback
      */
     ({ socket, options = {}, callback = nop } = {}) => {
+      runtimeStats.sendDhPubKey++;
       if (!options) {
         return callback({ error: '[sendDhPubKey] Malformed options.' });
       }
