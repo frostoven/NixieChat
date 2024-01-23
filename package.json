@@ -7,7 +7,7 @@
     "build-dev": "NODE_ENV=development webpack --mode development",
     "build-prod": "NODE_ENV=production webpack --mode production",
     "dev": "NODE_ENV=development npm-run-all --parallel build-dev dev-server",
-    "dev-server": "nodemon --ignore 'build/**' --ignore 'client/**' --inspect server/index.js",
+    "dev-server": "nodemon --ignore 'build/**' --ignore 'client/**' --ignore webpack.config.js --ignore package.json --inspect server/index.js",
     "start": "NODE_ENV=production node server/index.js"
   },
   "devDependencies": {
