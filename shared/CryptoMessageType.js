@@ -3,8 +3,9 @@ const CryptoMessageType = {
   // Signature: { userRooms: [{ pubName: 'name#0000' }, ...], v }
   makeDiscoverable: 'makeDiscoverable',
   // Signature: { source, target, greeting, pubKey, time, v }
-  findContact: 'findContact',
+  sendInvitation: 'sendInvitation',
   respondToInvite: 'respondToInvite',
+  sendDhPubKey: 'sendDhPubKey',
 };
 
 module.exports = {

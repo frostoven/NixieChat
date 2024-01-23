@@ -4,7 +4,7 @@ const MessageVersion = {
   discoverableRequestV1: 'v1',
   deviceRegistrationV1: 'v1',
   messageExchangeV1: 'v1',
-  findContactV1: 'v1',
+  sendInvitationV1: 'v1',
 };
 
 module.exports = {
