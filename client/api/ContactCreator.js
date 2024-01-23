@@ -21,8 +21,7 @@ const verbose = logConfig.verboseHandshakeLogs;
  * movements.
  * @type {number}
  */
-  // const MIN_UI_TRANSITION_MS = 250;
-const MIN_UI_TRANSITION_MS = 1;
+const MIN_UI_TRANSITION_MS = 250;
 
 /**
  * Represents a one-sided React-friendly representation of a ContactCreator
