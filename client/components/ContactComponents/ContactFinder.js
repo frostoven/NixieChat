@@ -125,7 +125,7 @@ class ContactFinder extends React.Component {
 
     await RemoteCrypto.createAndSendDhPubKey({
       modGroup: KeyStrength.messagingModGroup,
-      targetId: rsvp.contactId,
+      targetId: rsvp.contactSocketId,
     });
   }
 

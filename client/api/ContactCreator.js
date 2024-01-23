@@ -30,7 +30,7 @@ const MIN_UI_TRANSITION_MS = 250;
  * @typedef {{
  *   isOutbound: (boolean|null), greeting: string, localAccountId: string,
  *   contactPublicName: (string|null), contactGreetingName: (string|null),
- *   contactPubKey: (CryptoKey|null), contactId: (null|string), time: number,
+ *   contactPubKey: (CryptoKey|null), contactSocketId: (null|string), time: number,
  *   localPublicName: (string|null), error: (string|null), id: (string),
  *   localPubKey: (Buffer|null), rsvpAnswer: (InvitationResponse|null),
  *   receiverName: (null|string), initiatorName: (null|string),
@@ -38,7 +38,8 @@ const MIN_UI_TRANSITION_MS = 250;
  *   sharedSecret: (null|Uint8Array), localGreetingName: (null|string),
  *   contactGreetingMessage: (string), localGreeting: string,
  *   localDhPubKey: (null|ArrayBuffer), contactDhPubKey: (null|ArrayBuffer),
- *   contactPemKey: (null|string)
+ *   contactPemKey: (null|string), initiatorSocketId: (null|string),
+ *   receiverSocketId: (null|string)
  * }} ContactCreatorStats
  */
 
@@ -144,7 +145,7 @@ class ContactCreator {
   _localAccountId = null;
   _receiverName = null;
   _initiatorName = null;
-  _contactId = null;
+  _contactSocketId = null;
   _localSocketId = null;
   _time = 0;
   _contactPublicName = null;
@@ -292,18 +293,20 @@ class ContactCreator {
    * immediately because it cannot simply be looked up. The person needs to
    * elect to send it to us. The contact's socket ID is required by the server
    * for later contact-adding steps.
+   *
+   * Note that socket IDs are lost when the device's connection is reset.
    * @type {null|string}
    */
-  get contactId() {
-    this._contactId === null && this.logNullRead('contactId');
-    return this._contactId;
+  get contactSocketId() {
+    this._contactSocketId === null && this.logNullRead('contactSocketId');
+    return this._contactSocketId;
   }
 
-  set contactId(value) {
-    if (this._contactId !== null) {
-      return this.logRoError('contactId');
+  set contactSocketId(value) {
+    if (this._contactSocketId !== null) {
+      return this.logRoError('contactSocketId');
     }
-    this._contactId = value;
+    this._contactSocketId = value;
   }
 
   /**
@@ -499,11 +502,15 @@ class ContactCreator {
 
       /* Vars that should always be identical on both sides */
       time: this._time,
-      receiverName: this._receiverName,
       initiatorName: this._initiatorName,
+      initiatorSocketId:
+        this._isOutbound ? this._localSocketId : this.contactSocketId,
+      receiverName: this._receiverName,
+      receiverSocketId:
+        this._isOutbound ? this._contactSocketId : this._localSocketId,
 
       /* Contact info */
-      contactId: this._contactId,
+      contactSocketId: this._contactSocketId,
       contactPublicName: this._contactPublicName,
       contactGreetingName: this._contactGreetingName || '',
       contactGreetingMessage: this.contactGreeting,
@@ -688,10 +695,10 @@ class ContactCreator {
     this.receiverName = this.localPublicName;
 
     if (replyAddress) {
-      this.contactId = replyAddress;
+      this.contactSocketId = replyAddress;
     }
 
-    if (!this.contactId) {
+    if (!this.contactSocketId) {
       this.error = 'Cannot receive invite; bad contact ID.';
       return console.error(this.error);
     }
@@ -812,7 +819,7 @@ class ContactCreator {
       return;
     }
 
-    this.contactId = replyAddress;
+    this.contactSocketId = replyAddress;
     this.contactGreetingName = greetingName || '';
     this.contactGreeting = greetingMessage || '';
 
@@ -851,7 +858,7 @@ class ContactCreator {
    * @return {Promise<void>}
    */
   async stageless_receiveDhPubKey({ dhPubKey }) {
-    const targetId = this.contactId;
+    const targetId = this.contactSocketId;
     dhPubKey && (this.contactDhPubKey = dhPubKey);
     if (!this.contactDhPubKey) {
       // TODO: make crypto checks more robust.
@@ -873,7 +880,7 @@ class ContactCreator {
     this.dhModGroup = modGroup;
     this._dhPrepStatusMessage = 'Preparing key exchange, please stand by...';
 
-    const targetId = this.contactId;
+    const targetId = this.contactSocketId;
     const groupFriendly = KeyStrengthFriendly[this.dhModGroup];
 
     this._dhPrepPercentage = 0.1;

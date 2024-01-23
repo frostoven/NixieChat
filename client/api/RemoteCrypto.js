@@ -98,6 +98,7 @@ class RemoteCrypto {
     // create a new instance to track it.
     const contactCreator = new ContactCreator({
       localAccountId,
+      localSocketId: serverEmitter.id,
       localGreetingName,
       localGreeting,
       contactPublicName,
@@ -154,6 +155,7 @@ class RemoteCrypto {
     // step, so create a new instance to track it.
     const contactCreator = new ContactCreator({
       localAccountId: account.accountId,
+      localSocketId: serverEmitter.id,
       contactPublicName: source,
     });
 
@@ -231,7 +233,7 @@ class RemoteCrypto {
     }).catch(console.error);
     responseObject.needDhReply = true;
 
-    RemoteCrypto.trackedInvitesById[contactCreator.contactId] = contactCreator;
+    RemoteCrypto.trackedInvitesById[contactCreator.contactSocketId] = contactCreator;
 
     clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
     verbose && console.log(`Sending DH key to prospective contact (automatic).`);
@@ -277,8 +279,8 @@ class RemoteCrypto {
 
   static async startVerification({ creatorId }) {
     const contactCreator = ContactCreator.getInstanceById(creatorId);
-    const id = contactCreator.contactId;
-    if (!RemoteCrypto.trackedInvitesById[contactCreator.contactId]) {
+    const id = contactCreator.contactSocketId;
+    if (!RemoteCrypto.trackedInvitesById[contactCreator.contactSocketId]) {
       console.error('[RemoteCrypto] Cannot start verification - ID mismatch.');
       return;
     }
