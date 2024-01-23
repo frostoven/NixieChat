@@ -154,12 +154,6 @@ function char255toPinGroup(numberArray) {
     chars.push(' ', trailingChar);
   }
 
-  console.log('-> main chars:', chars);
-  console.log('-> aux chars:', {
-    spacePosition: spacePosition, dashPosition, color, trailingChar,
-  });
-  console.log('-> returning:', { chars: chars.join(''), color });
-
   return {
     chars: chars.join(''),
     color,
@@ -170,6 +164,7 @@ function char255toPinGroup(numberArray) {
 const pinStyle = {
   width: 162,
   borderRadius: 4,
+  cursor: 'default',
   fontFamily: 'monospace',
   textAlign: 'center',
   margin: 'auto',
@@ -179,7 +174,7 @@ const pinStyle = {
 /** @type React.CSSProperties */
 const fullPinStyle = {
   ...pinStyle,
-  cursor: 'pointer',
+  cursor: 'text',
   fontSize: '11pt',
   display: 'block',
   padding: 4,
@@ -299,11 +294,16 @@ class SharedPin extends React.Component {
       );
     }
 
+    const friendlyRgb = this.pinBgColor.slice(4, -1).split(' ').join(', ');
+
     return (
       <>
         <div style={pinStyle}>
           <div>{this.pinShortText}</div>
-          <div style={{ backgroundColor: this.pinBgColor }}>
+          <div
+            title={`Color RGB: ${friendlyRgb}`}
+            style={{ backgroundColor: this.pinBgColor }}
+          >
             <b style={{ color: this.pinColor }}>
               Color
             </b>
