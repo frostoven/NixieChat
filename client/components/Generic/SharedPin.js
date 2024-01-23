@@ -172,7 +172,6 @@ const pinStyle = {
 /** @type React.CSSProperties */
 const fullPinStyle = {
   ...pinStyle,
-  cursor: 'text',
   fontSize: '11pt',
   display: 'block',
   padding: 4,

@@ -11,6 +11,9 @@ import {
   setPromiseTimeout,
   uint8ArrayToHexString,
 } from '../utils';
+import { logConfig } from '../config/logging';
+
+const verbose = logConfig.verboseHandshakeLogs;
 
 /**
  * Updates are sometimes sent out at sub-millisecond speed. Where UI updates
@@ -30,13 +33,13 @@ const MIN_UI_TRANSITION_MS = 1;
  *   contactPublicName: (string|null), contactGreetingName: (string|null),
  *   contactPubKey: (CryptoKey|null), contactId: (null|string), time: number,
  *   localPublicName: (string|null), error: (string|null), id: (string),
- *   invitationProcessStarted: boolean, contactPemKey: (null|string)
  *   localPubKey: (Buffer|null), rsvpAnswer: (InvitationResponse|null),
  *   receiverName: (null|string), initiatorName: (null|string),
  *   dhPrepPercentage: (number), dhPrepStatusMessage: (string),
  *   sharedSecret: (null|Uint8Array), localGreetingName: (null|string),
  *   contactGreetingMessage: (string), localGreeting: string,
- *   localDhPubKey: (null|ArrayBuffer), contactDhPubKey: (null|ArrayBuffer)
+ *   localDhPubKey: (null|ArrayBuffer), contactDhPubKey: (null|ArrayBuffer),
+ *   contactPemKey: (null|string)
  * }} ContactCreatorStats
  */
 
@@ -468,8 +471,6 @@ class ContactCreator {
       id: this._id,
       error: this.error,
       isOutbound: this._isOutbound,
-      invitationProcessStarted:
-        this._isOutbound ? this.invitationSent : this.inviteResponseReceived,
       rsvpAnswer: this._rsvpAnswer,
       sharedSecret: this._sharedSecret,
 
@@ -740,11 +741,11 @@ class ContactCreator {
       // this account is online.
       // TODO: Handle block. Save block info in removeEventListener account
       //  only.
-      console.log('Not replying to invite.');
+      verbose && console.log('Not replying to invite.');
     }
     else if (answer === postpone) {
       // Send rain check without acceptance extras.
-      console.log(`Sending postponement to ${replyAddress}.`);
+      verbose && console.log(`Sending postponement to ${replyAddress}.`);
       return {
         target: replyAddress,
         answer,
@@ -797,7 +798,7 @@ class ContactCreator {
     const time = this.time;
 
     if (isNaN(time) || !time) {
-      console.log('Invalid time:', time);
+      console.error('Invalid time:', time);
       $modal.alert({
         prioritise: true,
         header: 'Error',
@@ -833,6 +834,7 @@ class ContactCreator {
       return console.error('[ContactCreator] Invalid modGroup:', modGroup);
     }
     // TODO: If already generated the key, just return it.
+    verbose && console.log('Starting key generation process.');
 
     this.dhModGroup = modGroup;
     this._dhPrepStatusMessage = 'Preparing key exchange, please stand by...';
@@ -854,7 +856,7 @@ class ContactCreator {
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
 
     alice.generateKeys();
-    console.log(`DH key generation complete...`);
+    verbose && console.log(`DH key generation complete...`);
 
     // Wait a bit so that the UI doesn't move too fast and bewilder the user.
     await setPromiseTimeout(MIN_UI_TRANSITION_MS);
@@ -890,9 +892,10 @@ class ContactCreator {
     this._dhPrepStatusMessage = `Ready`;
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
 
-    console.log(`--> DH secret generation complete:`, {
-      sharedSecret: uint8ArrayToHexString(aliceSecret),
-    });
+    verbose && console.log(
+      `DH shared secret generated. Full password:`,
+      uint8ArrayToHexString(aliceSecret),
+    );
   }
 }
 

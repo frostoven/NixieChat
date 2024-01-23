@@ -7,6 +7,9 @@ import {
   clientEmitterAction as Action,
 } from '../emitters/clientEmitterAction';
 import { ContactCreator } from './ContactCreator';
+import { logConfig } from '../config/logging';
+
+const verbose = logConfig.verboseHandshakeLogs;
 
 const nop = () => {
 };
@@ -73,10 +76,10 @@ class RemoteCrypto {
           console.error('Error:', error);
         }
         else if (!rejected.length) {
-          console.log('[makeDiscoverable] Success.');
+          verbose && console.log('[makeDiscoverable] Success.');
         }
         else {
-          console.log(
+          console.warn(
             '[makeDiscoverable] Some public names were rejected. Indexes:',
             rejected,
           );
@@ -145,6 +148,8 @@ class RemoteCrypto {
       );
     }
 
+    verbose && console.log('Received invitation from', replyAddress);
+
     // Receiving an invitation at random is a first (local) contact creation
     // step, so create a new instance to track it.
     const contactCreator = new ContactCreator({
@@ -159,6 +164,7 @@ class RemoteCrypto {
       replyAddress, pubKey, time, greetingName, greeting,
     }).catch(console.error);
 
+    verbose && console.log('Sending invitation response.');
     clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
     serverEmitter.emit(Socket.respondToInvite, responseObject);
   }
@@ -183,6 +189,9 @@ class RemoteCrypto {
       return console.warn('Ignoring RSVP from guest with weird public key:', {
         pubKey,
       });
+    }
+    else {
+      verbose && console.log('Received RSVP from', sourceId);
     }
 
     /** @type ContactCreator */
@@ -220,13 +229,12 @@ class RemoteCrypto {
     const responseObject = await contactCreator.stage4_prepareDhKey({
       modGroup,
     }).catch(console.error);
+    responseObject.needDhReply = true;
 
     RemoteCrypto.trackedInvitesById[contactCreator.contactId] = contactCreator;
 
-    console.log(`Sending DH key to prospective contact (automatic).`);
-    responseObject.needDhReply = true;
-
     clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+    verbose && console.log(`Sending DH key to prospective contact (automatic).`);
     serverEmitter.emit(Socket.sendDhPubKey, responseObject);
   }
 
@@ -241,6 +249,9 @@ class RemoteCrypto {
         'trackedInvitesById dump:', RemoteCrypto.trackedInvitesById,
       );
     }
+    else {
+      verbose && console.log('Received DH public key from', sourceId);
+    }
 
     /** @type ContactCreator */
     const contactCreator = RemoteCrypto.trackedInvitesById[sourceId];
@@ -252,10 +263,9 @@ class RemoteCrypto {
       const responseObject = await contactCreator.stage4_prepareDhKey({
         modGroup,
       }).catch(console.error);
-
-      console.log(`Sending DH key to prospective contact (as per request).`);
       responseObject.needDhReply = false;
 
+      verbose && console.log(`Sending DH key to prospective contact (as per request).`);
       clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
       serverEmitter.emit(Socket.sendDhPubKey, responseObject);
     }
@@ -273,7 +283,7 @@ class RemoteCrypto {
     }
 
     await contactCreator.stage5_computeSharedSecret();
-    console.log('=> Final handshake state:', contactCreator.getStats());
+    verbose && console.log('Final handshake state:', contactCreator.getStats());
   }
 }
 

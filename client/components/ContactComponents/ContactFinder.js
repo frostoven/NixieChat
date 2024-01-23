@@ -55,7 +55,6 @@ class ContactFinder extends React.Component {
   constructor(props) {
     super(props);
     const acc = Accounts.getActiveAccount();
-    console.log('active account:', acc);
     this.state.localGreetingName = acc.publicName || randomLocalName();
     this.invitationItems = {};
   }
@@ -123,8 +122,6 @@ class ContactFinder extends React.Component {
       return;
     }
     this.invitationItems[rsvp.id].dhKeySent = true;
-
-    console.log('=> sendDhKey:', { rsvp });
 
     await RemoteCrypto.createAndSendDhPubKey({
       modGroup: KeyStrength.messagingModGroup,

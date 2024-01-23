@@ -1,7 +1,9 @@
-let config = {
+let serverConfig = {
 	server: Object.freeze({
 		//
 	}),
 };
 
-export default config;
+export {
+	serverConfig,
+};
