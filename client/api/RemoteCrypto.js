@@ -2,18 +2,18 @@ import { clientEmitter, serverEmitter } from '../emitters/comms';
 import { CryptoMessageType as Socket } from '../../shared/CryptoMessageType';
 import { MessageVersion } from '../../shared/MessageVersion';
 import { Accounts } from '../storage/cacheFrontends/Accounts';
-import { exportRsaPublicKey, importRsaPublicKey } from '../encryption/rsa';
-import { showInvitationDialog } from '../modal/nixieDialogs';
-import { InvitationResponse } from '../../shared/InvitationResponse';
-import { getDiffieHellman } from 'diffie-hellman';
-import { KeyStrength } from '../../shared/KeyStrength';
 import { ClientMessageType } from '../emitters/ClientMessageType';
+import {
+  clientEmitterAction as Action,
+} from '../emitters/clientEmitterAction';
+import { ContactCreator } from './ContactCreator';
 
 const nop = () => {
 };
 
 class RemoteCrypto {
   static namesPendingInvites = {};
+  static trackedInvitesById = {};
 
   /**
    * This function should run when the application boots. This currently
@@ -24,7 +24,11 @@ class RemoteCrypto {
     // context of NixieChat, we use direct id message as an invitation response
     // system. If we're not expecting invitation responses, we silently reject
     // the messages.
-    serverEmitter.on(serverEmitter.id, RemoteCrypto.receiveInviteResponse);
+    serverEmitter.on(serverEmitter.id, RemoteCrypto.receiveInvitationResponse);
+
+    // We've received a DH key from someone we're in the process of becoming
+    // contacts with.
+    serverEmitter.on(Socket.sendDhPubKey, RemoteCrypto.receiveDhPubKey);
   }
 
   // Makes you visible to the network so that you may receive invitations.
@@ -49,7 +53,7 @@ class RemoteCrypto {
         });
         // Treat our own public name as a chat room. This allows us to receive
         // invitations in a very natural fashion.
-        serverEmitter.on(publicName, (args) => RemoteCrypto.receiveInvite(publicName, args));
+        serverEmitter.on(publicName, (args) => RemoteCrypto.receiveInvitation(publicName, args));
       }
     }
 
@@ -58,7 +62,6 @@ class RemoteCrypto {
       v: MessageVersion.deviceRegistrationV1,
     };
 
-    console.log(userRooms);
     serverEmitter.timeout(10000).emit(
       Socket.makeDiscoverable,
       options,
@@ -83,32 +86,35 @@ class RemoteCrypto {
   }
 
   // Sends an invitation to someone.
-  static async findContact(source, target, greeting, callback = nop) {
-    const activeAccount = Accounts.getActiveAccount();
-    const time = Date.now();
-
-    source = source.trim();
-    target = target.trim();
-    greeting = greeting.trim();
-
-    const options = {
-      source,
-      target,
-      greeting,
-      pubKey: await exportRsaPublicKey({ publicKey: activeAccount.publicKey }),
-      time,
-      v: MessageVersion.findContactV1,
-    };
-    console.log('[findContact] Sending:', options);
+  // Used to be called findContact.
+  static async sendInvitation(
+    localAccountId, contactPublicName, localGreeting, localGreetingName,
+    callback = nop,
+  ) {
+    // Sending out an invitation is a first (local) contact creation step, so
+    // create a new instance to track it.
+    const contactCreator = new ContactCreator({
+      localAccountId,
+      localGreetingName,
+      localGreeting,
+      contactPublicName,
+    });
 
     // Keep track of pending invite names. If we receive an RSVP response from
-    // someone we didn't send an invitation to then treat them as spam.
-    RemoteCrypto.namesPendingInvites[target] = { name: target, time };
+    // someone we didn't send an invitation to then treat them as spam. This
+    // allows looking them up by public name.
+    // TODO: check from class instead.
+    RemoteCrypto.namesPendingInvites[contactPublicName] = contactCreator;
+
+    const responseObject = await contactCreator.stage1_prepareInvitation()
+      .catch(console.error);
+    responseObject.v = MessageVersion.sendInvitationV1;
 
     serverEmitter.timeout(120000).emit(
-      Socket.findContact,
-      options,
+      Socket.sendInvitation,
+      responseObject,
       (socketError, { error, results = [] } = {}) => {
+        // TODO: Toast these errors.
         if (socketError) {
           console.error('Socket error:', socketError);
           callback('Socket error:' + socketError.toString());
@@ -125,85 +131,48 @@ class RemoteCrypto {
   }
 
   // Called when we receive an invitation from someone.
-  static async receiveInvite(ownName, {
-    requestId,
-    source,
-    greeting,
-    pubKey,
-    time,
+  static async receiveInvitation(receiverName, {
+    source, greetingName, greeting, pubKey, time, replyAddress,
   }) {
-    // TODO: toast that invite was received, in case user is in another modal.
-
-    console.log('[invite]', {
-      ownName, requestId, source, greeting, pubKey, time,
+    const account = Accounts.findAccountByPublicName({
+      publicName: receiverName,
     });
 
-    const response = await showInvitationDialog({
-      ownName, requestId, source, greeting, pubKey, time,
+    if (!account) {
+      return console.error(
+        'Received an invite for which we have no matching public name ' +
+        `(${receiverName}). Stale info server-side?`,
+      );
+    }
+
+    // Receiving an invitation at random is a first (local) contact creation
+    // step, so create a new instance to track it.
+    const contactCreator = new ContactCreator({
+      localAccountId: account.accountId,
+      contactPublicName: source,
     });
 
-    // Find the account associated with the requested public name.
-    const receivingAccount = Accounts.findAccountByPublicName({
-      publicName: ownName,
-    });
+    // Store by sender's public name for later use.
+    RemoteCrypto.trackedInvitesById[replyAddress] = contactCreator;
 
-    if (!receivingAccount) {
-      return $modal.alert({
-        header: 'Invite Response Failed',
-        body: 'Could not respond to invite because none of your accounts ' +
-          `appear to have the public name "${ownName}" associated with  ` +
-          'them. Was the name maybe deleted before the contact could respond?',
-      });
-    }
+    const responseObject = await contactCreator.stage1_prepareInvitationResponse({
+      replyAddress, pubKey, time, greetingName, greeting,
+    }).catch(console.error);
 
-    const { answer } = response;
-
-    const { block, reject, postpone, accept } = InvitationResponse;
-    if (answer === block || answer === reject) {
-      // Do not reply; this means a malicious party won't know whether or not
-      // this account is online.
-      // TODO: Handle block. Save block info in removeEventListener account
-      //  only.
-      console.log('Not replying to invite.');
-    }
-    else if (answer === postpone) {
-      // Send rain check without acceptance extras.
-      console.log(`Sending postponement to ${requestId}.`);
-      serverEmitter.emit(Socket.respondToInvite, {
-        target: requestId,
-        answer,
-      });
-    }
-    else if (answer === accept) {
-      // The server sends us the public key as an ArrayBuffer, convert to view.
-      pubKey = new Uint8Array(pubKey);
-
-      const { greetingName, greetingMessage } = response;
-
-      console.log(`Sending response ${response} to ${requestId}.`);
-      serverEmitter.emit(Socket.respondToInvite, {
-        target: requestId,
-        answer,
-        ownName,
-        greetingName,
-        greetingMessage,
-        pubKey: await exportRsaPublicKey({
-          publicKey: receivingAccount.publicKey,
-        }),
-      });
-    }
+    clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+    serverEmitter.emit(Socket.respondToInvite, responseObject);
   }
 
-  // Called when we send out an invitation and got a response.
-  static async receiveInviteResponse({
+  // Called when we've sent out an invitation and got a response.
+  static async receiveInvitationResponse({
     answer,
     sourceId,
     publicName,
     greetingName,
     greetingMessage,
     pubKey,
+    replyAddress,
   } = {}) {
-    // TODO: save these in a global log.
     if (sourceId !== serverEmitter.id) {
       return console.warn('Ignoring RSVP to invalid id', sourceId);
     }
@@ -216,53 +185,95 @@ class RemoteCrypto {
       });
     }
 
-    const time = RemoteCrypto.namesPendingInvites[publicName].time;
-
+    /** @type ContactCreator */
+    const contactCreator = RemoteCrypto.namesPendingInvites[publicName];
     // Ticket used up; forget.
+    // TODO: maybe with new system instead set flag? or maybe not.
     delete RemoteCrypto.namesPendingInvites[publicName];
+    RemoteCrypto.trackedInvitesById[replyAddress] = contactCreator;
 
-    if (isNaN(time) || !time) {
-      console.log('Invalid time:', time);
-      $modal.alert({
-        prioritise: true,
-        header: 'Error',
-        body: 'An error occurred while processing the response - invalid time',
-      });
+    await contactCreator.stage2_receiveInvitationResponse({
+      answer,
+      greetingMessage,
+      greetingName,
+      pubKey,
+      replyAddress,
+    }).catch(console.error);
+
+    clientEmitter.emit(ClientMessageType.receiveRsvpResponse, contactCreator.getStats());
+  }
+
+  /**
+   * Generates a DH public key and passes sends it to the specified target
+   * socket ID. Returns the generated key.
+   */
+  static async createAndSendDhPubKey({ targetId, modGroup }) {
+    /** @type ContactCreator */
+    const contactCreator = RemoteCrypto.trackedInvitesById[targetId];
+    if (!contactCreator) {
+      return console.error(
+        `No creator instance exists for id '${targetId}'. Ignoring request. ` +
+        `trackedInvitesById dump:`, RemoteCrypto.trackedInvitesById,
+      );
+    }
+
+    const responseObject = await contactCreator.stage4_prepareDhKey({
+      modGroup,
+    }).catch(console.error);
+
+    RemoteCrypto.trackedInvitesById[contactCreator.contactId] = contactCreator;
+
+    console.log(`Sending DH key to prospective contact (automatic).`);
+    responseObject.needDhReply = true;
+
+    clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+    serverEmitter.emit(Socket.sendDhPubKey, responseObject);
+  }
+
+  // We've received a DH key from someone that we're in the process of becoming
+  // contacts with.
+  static async receiveDhPubKey(options) {
+    const { sourceId, dhPubKey, needDhReply, modGroup } = options;
+    if (!RemoteCrypto.trackedInvitesById[sourceId]) {
+      return console.error(
+        `Received DH key from ID '${sourceId}', but we're not currently ` +
+        'waiting for any such keys. Perhaps they suffered a connection reset?',
+        'trackedInvitesById dump:', RemoteCrypto.trackedInvitesById,
+      );
+    }
+
+    /** @type ContactCreator */
+    const contactCreator = RemoteCrypto.trackedInvitesById[sourceId];
+    await contactCreator.stage3_receiveDhPubKey({
+      dhPubKey,
+    }).catch(console.error);
+
+    if (needDhReply) {
+      const responseObject = await contactCreator.stage4_prepareDhKey({
+        modGroup,
+      }).catch(console.error);
+
+      console.log(`Sending DH key to prospective contact (as per request).`);
+      responseObject.needDhReply = false;
+
+      clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+      serverEmitter.emit(Socket.sendDhPubKey, responseObject);
+    }
+    else {
+      clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+    }
+  }
+
+  static async startVerification({ creatorId }) {
+    const contactCreator = ContactCreator.getInstanceById(creatorId);
+    const id = contactCreator.contactId;
+    if (!RemoteCrypto.trackedInvitesById) {
+      console.error('[RemoteCrypto] Cannot start verification - mismatch.');
       return;
     }
 
-
-    // The server sends us the public key as an ArrayBuffer, convert to a view.
-    pubKey = new Uint8Array(pubKey);
-
-    // Used for visualizations.
-    let pemKey = await importRsaPublicKey(pubKey, 'raw');
-    pemKey = await exportRsaPublicKey({ publicKey: pemKey }, 'pem');
-
-    console.log('=> got invite response:', {
-      answer,
-      sourceId,
-      publicName,
-      pubKey,
-    });
-
-    const bob = getDiffieHellman(KeyStrength.messagingModGroup);
-    // console.log(`Generating ${KeyStrength.messagingModGroup} DH keys.`);
-    // bob.generateKeys();
-    // console.log(`DH key generation complete.`);
-    // console.log(`Generating DH secret.`);
-    // const bobSecret = bob.computeSecret(pubKey);
-    // console.log(`DH secret generation complete.`);
-    // console.log({ bobSecret });
-
-    clientEmitter.emit(ClientMessageType.receiveRsvpResponse, {
-      answer,
-      sourceId,
-      publicName,
-      pubKey,
-      pemKey,
-      time,
-    });
+    await contactCreator.stage5_computeSharedSecret();
+    console.log('=> Final handshake state:', contactCreator.getStats());
   }
 }
 
