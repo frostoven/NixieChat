@@ -157,7 +157,7 @@ class AccountCreator extends React.Component {
           <Button
             icon
             primary
-            type="submit"
+            type="button"
             labelPosition="left"
             onClick={this.create}
             disabled={buttonDisabled}

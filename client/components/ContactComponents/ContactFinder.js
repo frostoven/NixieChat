@@ -206,7 +206,7 @@ class ContactFinder extends React.Component {
 
           <Button
             primary
-            type="submit"
+            type="button"
             disabled={buttonDisabled}
             onClick={this.findContact}
           >
