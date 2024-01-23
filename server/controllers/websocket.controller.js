@@ -3,8 +3,9 @@ const { generateEventSignaller } = require('../socketProcessing/generateEventSig
 const socketEvent = {
   ping: generateEventSignaller(),
   makeDiscoverable: generateEventSignaller(),
-  findContact: generateEventSignaller(),
+  sendInvitation: generateEventSignaller(),
   respondToInvite: generateEventSignaller(),
+  sendDhPubKey: generateEventSignaller(),
 };
 
 function ping(socket) {
@@ -17,9 +18,9 @@ function makeDiscoverable(socket, options, callback) {
   }
 }
 
-function findContact(socket, options, callback) {
+function sendInvitation(socket, options, callback) {
   if (socket) {
-    socketEvent.findContact.trigger({ socket, options, callback });
+    socketEvent.sendInvitation.trigger({ socket, options, callback });
   }
 }
 
@@ -29,10 +30,17 @@ function respondToInvite(socket, options, callback) {
   }
 }
 
+function sendDhPubKey(socket, options, callback) {
+  if (socket) {
+    socketEvent.sendDhPubKey.trigger({ socket, options, callback });
+  }
+}
+
 module.exports = {
   socketEvent,
   ping,
   makeDiscoverable,
-  findContact,
+  sendInvitation,
   respondToInvite,
+  sendDhPubKey,
 };

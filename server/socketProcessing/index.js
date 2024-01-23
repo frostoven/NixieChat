@@ -6,6 +6,8 @@ const {
 const { MessageVersion } = require('../../shared/MessageVersion');
 const { Emitter } = require('@socket.io/postgres-emitter');
 const { sharedConfig } = require('../../shared/config');
+const { CryptoMessageType } = require('../../shared/CryptoMessageType');
+const { AssertReject } = require('../../shared/AssertReject');
 
 const nop = () => {
 };
@@ -20,12 +22,10 @@ function bootServer(clusterEmitter) {
     /**
      * @param {Object} payload
      * @param {Socket} payload.socket
-     * @param {Object} payload.options
-     * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop } = {}) => {
+    ({ socket } = {}) => {
       return sendMessageToClient({
-        message: 'Received.', socket,
+        message: 'Received.', socket: socket.id,
       });
     });
 
@@ -37,6 +37,10 @@ function bootServer(clusterEmitter) {
      * @param {Function} payload.callback
      */
     ({ socket, options = {}, callback = nop } = {}) => {
+      if (!options) {
+        return callback({ error: '[makeDiscoverable] Malformed options.' });
+      }
+
       const { userRooms, v } = options;
       console.log(`[makeDiscoverable] socket.id: ${socket.id}, v: ${v}, userRooms:`, userRooms);
       if (
@@ -69,7 +73,7 @@ function bootServer(clusterEmitter) {
       callback({ rejected });
     });
 
-  socketEvent.findContact.addListener(
+  socketEvent.sendInvitation.addListener(
     /**
      * @param {Object} payload
      * @param {Socket} payload.socket
@@ -77,22 +81,30 @@ function bootServer(clusterEmitter) {
      * @param {Function} payload.callback
      */
     ({ socket, options = {}, callback = nop } = {}) => {
+      if (!options) {
+        return callback({ error: '[sendInvitation] Malformed options.' });
+      }
+
       console.log(`=> socket.id: ${socket.id}`);
-      const { source, target, greeting, pubKey, time, v } = options;
-      console.log(`[findContact] socket.id: ${socket.id}, v: ${v}, source: ${source}, target: ${target}`);
-      if (v !== MessageVersion.findContactV1 || !source || !target) {
-        callback({
-          error: '[findContact] Unsupported options or version.',
-        });
+      const {
+        source, target, greeting, greetingName, pubKey, time, v,
+      } = options;
+      console.log(`[sendInvitation] socket.id: ${socket.id}, v: ${v}, source: ${source}, target: ${target}`);
+
+      if (v !== MessageVersion.sendInvitationV1 || !source || !target) {
+        callback({ error: '[sendInvitation] Unsupported options or version.' });
         return;
       }
 
-      if (greeting.length > sharedConfig.greetingLimit) {
-        callback({
-          error: '[findContact] Greeting character limit exceeded.',
-        });
+      // Requirement: Must be string or null, no larger than greetingLimit.
+      if (!assertReject.stringOrNull(
+        '[sendInvitation] "greeting"', greeting, sharedConfig.greetingLimit,
+        callback,
+      )) {
         return;
       }
+
+      // TODO: check greeting limits
 
       // It's important to know how we use socket.id because we actually use
       // it for many different things simultaneously. Socket.io automatically
@@ -112,11 +124,12 @@ function bootServer(clusterEmitter) {
       // new invite. This also drives home the idea that ids should not be
       // relied on for permanence, as per Socket.io docs recommendation.
       clusterEmitter.to(target).emit(target, {
-        requestId: socket.id,
         source,
         greeting,
+        greetingName,
         pubKey,
         time,
+        replyAddress: socket.id,
       });
 
       callback({ status: 'received' });
@@ -132,6 +145,11 @@ function bootServer(clusterEmitter) {
      */
     ({ socket, options = {}, callback = nop } = {}) => {
       console.log('====> receiveInviteResponse:', options);
+      if (!options) {
+        return callback({ error: '[respondToInvite] Malformed options.' });
+      }
+
+      console.log('=> receiveInvitationResponse:', options);
       const {
         target, answer, ownName, greetingName, greetingMessage, pubKey,
       } = options;
@@ -142,6 +160,45 @@ function bootServer(clusterEmitter) {
         greetingName,
         greetingMessage,
         pubKey,
+        replyAddress: socket.id,
+      });
+    });
+
+  socketEvent.sendDhPubKey.addListener(
+    /**
+     * @param {Object} payload
+     * @param {Socket} payload.socket
+     * @param {Object} payload.options
+     * @param {Function} payload.callback
+     */
+    ({ socket, options = {}, callback = nop } = {}) => {
+      if (!options) {
+        return callback({ error: '[sendDhPubKey] Malformed options.' });
+      }
+
+      console.log('--> Server received sendDhPubKey. Options:', options);
+      const { targetId, dhPubKey, needDhReply, modGroup } = options;
+
+      if (!targetId || typeof targetId !== 'string') {
+        callback({ error: '[sendDhPubKey] Invalid target.' });
+        return;
+      }
+
+      if (!dhPubKey) {
+        callback({ error: '[sendDhPubKey] Missing key.' });
+        return;
+      }
+
+      if (!modGroup) {
+        callback({ error: '[sendDhPubKey] Missing mod group.' });
+        return;
+      }
+
+      clusterEmitter.to(targetId).emit(CryptoMessageType.sendDhPubKey, {
+        sourceId: socket.id,
+        dhPubKey,
+        needDhReply,
+        modGroup,
       });
     });
 }
