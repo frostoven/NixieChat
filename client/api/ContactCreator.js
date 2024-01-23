@@ -145,6 +145,7 @@ class ContactCreator {
   _receiverName = null;
   _initiatorName = null;
   _contactId = null;
+  _localSocketId = null;
   _time = 0;
   _contactPublicName = null;
   _contactGreetingName = null;
@@ -303,6 +304,25 @@ class ContactCreator {
       return this.logRoError('contactId');
     }
     this._contactId = value;
+  }
+
+  /**
+   * Ephemeral socket ID of this device. This is used for things like password
+   * salting.
+   *
+   * Note that socket IDs are lost when the device's connection is reset.
+   * @type {null|string}
+   */
+  get localSocketId() {
+    this._localSocketId === null && this.logNullRead('localSocketId');
+    return this._localSocketId;
+  }
+
+  set localSocketId(value) {
+    if (this._localSocketId !== null) {
+      return this.logRoError('localSocketId');
+    }
+    this._localSocketId = value;
   }
 
   /**
@@ -509,19 +529,21 @@ class ContactCreator {
 
   constructor({
     localAccountId,
+    localSocketId,
     localGreetingName = null,
     localGreeting,
     contactPublicName,
   } = {}) {
     ContactCreator._instanceFromId[this._id] = this;
 
-    if (!contactPublicName || !localAccountId) {
+    if (!contactPublicName || !localAccountId || !localAccountId) {
       this.error = '[ContactCreator] Invalid options specified.';
       console.error(this.error);
     }
     else {
       this.localAccountId = localAccountId;
       this.contactPublicName = contactPublicName;
+      this.localSocketId = localSocketId;
 
       typeof localGreetingName === 'string' && (
         this.localGreetingName = localGreetingName
