@@ -13,35 +13,11 @@ function showAddContactDialog() {
   });
 }
 
-async function showInvitationDialog({
-  ownName,
-  requestId,
-  source,
-  greeting,
-  pubKey,
-  time,
-} = {}) {
-  if (
-    typeof requestId !== 'string' ||
-    typeof source !== 'string' ||
-    typeof greeting !== 'string' ||
-    !(pubKey instanceof ArrayBuffer) ||
-    typeof time !== 'number'
-  ) {
-    console.log(
-      '[receiveInvite] Received malformed invite. Dump:',
-      { requestId, source, greeting, pubKey, time },
-    );
-    return;
-  }
-
-  // Node sends this as an ArrayBuffer, so we wrap it in a uint8 view.
-  pubKey = new Uint8Array(pubKey);
-
-  // Useful for visualisations.
-  let pemKey = await importRsaPublicKey(pubKey, 'raw');
-  pemKey = await exportRsaPublicKey({ publicKey: pemKey }, 'pem');
-
+/**
+ * @param {ContactCreatorStats} stats
+ * @return {Promise}
+ */
+async function showInvitationDialog(stats) {
   const dialog = $modal.alert({
     header: 'Contact Invite',
     body: 'Loading invite...',
@@ -71,13 +47,8 @@ async function showInvitationDialog({
     // dialog options object.
     dialog.body = (
       <ReceiveInvitation
+        creatorId={stats.id}
         dialog={dialog}
-        source={source}
-        ownName={ownName}
-        greeting={greeting}
-        pubKey={pubKey}
-        pemKey={pemKey}
-        time={time}
         onSelectChoice={(answer) => {
           resolve(answer);
         }}
