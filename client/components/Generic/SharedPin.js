@@ -81,8 +81,6 @@ function char255toPinGroup(numberArray) {
   // This produces the spaces, dashes, and color, and the trailing character.
   const auxBytes = numberArray.slice(12);
 
-  console.log({ characters, pinStart, auxBytes });
-
   const chars = [];
   for (let i = 0, len = pinStart.length; i < len; i++) {
     let character = pinStart[i];

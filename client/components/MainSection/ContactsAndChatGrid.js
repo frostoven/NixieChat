@@ -41,8 +41,6 @@ class ContactsAndChatGrid extends React.Component {
     const darkMode = Settings.isDarkModeEnabled();
     const account = Accounts.getActiveAccount();
 
-    // console.log('-> last active:', Accounts.getActiveAccount());
-
     // If the user has no chats:
     // return <CreateFirstChat/>;
 
