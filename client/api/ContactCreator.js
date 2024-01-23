@@ -474,8 +474,8 @@ class ContactCreator {
       sharedSecret: this._sharedSecret,
 
       /* UI and log vars */
-      dhPrepPercentage: this._dhPrepPercentage,
-      dhPrepStatusMessage: this._dhPrepStatusMessage,
+      dhPrepPercentage: this.error ? 0 : this._dhPrepPercentage,
+      dhPrepStatusMessage: this.error || this._dhPrepStatusMessage,
 
       /* Vars that should always be identical on both sides */
       time: this._time,
@@ -516,7 +516,8 @@ class ContactCreator {
     ContactCreator._instanceFromId[this._id] = this;
 
     if (!contactPublicName || !localAccountId) {
-      console.error('[ContactCreator] Invalid options specified.');
+      this.error = '[ContactCreator] Invalid options specified.';
+      console.error(this.error);
     }
     else {
       this.localAccountId = localAccountId;
@@ -540,7 +541,8 @@ class ContactCreator {
   }
 
   logRoError(varName) {
-    console.error(`[ContactCreator] ${varName} may only be set once.`);
+    this.error = `${varName} may only be set once.`;
+    console.error(`[ContactCreator] ${this.error}`);
   }
 
   /**
@@ -568,6 +570,7 @@ class ContactCreator {
    */
   async stage1_prepareInvitation() {
     if (this.invitationSent) {
+      this.error = 'Failed to send invite. Please try again.';
       return console.error(
         `Cannot send invite; already sent to ${this.contactPublicName}.`,
         'Please create a new ContactCreator instance to create more contacts.',
@@ -667,15 +670,13 @@ class ContactCreator {
     }
 
     if (!this.contactId) {
-      return console.error(
-        `Cannot receive invite; bad contact ID.`,
-      );
+      this.error = 'Cannot receive invite; bad contact ID.';
+      return console.error(this.error);
     }
 
     if (!pubKey) {
-      return console.error(
-        `Cannot receive invite; bad contact public key.`,
-      );
+      this.error = 'Cannot receive invite; bad contact public key.';
+      return console.error(this.error);
     }
 
     // Node sends this as an ArrayBuffer, so we wrap it in a uint8 view.
@@ -797,7 +798,8 @@ class ContactCreator {
     const time = this.time;
 
     if (isNaN(time) || !time) {
-      console.error('Invalid time:', time);
+      this.error = 'System time appears to be invalid.';
+      console.error('[ContactCreator] Invalid time:', time);
       $modal.alert({
         prioritise: true,
         header: 'Error',
@@ -840,6 +842,7 @@ class ContactCreator {
 
   async stage3_prepareDhKey({ modGroup }) {
     if (!modGroup) {
+      this.error = 'Invalid modGroup: ' + modGroup;
       return console.error('[ContactCreator] Invalid modGroup:', modGroup);
     }
     // TODO: If already generated the key, just return it.
@@ -892,7 +895,10 @@ class ContactCreator {
     await setPromiseTimeout(50);
 
     if (!this.contactDhPubKey) {
-      return console.error('[ContactCreator] Contact DH not ready.');
+      this.error = 'Contact sent invalid key.';
+      return console.error(
+        `[ContactCreator] Invalid DH contact key:`, this.contactDhPubKey,
+      );
     }
 
     const alice = this.localDhKeyExchange;
