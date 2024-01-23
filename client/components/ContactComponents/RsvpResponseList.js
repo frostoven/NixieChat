@@ -139,6 +139,7 @@ class RsvpResponseList extends React.Component {
         contactPemKey,
         dhPrepPercentage,
         dhPrepStatusMessage,
+        contactDhPubKey,
         sharedSecret,
       } = responseOptions;
 
@@ -173,7 +174,7 @@ class RsvpResponseList extends React.Component {
 
       // 0.5 means the exchange has paused and is now waiting for user
       // to authorize computing the DH secret (which takes some time).
-      const readyToConnect = dhPrepPercentage === 0.5;
+      const readyToConnect = dhPrepPercentage === 0.5 && contactDhPubKey;
 
       // Used to generate the Diffie-Hellman secret.
       const InitHandshake = () => (

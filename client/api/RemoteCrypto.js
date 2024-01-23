@@ -226,7 +226,7 @@ class RemoteCrypto {
       );
     }
 
-    const responseObject = await contactCreator.stage4_prepareDhKey({
+    const responseObject = await contactCreator.stage3_prepareDhKey({
       modGroup,
     }).catch(console.error);
     responseObject.needDhReply = true;
@@ -242,7 +242,10 @@ class RemoteCrypto {
   // contacts with.
   static async receiveDhPubKey(options) {
     const { sourceId, dhPubKey, needDhReply, modGroup } = options;
-    if (!RemoteCrypto.trackedInvitesById[sourceId]) {
+
+    /** @type ContactCreator */
+    const contactCreator = RemoteCrypto.trackedInvitesById[sourceId];
+    if (!contactCreator) {
       return console.error(
         `Received DH key from ID '${sourceId}', but we're not currently ` +
         'waiting for any such keys. Perhaps they suffered a connection reset?',
@@ -253,14 +256,12 @@ class RemoteCrypto {
       verbose && console.log('Received DH public key from', sourceId);
     }
 
-    /** @type ContactCreator */
-    const contactCreator = RemoteCrypto.trackedInvitesById[sourceId];
-    await contactCreator.stage3_receiveDhPubKey({
+    await contactCreator.stageless_receiveDhPubKey({
       dhPubKey,
     }).catch(console.error);
 
     if (needDhReply) {
-      const responseObject = await contactCreator.stage4_prepareDhKey({
+      const responseObject = await contactCreator.stage3_prepareDhKey({
         modGroup,
       }).catch(console.error);
       responseObject.needDhReply = false;
@@ -277,12 +278,12 @@ class RemoteCrypto {
   static async startVerification({ creatorId }) {
     const contactCreator = ContactCreator.getInstanceById(creatorId);
     const id = contactCreator.contactId;
-    if (!RemoteCrypto.trackedInvitesById) {
-      console.error('[RemoteCrypto] Cannot start verification - mismatch.');
+    if (!RemoteCrypto.trackedInvitesById[contactCreator.contactId]) {
+      console.error('[RemoteCrypto] Cannot start verification - ID mismatch.');
       return;
     }
 
-    await contactCreator.stage5_computeSharedSecret();
+    await contactCreator.stage4_computeSharedSecret();
     verbose && console.log('Final handshake state:', contactCreator.getStats());
   }
 }

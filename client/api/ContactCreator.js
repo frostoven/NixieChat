@@ -818,7 +818,15 @@ class ContactCreator {
     this.contactPemKey = pemKey;
   }
 
-  async stage3_receiveDhPubKey({ dhPubKey }) {
+  /**
+   * This is marked as "stageless" because we don't exactly wait; we continue
+   * doing DH computations etc. while we wait for the other side to send their
+   * key. The originating process should trigger between stages 2 and 3, though
+   * this will usually only arrive after 3 has completed.
+   * @param dhPubKey
+   * @return {Promise<void>}
+   */
+  async stageless_receiveDhPubKey({ dhPubKey }) {
     const targetId = this.contactId;
     dhPubKey && (this.contactDhPubKey = dhPubKey);
     if (!this.contactDhPubKey) {
@@ -826,9 +834,11 @@ class ContactCreator {
       this.error = 'Contact sent invalid handshake crypto key.';
       return console.error(`Received invalid DH public key from ${targetId}.`);
     }
+    this._dhPrepStatusMessage = `Ready to connect`;
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
   }
 
-  async stage4_prepareDhKey({ modGroup }) {
+  async stage3_prepareDhKey({ modGroup }) {
     if (!modGroup) {
       return console.error('[ContactCreator] Invalid modGroup:', modGroup);
     }
@@ -861,7 +871,7 @@ class ContactCreator {
     await setPromiseTimeout(MIN_UI_TRANSITION_MS);
 
     this._dhPrepPercentage = 0.5;
-    this._dhPrepStatusMessage = `Ready to connect`;
+    this._dhPrepStatusMessage = `Waiting for contact DH key...`;
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
 
     this.localDhKeyExchange = alice;
@@ -873,13 +883,17 @@ class ContactCreator {
     };
   }
 
-  async stage5_computeSharedSecret() {
+  async stage4_computeSharedSecret() {
     this._dhPrepPercentage = 0.75;
     this._dhPrepStatusMessage = `Computing shared secret...`;
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
 
     // Give the UI time to update for we lock the main thread.
     await setPromiseTimeout(50);
+
+    if (!this.contactDhPubKey) {
+      return console.error('[ContactCreator] Contact DH not ready.');
+    }
 
     const alice = this.localDhKeyExchange;
     const bobPublicKey = new Uint8Array(this.contactDhPubKey);
