@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import {
   Button,
@@ -13,6 +14,9 @@ import { clientEmitter } from '../../emitters/comms';
 import { ClientMessageType } from '../../emitters/ClientMessageType';
 import { RsvpResponseList } from './RsvpResponseList';
 import { NxField } from '../Generic/NxField';
+import { setPromiseTimeout } from '../../utils';
+import { KeyStrength } from '../../../shared/KeyStrength';
+import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 
 // Used to pick a server error message at random. The reason we randomise them
 // is that they all look pretty, and all look like valid error message
@@ -39,9 +43,9 @@ function randomLocalName() {
 
 class ContactFinder extends React.Component {
   state = {
-    localName: '',
-    targetName: '',
-    greeting: '',
+    localGreetingName: '',
+    localGreeting: '',
+    contactPublicName: '',
     buttonDisabled: false,
     buttonText: 'Search',
     errorMessage: '',
@@ -52,47 +56,119 @@ class ContactFinder extends React.Component {
     super(props);
     const acc = Accounts.getActiveAccount();
     console.log('active account:', acc);
-    this.state.localName = acc.publicName || randomLocalName();
-    this.rsvpResponses = [];
+    this.state.localGreetingName = acc.publicName || randomLocalName();
+    this.invitationItems = {};
   }
 
   componentDidMount() {
-    clientEmitter.on(ClientMessageType.receiveRsvpResponse, (rsvp) => {
-      // To avoid concurrency issues, we use a simple array with force update
-      // instead of setState.
-      this.rsvpResponses.push(rsvp);
-      this.forceUpdate();
+    clientEmitter.on(
+      ClientMessageType.receiveRsvpResponse, this.receiveRsvpResponse,
+    );
+
+    clientEmitter.on(
+      clientEmitterAction.updateContactCreatorViews, this.updateContactCreatorViews,
+    );
+  }
+
+  componentWillUnmount() {
+    clientEmitter.removeListener(
+      ClientMessageType.receiveRsvpResponse, this.receiveRsvpResponse,
+    );
+
+    clientEmitter.removeListener(
+      clientEmitterAction.updateContactCreatorViews, this.updateContactCreatorViews,
+    );
+  }
+
+  /**
+   * @param {ContactCreatorStats} rsvp
+   */
+  receiveRsvpResponse = (rsvp) => {
+    this.invitationItems[rsvp.id] = {
+      id: rsvp.id,
+      dhKeySent: false,
+    };
+    // To avoid concurrency issues, we use a simple array with force update
+    // instead of setState.
+    this.forceUpdate(async () => {
+      // Give the UI room to breath. We should eventually make things like
+      // this use web workers instead.
+      await setPromiseTimeout(500);
+      await this.sendDhKey(rsvp);
+    });
+  };
+
+  /**
+   * See comment for this.sendDhKeys.
+   * @param {ContactCreatorStats} stats
+   */
+  updateContactCreatorViews = (stats) => {
+    if (!this.invitationItems[stats.id]) {
+      this.invitationItems[stats.id] = {};
+    }
+    this.invitationItems[stats.id].id = stats.id;
+    _.defer(() => this.forceUpdate());
+  };
+
+  // If ever there was a sane reason to use Flux or Redux, this is it; here
+  // we're waiting for network effects and then updating props with a
+  // forceUpdate in componentDidMount when things arrive. Not great, but that's
+  // how things are currently set up.
+  // TODO: Set up a dispatch system system, and integrate me into it.
+  /**
+   * @param {ContactCreatorStats} rsvp
+   */
+  async sendDhKey(rsvp) {
+    if (this.invitationItems[rsvp.id].dhKeySent) {
+      return;
+    }
+    this.invitationItems[rsvp.id].dhKeySent = true;
+
+    console.log('=> sendDhKey:', { rsvp });
+
+    await RemoteCrypto.createAndSendDhPubKey({
+      modGroup: KeyStrength.messagingModGroup,
+      targetId: rsvp.contactId,
     });
   }
 
-  findContact = () => {
+  sendInvitation = () => {
+    if (!this.state.contactPublicName) {
+      return this.setState({
+        errorMessage: 'Please specify the contact\'s public name.',
+      });
+    }
+
     this.setState({
       buttonDisabled: true,
       buttonText: 'Searching...',
       errorMessage: '',
       showSearchWindow: true,
     }, async () => {
-      const source = this.state.localName || '(No name specified)';
-      const { targetName: target, greeting } = this.state;
-      await RemoteCrypto.findContact(source, target, greeting, (error, data) => {
-        console.log('findContact', { error, data });
-        const state = {
-          buttonDisabled: false,
-          buttonText: 'Search',
-        };
+      const greetingName = this.state.localGreetingName || '(No name specified)';
+      const { contactPublicName, localGreeting } = this.state;
+      const accountId = Accounts.getActiveAccount().accountId;
 
-        if (error) {
-          state.errorMessage = error;
-        }
+      await RemoteCrypto.sendInvitation(
+        accountId, contactPublicName, localGreeting, greetingName,
+        (error, data) => {
+          const state = {
+            buttonDisabled: false,
+            buttonText: 'Search',
+          };
 
-        this.setState(state);
-      });
+          if (error) {
+            state.errorMessage = error;
+          }
+
+          this.setState(state);
+        });
     });
   };
 
   greetingLimitNotice = () => {
     const limit = sharedConfig.greetingLimit;
-    const greetingLength = this.state.greeting.length;
+    const greetingLength = this.state.localGreeting.length;
     const threshold = greetingLength / limit;
     if (threshold < 0.5) {
       return null;
@@ -121,17 +197,17 @@ class ContactFinder extends React.Component {
     if (this.state.showSearchWindow) {
       return (
         <RsvpResponseList
-          responses={this.rsvpResponses}
-          ownName={this.state.localName}
+          key={`RsvpResponseList-Finder`}
+          invitationIds={Object.keys(this.invitationItems)}
         />
       );
     }
 
     const darkMode = Settings.isDarkModeEnabled();
     const {
-      localName,
-      targetName,
-      greeting,
+      localGreetingName,
+      contactPublicName,
+      localGreeting,
       buttonDisabled,
       buttonText,
       errorMessage,
@@ -162,9 +238,9 @@ class ContactFinder extends React.Component {
               </div>
             )}
             placeholder="Shown in Invite"
-            value={localName}
+            value={localGreetingName}
             onChange={(event) => {
-              this.setState({ localName: event.target.value });
+              this.setState({ localGreetingName: event.target.value });
             }}
           />
 
@@ -178,9 +254,9 @@ class ContactFinder extends React.Component {
                 public names are visible only while they are online.
               </div>
             )}
-            value={targetName}
+            value={contactPublicName}
             onChange={(event) => {
-              this.setState({ targetName: event.target.value });
+              this.setState({ contactPublicName: event.target.value });
             }}
           />
 
@@ -189,13 +265,15 @@ class ContactFinder extends React.Component {
             help={(
               <div>
                 Optional message you want them to see when they receive the
-                invite
+                invite.
+                <br/>
+                <b>Note:</b> Greetings are not encrypted.
               </div>
             )}
             placeholder="Optional Greeting"
-            value={greeting}
+            value={localGreeting}
             onChange={(event) => {
-              this.setState({ greeting: event.target.value });
+              this.setState({ localGreeting: event.target.value });
             }}
           />
 
@@ -208,7 +286,7 @@ class ContactFinder extends React.Component {
             primary
             type="button"
             disabled={buttonDisabled}
-            onClick={this.findContact}
+            onClick={this.sendInvitation}
           >
             {buttonText}
           </Button>
