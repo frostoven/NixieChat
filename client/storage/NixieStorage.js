@@ -1,6 +1,6 @@
 import { StorageProxy } from './StorageProxy';
 import { CollectionCache } from './types/CollectionCache';
-import { sha256 } from '../utils';
+import { get256RandomBits, sha256 } from '../utils';
 
 let instance = null;
 
@@ -117,6 +117,7 @@ class NixieStorage extends StorageProxy {
 
     accounts[accountName] = {
       accountName,
+      accountId: get256RandomBits(),
       personalName,
       publicName,
       publicKey,
