@@ -6,15 +6,15 @@ import { InvitationResponse } from '../../../shared/InvitationResponse';
 import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { NxField } from '../Generic/NxField';
 import { RsaPreview } from '../Generic/RsaPreview';
+import { RsvpResponseList } from './RsvpResponseList';
+import { clientEmitter } from '../../emitters/comms';
+import { clientEmitterAction } from '../../emitters/clientEmitterAction';
+import { ContactCreator } from '../../api/ContactCreator';
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
+    creatorId: PropTypes.string,
     dialog: PropTypes.object.isRequired,
-    source: PropTypes.string.isRequired,
-    ownName: PropTypes.string.isRequired,
-    greeting: PropTypes.string.isRequired,
-    pubKey: PropTypes.any.isRequired,
-    time: PropTypes.number.isRequired,
     onSelectChoice: PropTypes.func,
   };
 
@@ -23,16 +23,42 @@ class ReceiveInvitation extends React.Component {
     },
   };
 
-  constructor(props) {
-    super(props);
-
-    this.dialog = props.dialog;
-    this.setupDialog(props.dialog);
-  }
-
   state = {
     greetingName: '',
     greetingMessage: '',
+    waitingForConfirmation: false,
+    contactStats: null,
+  };
+
+  constructor(props) {
+    super(props);
+      this.dialog = props.dialog;
+      this.setupDialog(props.dialog);
+  }
+
+  componentDidMount() {
+    clientEmitter.on(
+      clientEmitterAction.updateContactCreatorViews, this.updateContactCreatorViews,
+    );
+    this.rebuild();
+  }
+
+  /** @param {ContactCreatorStats} stats */
+  updateContactCreatorViews = (stats) => {
+    if (this.props.creatorId === stats.id) {
+      this.rebuild();
+    }
+  };
+
+  rebuild = () => {
+    const contactStats = ContactCreator.getStatsById(this.props.creatorId);
+    const newState = { contactStats, };
+
+    if (!this.state.greetingName) {
+      newState.greetingName = this.getGreetingName(contactStats);
+    }
+
+    this.setState(newState);
   };
 
   // All these buttons are disabled at first to give the user time to respond
@@ -66,7 +92,7 @@ class ReceiveInvitation extends React.Component {
         }, (confirmedBlock) => {
           if (confirmedBlock) {
             $modal.deactivateModalById(this.dialog.id);
-            console.log('TODO: block RSA key.');
+            console.warn('TODO: block RSA key.');
             this.props.onSelectChoice({ answer: InvitationResponse.block });
           }
         });
@@ -99,21 +125,22 @@ class ReceiveInvitation extends React.Component {
     {
       name: 'Accept Invite',
       onSelect: () => {
-        $modal.deactivateModalById(this.dialog.id);
         this.props.onSelectChoice({
           answer: InvitationResponse.accept,
           greetingName: this.state.greetingName,
           greetingMessage: this.state.greetingMessage,
         });
+        this.setState({
+          waitingForConfirmation: true,
+        });
+
+        this.props.dialog.actions = [];
+        $modal.invalidate();
       },
       disabled: true,
       style: { marginLeft: 16 },
     },
   ];
-
-  componentDidMount() {
-    this.setupPersonalName();
-  }
 
   setupDialog = (dialog) => {
     dialog.actions = [
@@ -138,32 +165,60 @@ class ReceiveInvitation extends React.Component {
     }, 3);
   };
 
-  setupPersonalName = () => {
-    const { ownName } = this.props;
+  /**
+   * @param {ContactCreatorStats} stats
+   * @return {string}
+   */
+  getGreetingName = (stats) => {
+    if (!stats) {
+      return '';
+    }
 
-    let replyingAccount = Accounts.findAccountByPublicName({
-      publicName: ownName,
+    let replyingAccount = Accounts.findAccountById({
+      id: stats.localAccountId,
     });
 
-    console.log('=> replyingAccount:', replyingAccount);
-
-    if (replyingAccount === null) {
-      this.setState({ greetingName: ownName });
+    if (replyingAccount.publicName) {
+      return replyingAccount.publicName;
     }
     else {
-      this.setState({ greetingName: replyingAccount.personalName });
+      return replyingAccount.personalName;
     }
   };
 
   render() {
-    const { greetingName, greetingMessage } = this.state;
-    const { source, ownName, pubKey, pemKey } = this.props;
+    if (!this.state.contactStats) {
+      return 'Invitation no longer valid.';
+    }
+
+    /** @type ContactCreatorStats */
+    const stats = this.state.contactStats;
+    const {
+      greetingName, greetingMessage, waitingForConfirmation,
+    } = this.state;
     const darkMode = Settings.isDarkModeEnabled();
+
+    const {
+      localPublicName,
+      contactGreetingName,
+      contactPubKey,
+      contactPemKey,
+    } = stats;
+
+    if (this.state.waitingForConfirmation) {
+      return (
+        <RsvpResponseList
+          key={`RsvpResponseList-${this.props.creatorId}`}
+          overrideLoaderMessage={'Waiting for confirmation...'}
+          invitationIds={[ stats.id ]}
+        />
+      );
+    }
 
     return (
       <div>
         You have received a contact invite from someone claiming to be
-        "{source}". This request was sent to "{ownName}".
+        "{contactGreetingName}". This request was sent to "{localPublicName}".
         <br/><br/>
         If you are not expecting an invitation, it is highly advisable you
         decline this request. Only accept contacts you trust; they can resend
@@ -179,7 +234,8 @@ class ReceiveInvitation extends React.Component {
                 <div>
                   The name displayed if you accept their invite.
                   <br/><br/>
-                  Names and greetings are not shown to the other person if you
+                  Names and greetings are not shown to the other person if
+                  you
                   reject, block, or postpone the invite.
                 </div>
               }
@@ -192,7 +248,13 @@ class ReceiveInvitation extends React.Component {
 
             <NxField
               label="Greeting shown if you accept"
-              autoFocus
+              help={
+                <div>
+                  Message to send back before confirming adding as contact.
+                  <br/>
+                  <b>Note:</b> Greetings are not encrypted.
+                </div>
+              }
               value={greetingMessage}
               onChange={(event) => {
                 this.setState({ greetingMessage: event.target.value });
@@ -200,7 +262,7 @@ class ReceiveInvitation extends React.Component {
             />
           </Form>
         </Segment>
-        <RsaPreview pubKey={pubKey} pemKey={pemKey}/>
+        <RsaPreview pubKey={contactPubKey} pemKey={contactPemKey}/>
       </div>
     );
   }
