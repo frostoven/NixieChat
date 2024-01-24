@@ -2,7 +2,6 @@
 //  Client bundle                                                            //
 // ========================================================================= //
 
-const webpack = require('webpack');
 const { clearInterval } = require('node:timers');
 const exec = require('child_process').exec;
 
@@ -100,7 +99,7 @@ module.exports = {
         let lastBuildEnd = Infinity;
         let buildCount = 0;
 
-        compiler.hooks.watchRun.tap('NixieRebuildNoticePlugin', (compilation) => {
+        compiler.hooks.watchRun.tap('NixieRebuildNoticePlugin', (_compilation) => {
           buildInProgress = true;
           lastBuildStart = Date.now();
           const timer = setInterval(() => {
@@ -119,7 +118,7 @@ module.exports = {
         });
 
         // AfterEmitPlugin
-        compiler.hooks.afterEmit.tap('NixieUpdateTitlePlugin', (compilation) => {
+        compiler.hooks.afterEmit.tap('NixieUpdateTitlePlugin', (_compilation) => {
           buildInProgress = false;
           const date = new Date();
           let hh = date.getHours();
@@ -130,7 +129,7 @@ module.exports = {
           mm < 10 && (mm = '0' + mm);
           ss < 10 && (ss = '0' + ss);
 
-          // Wait a little so the update doesn't seem glitchy when rapid.1
+          // Wait a little so the update doesn't seem glitchy when rapid.
           setTimeout(() => {
             const timer = setInterval(() => {
               if (Date.now() - lastBuildEnd < 5000) {

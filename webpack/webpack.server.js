@@ -2,8 +2,6 @@
 //  Server bundle                                                            //
 // ========================================================================= //
 
-const webpack = require('webpack');
-const exec = require('child_process').exec;
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
@@ -11,7 +9,7 @@ module.exports = {
   target: 'node',
   node: {
     // Webpack has the power to change what __dirname means. We don't want that
-    // server-server.
+    // server-side.
     __dirname: false,
   },
 
