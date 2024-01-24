@@ -9,7 +9,7 @@ const KeyStrengthFriendly = {
 
 const KeyStrength = {
   // messagingModGroup: 'modp17',
-  messagingModGroup: 'modp14',
+  messagingModGroup: 'modp16',
 };
 
 module.exports = {

@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2019",
+    "noImplicitAny": false,
+    "moduleResolution": "bundler",
+    "outDir": "lib",
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "checkJs": false,
+    "inlineSourceMap": true,
+    "incremental": true,
+    "jsx": "react"
+  },
+  "rules": {
+    "semicolon": [
+      true,
+      "always"
+    ]
+  },
+  "include": [
+    "client/**/*",
+    "server/**/*"
+  ]
+}

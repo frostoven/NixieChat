@@ -1,5 +1,8 @@
+// ========================================================================= //
+//  Client bundle                                                            //
+// ========================================================================= //
+
 const webpack = require('webpack');
-// const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const { clearInterval } = require('node:timers');
 const exec = require('child_process').exec;
 
@@ -19,7 +22,7 @@ module.exports = {
   },
 
   output: {
-    path: __dirname + '/client/.build',
+    path: __dirname + '/../client/.build',
     publicPath: 'client/.build/',
     filename: '[name].js',
   },
@@ -27,12 +30,21 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js?$/,
+        test: /\.(js|ts|tsx)?$/,
         loader: 'babel-loader',
         options: {
           // Reduces output by around 1MB at the time of writing.
           comments: process.env.NODE_ENV !== 'production',
-          presets: [ '@babel/preset-react' ],
+          presets: [
+            [
+              '@babel/preset-typescript',
+              {
+                'isTSX': true,
+                'allExtensions': true,
+              },
+            ],
+            [ '@babel/preset-react' ],
+          ],
           plugins: [
             // New features:
             '@babel/plugin-proposal-optional-chaining',
