@@ -15,7 +15,7 @@ class Settings {
     cache.darkModeEnabled = value;
     await storage.writeSettings(cache);
     if (updateUi) {
-      clientEmitter.emit(clientEmitterAction.hardReloadApp);
+      clientEmitter.emit(clientEmitterAction.reloadApp);
     }
   }
 
@@ -25,7 +25,7 @@ class Settings {
     cache.darkModeEnabled = !darkMode;
     await storage.writeSettings(storage.settingsCache);
     if (updateUi) {
-      clientEmitter.emit(clientEmitterAction.hardReloadApp);
+      clientEmitter.emit(clientEmitterAction.reloadApp);
     }
   }
 }

@@ -86,7 +86,7 @@ class AccountCreator extends React.Component {
         setTimeout(() => {
           // The timeout is just so things don't move too fast and look like a
           // glitch fest.
-          clientEmitter.emit(clientEmitterAction.softReloadApp);
+          clientEmitter.emit(clientEmitterAction.reloadStorage);
         }, 250);
       });
 

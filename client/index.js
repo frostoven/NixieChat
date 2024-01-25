@@ -6,8 +6,6 @@ import { NixieStorage } from './storage/NixieStorage';
 import { AccountsScreen } from './components/AccountsScreen';
 import { MainSection } from './components/MainSection';
 import { clientEmitterAction } from './emitters/clientEmitterAction';
-import { RemoteCrypto } from './api/RemoteCrypto';
-import { RemotePlaintext } from './api/RemotePlaintext';
 
 /**
  * TODO list:
@@ -55,30 +53,13 @@ class RootNode extends React.Component {
   }
 
   componentDidMount() {
-    clientEmitter.on(clientEmitterAction.softReloadApp, async () => {
-      await this.refreshStorage();
+    clientEmitter.on(clientEmitterAction.reloadApp, async () => {
+      this.setState({
+        loggedIn: !!this.storage.lastActiveAccount,
+        booting: false,
+      });
     });
-
-    clientEmitter.on(clientEmitterAction.hardReloadApp, async () => {
-      await this.refreshStorage();
-      this.forceUpdate();
-    });
-
-    this.refreshStorage().catch(console.error);
   }
-
-  refreshStorage = async () => {
-    await this.storage.initStorage();
-    const accounts = await this.storage.buildAccountCollectionCache();
-    this.setState({
-      loggedIn: !!this.storage.lastActiveAccount,
-      booting: false,
-    });
-  };
-
-  setupServerListeners = () => {
-    //
-  };
 
   render() {
     const { booting, loggedIn } = this.state;

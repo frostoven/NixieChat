@@ -52,7 +52,6 @@ class RemoteCrypto {
       const {
         accountName, publicName, privateKey, publicKey, modulusHash,
       } = accounts[i];
-      console.log(`-> Account "${accountName}" info:`, accounts[i]);
       if (publicName) {
         userRooms.push({
           pubName: publicName,

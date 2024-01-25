@@ -89,7 +89,7 @@ class Accounts {
       overwrite,
     });
     if (updateUi) {
-      clientEmitter.emit(clientEmitterAction.hardReloadApp);
+      clientEmitter.emit(clientEmitterAction.reloadApp);
     }
   }
 }
