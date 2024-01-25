@@ -1,11 +1,11 @@
 import { Socket } from 'socket.io';
 
-interface listenerResponse {
+interface SocketEventParameters {
   socket: Socket,
   options?: { [key: string]: any },
   callback?: Function,
 }
 
 export {
-  listenerResponse,
+  SocketEventParameters,
 }

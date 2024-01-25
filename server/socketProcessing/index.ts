@@ -5,7 +5,7 @@ import { Emitter } from '@socket.io/postgres-emitter';
 import { sharedConfig } from '../../shared/config';
 import { CryptoMessageType } from '../../shared/CryptoMessageType';
 import { AssertReject } from '../../shared/AssertReject';
-import { listenerResponse } from './types/listenerResponse';
+import { SocketEventParameters } from './types/SocketEventParameters';
 
 const nop = () => {
 };
@@ -59,7 +59,7 @@ function bootServer(clusterEmitter: Emitter) {
      * @param {Object} payload
      * @param {Socket} payload.socket
      */
-    ({ socket }: listenerResponse) => {
+    ({ socket }: SocketEventParameters) => {
       return sendMessageToClient({
         message: 'Received.', socket: socket.id,
       });
@@ -72,7 +72,7 @@ function bootServer(clusterEmitter: Emitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop }: listenerResponse) => {
+    ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.makeDiscoverable++;
       if (!options) {
         return callback({ error: '[makeDiscoverable] Malformed options.' });
@@ -117,7 +117,7 @@ function bootServer(clusterEmitter: Emitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop }: listenerResponse) => {
+    ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.sendInvitation++;
       if (!options) {
         return callback({ error: '[sendInvitation] Malformed options.' });
@@ -181,7 +181,7 @@ function bootServer(clusterEmitter: Emitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop }: listenerResponse) => {
+    ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.respondToInvite++;
       if (!options) {
         return callback({ error: '[respondToInvite] Malformed options.' });
@@ -209,7 +209,7 @@ function bootServer(clusterEmitter: Emitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop }: listenerResponse) => {
+    ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.sendDhPubKey++;
       if (!options) {
         return callback({ error: '[sendDhPubKey] Malformed options.' });
