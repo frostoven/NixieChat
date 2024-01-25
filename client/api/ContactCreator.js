@@ -14,6 +14,7 @@ import {
 import { logConfig } from '../config/logging';
 
 const verbose = logConfig.verboseHandshakeLogs;
+const oldestAllowedTime = 1700000000000;
 
 /**
  * Updates are sometimes sent out at sub-millisecond speed. Where UI updates
@@ -687,6 +688,11 @@ class ContactCreator {
       return;
     }
 
+    if (time < oldestAllowedTime) {
+      this.error = 'Sender\'s time is very wrong.';
+      return console.error(this.error);
+    }
+
     this.isOutbound = false;
     this._dhPrepStatusMessage = 'Awaiting the sender\'s public key...';
 
@@ -826,7 +832,7 @@ class ContactCreator {
     this.inviteResponseReceived = true;
     const time = this.time;
 
-    if (isNaN(time) || !time) {
+    if (isNaN(time) || !time || time < oldestAllowedTime) {
       this.error = 'System time appears to be invalid.';
       console.error('[ContactCreator] Invalid time:', time);
       $modal.alert({
