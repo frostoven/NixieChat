@@ -1,13 +1,11 @@
-const { socketEvent } = require('../controllers/websocket.controller');
-const { Socket } = require('socket.io');
-const {
-  sendMessageToClient,
-} = require('./outboundMessages');
-const { MessageVersion } = require('../../shared/MessageVersion');
-const { Emitter } = require('@socket.io/postgres-emitter');
-const { sharedConfig } = require('../../shared/config');
-const { CryptoMessageType } = require('../../shared/CryptoMessageType');
-const { AssertReject } = require('../../shared/AssertReject');
+import { socketEvent } from '../controllers/websocket.controller';
+import { sendMessageToClient } from './outboundMessages';
+import { MessageVersion } from '../../shared/MessageVersion';
+import { Emitter } from '@socket.io/postgres-emitter';
+import { sharedConfig } from '../../shared/config';
+import { CryptoMessageType } from '../../shared/CryptoMessageType';
+import { AssertReject } from '../../shared/AssertReject';
+import { listenerResponse } from './types/listenerResponse';
 
 const nop = () => {
 };
@@ -36,7 +34,9 @@ setInterval(() => {
 }, 60000);
 
 // Used to auto-gen error responses.
-const assertReject = new AssertReject((logTitle, failedCheck, onError) => {
+const assertReject = new AssertReject((
+  logTitle: string, failedCheck: string, onError: Function,
+) => {
   if (runtimeStats.usageErrors[logTitle]) {
     runtimeStats.usageErrors[logTitle]++;
   }
@@ -53,13 +53,13 @@ const assertReject = new AssertReject((logTitle, failedCheck, onError) => {
 /**
  * @param {Emitter} clusterEmitter
  */
-function bootServer(clusterEmitter) {
+function bootServer(clusterEmitter: Emitter) {
   socketEvent.ping.addListener(
     /**
      * @param {Object} payload
      * @param {Socket} payload.socket
      */
-    ({ socket } = {}) => {
+    ({ socket }: listenerResponse) => {
       return sendMessageToClient({
         message: 'Received.', socket: socket.id,
       });
@@ -72,7 +72,7 @@ function bootServer(clusterEmitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop } = {}) => {
+    ({ socket, options = {}, callback = nop }: listenerResponse) => {
       runtimeStats.makeDiscoverable++;
       if (!options) {
         return callback({ error: '[makeDiscoverable] Malformed options.' });
@@ -94,7 +94,7 @@ function bootServer(clusterEmitter) {
         socket.data.pubNames = {};
       }
 
-      const rejected = [];
+      const rejected: number[] = [];
       for (let i = 0, len = userRooms.length; i < len; i++) {
         const pubName = userRooms[i].pubName;
 
@@ -117,7 +117,7 @@ function bootServer(clusterEmitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop } = {}) => {
+    ({ socket, options = {}, callback = nop }: listenerResponse) => {
       runtimeStats.sendInvitation++;
       if (!options) {
         return callback({ error: '[sendInvitation] Malformed options.' });
@@ -181,7 +181,7 @@ function bootServer(clusterEmitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop } = {}) => {
+    ({ socket, options = {}, callback = nop }: listenerResponse) => {
       runtimeStats.respondToInvite++;
       if (!options) {
         return callback({ error: '[respondToInvite] Malformed options.' });
@@ -209,7 +209,7 @@ function bootServer(clusterEmitter) {
      * @param {Object} payload.options
      * @param {Function} payload.callback
      */
-    ({ socket, options = {}, callback = nop } = {}) => {
+    ({ socket, options = {}, callback = nop }: listenerResponse) => {
       runtimeStats.sendDhPubKey++;
       if (!options) {
         return callback({ error: '[sendDhPubKey] Malformed options.' });
@@ -244,6 +244,6 @@ function bootServer(clusterEmitter) {
 
 // --- Exports --- //
 
-module.exports = {
+export {
   bootServer,
 };
