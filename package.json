@@ -1,7 +1,7 @@
 {
   "name": "nixiechat",
   "version": "0.1.0",
-  "main": "server/index.js",
+  "main": "server/index.ts",
   "license": "All rights reserved",
   "scripts": {
     "build-client-dev": "webpack --mode development --config webpack/webpack.client.js",
@@ -26,6 +26,7 @@
     "@babel/register": "7.16.0",
     "@babel/runtime": "7.23.4",
     "@react-spring/web": "9.7.3",
+    "@types/express": "4.17.21",
     "@types/jest": "29.5.2",
     "@types/node": "18.11.10",
     "@types/pg": "8.10.9",

@@ -33,7 +33,7 @@ module.exports = {
   devtool: process.env.NODE_ENV === 'production' ? false : 'source-map',
 
   entry: {
-    'server': './server/index.js',
+    'server': './server/index.ts',
   },
 
   output: {
