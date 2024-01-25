@@ -2,6 +2,7 @@ const _ = require('lodash');
 
 const { isObject, isNumber } = _;
 const isArray = Array.isArray;
+const isView = ArrayBuffer.isView;
 
 /**
  * Class that does runtime type and value checking. Used by the API endpoints.
@@ -114,7 +115,7 @@ class AssertReject {
   /**
    * @param {string} logTitle
    * @param {string|undefined} value
-   * @param {number|undefined} [minSize]
+   * @param {number|undefined} minSize
    * @param {function} onError
    * @return {boolean}
    */
@@ -129,6 +130,21 @@ class AssertReject {
     }
 
     return this.checkFailed(logTitle, `is not a valid number.`, onError);
+  }
+
+  /**
+   * @param {string} logTitle
+   * @param {string|undefined} value
+   * @param {number|undefined} maxSize
+   * @param {function} onError
+   * @return {boolean}
+   */
+  bufferSmallerThan(logTitle, value, maxSize, onError) {
+    if (isView(value) && value.length < maxSize) {
+      return true;
+    }
+
+    return this.checkFailed(logTitle, 'is not an appropriate buffer.', onError);
   }
 }
 

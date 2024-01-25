@@ -12,6 +12,7 @@ const {
   maxConcurrentAccounts,
   minPubNameLength,
   maxPubNameLength,
+  maxPubKeyLength,
 } = sharedConfig;
 
 const nop = () => {
@@ -119,7 +120,7 @@ function bootServer(clusterEmitter: Emitter) {
       }
 
       const rejected: number[] = [];
-      const len = Math.min(userRooms.length, userRooms.length);
+      const len = Math.min(userRooms.length, maxConcurrentAccounts);
       for (let i = 0; i < len; i++) {
         const pubName = userRooms[i].pubName;
 
@@ -185,6 +186,13 @@ function bootServer(clusterEmitter: Emitter) {
       // maxPubNameLength.
       if (!assertReject.stringOrNull(
         '[sendInvitation] "greetingName"', greetingName, maxPubNameLength, callback,
+      )) {
+        return;
+      }
+
+      // Requirement: 'pubKey' must be a buffer view of reasonable size.
+      if (!assertReject.bufferSmallerThan(
+        '[sendInvitation] "pubKey"', pubKey, maxPubKeyLength, callback,
       )) {
         return;
       }

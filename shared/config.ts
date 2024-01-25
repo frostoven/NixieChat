@@ -4,6 +4,7 @@ const sharedConfig = Object.freeze({
   maxConcurrentAccounts: 12,
   minPubNameLength: 5,
   maxPubNameLength: 36,
+  maxPubKeyLength: 10240 / 8,
 });
 
 export {
