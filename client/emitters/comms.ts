@@ -23,12 +23,18 @@ serverEmitter.on('connect', async () => {
   await refreshStorage();
   RemoteCrypto.initApiListeners();
 
+  clientEmitter.emit(clientEmitterAction.clientReconnected);
   if (!reconnectionCount++) {
     console.log('Connected to server.');
   }
   else {
     console.log('Reconnected to server.');
   }
+});
+
+serverEmitter.on('disconnect', () => {
+  console.log('Disconnected from server...');
+  clientEmitter.emit(clientEmitterAction.clientDisconnected);
 });
 
 export {

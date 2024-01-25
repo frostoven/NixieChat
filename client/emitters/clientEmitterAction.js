@@ -3,6 +3,10 @@ let _autoCounter = 0;
 const clientEmitterAction = {
   // Exists only so that we can write things like "if (!validAction)".
   nop: _autoCounter++,
+  // Reconnected to server.
+  clientReconnected: _autoCounter++,
+  // Disconnected from server.
+  clientDisconnected: _autoCounter++,
   reloadStorage: _autoCounter++,
   reloadApp: _autoCounter++,
   // Action indicating that some ContactCreator instance has had significant
