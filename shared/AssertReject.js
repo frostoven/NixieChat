@@ -60,6 +60,36 @@ class AssertReject {
 
     return this.string(logTitle, value, maxLength, onError);
   }
+
+  /**
+   * @param {string} logTitle
+   * @param {string} value
+   * @param {function} onError
+   * @return {boolean}
+   */
+  nonEmptyString(logTitle, value, onError) {
+    if (typeof value === 'string' && value !== '') {
+      return true;
+    }
+
+    return this.checkFailed(logTitle, 'bad string.', onError);
+  }
+
+  /**
+   * Check if the specified value is an object. Returns false for null and
+   * arrays.
+   * @param {string} logTitle
+   * @param {object} value
+   * @param {function} onError
+   * @return {boolean}
+   */
+  nonNullObject(logTitle, value, onError) {
+    if (_.isObject(value) && !Array.isArray(value)) {
+      return true;
+    }
+
+    return this.checkFailed(logTitle, 'not a valid object.', onError);
+  }
 }
 
 module.exports = {
