@@ -70,15 +70,16 @@ class AssertReject {
   /**
    * @param {string} logTitle
    * @param {string} value
+   * @param {number} [maxLength] - 0 means "don't check".
    * @param {function} onError
    * @return {boolean}
    */
-  nonEmptyString(logTitle, value, onError) {
-    if (typeof value === 'string' && value !== '') {
-      return true;
+  nonEmptyString(logTitle, value, maxLength, onError) {
+    if (value === '') {
+      return this.checkFailed(logTitle, 'is empty.', onError);
     }
 
-    return this.checkFailed(logTitle, 'is a bad string.', onError);
+    return this.string(logTitle, value, maxLength, onError);
   }
 
   /**
@@ -119,7 +120,7 @@ class AssertReject {
    * @param {function} onError
    * @return {boolean}
    */
-  numberGreaterThan(logTitle, value, minSize = -Infinity, onError) {
+  numberLessThan(logTitle, value, minSize = -Infinity, onError) {
     if (isNumber(value)) {
       if (value < minSize) {
         return this.checkFailed(logTitle, `is too small.`, onError);
@@ -127,6 +128,21 @@ class AssertReject {
       else {
         return true;
       }
+    }
+
+    return this.checkFailed(logTitle, `is not a valid number.`, onError);
+  }
+
+  /**
+   * Any number except NaN (which is a number by technical definition).
+   * @param {string} logTitle
+   * @param {string|undefined} value
+   * @param {function} onError
+   * @return {boolean}
+   */
+  anyNumber(logTitle, value, onError) {
+    if (_.isNumber(value) && !isNaN(value)) {
+      return true;
     }
 
     return this.checkFailed(logTitle, `is not a valid number.`, onError);
