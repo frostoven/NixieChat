@@ -26,6 +26,12 @@ module.exports = {
     minimize: false,
   },
 
+  // Note: Leaving devtool undefined causes eval statements to show up in the
+  // bundle. As far as I can tell, JS engines cannot optimize for eval
+  // statements, so we explicitly set it to false to prevent evals from being
+  // generated in prod.
+  devtool: process.env.NODE_ENV === 'production' ? false : 'source-map',
+
   entry: {
     'server': './server/index.js',
   },

@@ -8,13 +8,18 @@ const exec = require('child_process').exec;
 module.exports = {
   watch: process.env.NODE_ENV !== 'production',
   target: 'web',
-  devtool: 'source-map',
 
   // This drastically increases bundle size. The reason we do this is so that
   // people can easily inspect our source to look for malicious intent.
   optimization: {
     minimize: false,
   },
+
+  // Note: Leaving devtool undefined causes eval statements to show up in the
+  // bundle. As far as I can tell, JS engines cannot optimize for eval
+  // statements, so we explicitly set it to false to prevent evals from being
+  // generated in prod.
+  devtool: process.env.NODE_ENV === 'production' ? false : 'source-map',
 
   entry: {
     'NixieChat-v0': './client/index.js',
