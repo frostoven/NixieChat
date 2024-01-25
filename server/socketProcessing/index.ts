@@ -7,6 +7,8 @@ import { CryptoMessageType } from '../../shared/CryptoMessageType';
 import { AssertReject } from '../../shared/AssertReject';
 import { SocketEventParameters } from './types/SocketEventParameters';
 
+const { greetingLimit, greetingNameLimit } = sharedConfig;
+
 const nop = () => {
 };
 
@@ -119,30 +121,56 @@ function bootServer(clusterEmitter: Emitter) {
      */
     ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.sendInvitation++;
-      if (!options) {
-        return callback({ error: '[sendInvitation] Malformed options.' });
-      }
 
-      console.log(`=> socket.id: ${socket.id}`);
-      const {
-        source, target, greeting, greetingName, pubKey, time, v,
-      } = options;
-      console.log(`[sendInvitation] socket.id: ${socket.id}, v: ${v}, source: ${source}, target: ${target}`);
-
-      if (v !== MessageVersion.sendInvitationV1 || !source || !target) {
-        callback({ error: '[sendInvitation] Unsupported options or version.' });
-        return;
-      }
-
-      // Requirement: Must be string or null, no larger than greetingLimit.
-      if (!assertReject.stringOrNull(
-        '[sendInvitation] "greeting"', greeting, sharedConfig.greetingLimit,
-        callback,
+      // Requirement: 'options' must be non-null object. Arrays disallowed.
+      if (!assertReject.nonNullObject(
+        '[sendInvitation] "options"', options, callback,
       )) {
         return;
       }
 
-      // TODO: check greeting limits
+      const {
+        source, target, greeting, greetingName, pubKey, time, v,
+      } = options;
+
+      if (v !== MessageVersion.sendInvitationV1) {
+        callback({ error: '[sendInvitation] Unsupported version.' });
+        return;
+      }
+
+      // Requirement: 'source' must be string. Cannot be empty.
+      if (!assertReject.nonEmptyString('[sendInvitation] "source"', source, callback)) {
+        return;
+      }
+
+      // Requirement: 'target' must be string. Cannot be empty.
+      if (!assertReject.nonEmptyString('[sendInvitation] "target"', target, callback)) {
+        return;
+      }
+
+      // Requirement: 'greeting' must be string or null, and no larger than
+      // greetingLimit.
+      if (!assertReject.stringOrNull(
+        '[sendInvitation] "greeting"', greeting, greetingLimit, callback,
+      )) {
+        return;
+      }
+
+      // Requirement: 'greetingName' must be string or null, and no larger than
+      // greetingNameLimit.
+      if (!assertReject.stringOrNull(
+        '[sendInvitation] "greetingName"', greetingName, greetingNameLimit, callback,
+      )) {
+        return;
+      }
+
+      // Requirement: 'time' must be number representing a date after November
+      // 2023.
+      if (!assertReject.numberGreaterThan(
+        '[sendInvitation] "time"', time, 1700000000000, callback,
+      )) {
+        return;
+      }
 
       // It's important to know how we use socket.id because we actually use
       // it for many different things simultaneously. Socket.io automatically
