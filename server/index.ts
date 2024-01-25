@@ -16,7 +16,9 @@ if (process.env.NODE_ENV === 'development') {
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  serveClient: false,
+});
 
 // Potentially increase socket amount:
 // * https://stackoverflow.com/questions/15872788/maximum-concurrent-socket-io-connections
