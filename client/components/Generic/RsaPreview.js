@@ -123,7 +123,7 @@ class RsaPreview extends React.Component {
             onClick={this.toggleAdvancedInfo}
           >
             <Icon name="dropdown"/>
-            Advanced Info
+            View Digital Signature
           </Accordion.Title>
           <Accordion.Content active={showAdvancedInfo} style={contentStyle}>
             The prospective contact's RSA-4096 digital signature is as

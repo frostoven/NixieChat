@@ -3,9 +3,17 @@
  *
  * Directly based on the gist by deiu:
  * https://gist.github.com/deiu/2c3208c89fbc91d23226
+ *
+ * It has since been modified.
  */
 
-/** */
+// This is a big int. 1,0,1 translates to 65537, or 00000001 00000000 00000001.
+// See:
+// * https://crypto.stackexchange.com/questions/3110/impacts-of-not-using-rsa-exponent-of-65537
+// * https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/generateKey
+// * https://stackoverflow.com/questions/51168408/how-can-i-use-publicexponent-as-65537-in-rsa-oaep-algorithm-in-javascript
+const exponent65537 = new Uint8Array([ 1, 0, 1 ]);
+
 function generateKey(alg, scope) {
   return new Promise(function(resolve) {
     var genkey = crypto.subtle.generateKey(alg, true, scope);
@@ -186,19 +194,21 @@ function decryptData(vector, key, data) {
 }
 
 const rsaSignAlgorithm = {
-  name: 'RSASSA-PKCS1-v1_5',
+  // name: 'RSASSA-PKCS1-v1_5',
+  name: 'RSA-PSS',
+  // name: 'RSASSA-PSS',
   hash: {
     name: 'SHA-384',
   },
   modulusLength: 4096,
   extractable: true,
-  publicExponent: new Uint8Array([ 1, 0, 1 ]),
+  publicExponent: exponent65537,
 };
 
 const rsaEncryptAlgorithm = {
   name: 'RSA-OAEP',
   modulusLength: 4096,
-  publicExponent: new Uint8Array([ 1, 0, 1 ]),
+  publicExponent: exponent65537,
   extractable: true,
   hash: {
     name: 'SHA-384',
@@ -212,13 +222,13 @@ const rsaEncryptAlgorithm = {
 //   },
 //   modulusLength: 2048,
 //   extractable: false,
-//   publicExponent: new Uint8Array([ 1, 0, 1 ]),
+//   publicExponent: exponent65537,
 // };
 //
 // const rsaEncryptAlgorithm = {
 //   name: 'RSA-OAEP',
 //   modulusLength: 2048,
-//   publicExponent: new Uint8Array([ 1, 0, 1 ]),
+//   publicExponent: exponent65537,
 //   extractable: false,
 //   hash: {
 //     name: 'SHA-256',
