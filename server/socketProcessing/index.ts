@@ -7,7 +7,12 @@ import { CryptoMessageType } from '../../shared/CryptoMessageType';
 import { AssertReject } from '../../shared/AssertReject';
 import { SocketEventParameters } from './types/SocketEventParameters';
 
-const { greetingLimit, greetingNameLimit } = sharedConfig;
+const {
+  greetingLimit,
+  maxConcurrentAccounts,
+  minPubNameLength,
+  maxPubNameLength,
+} = sharedConfig;
 
 const nop = () => {
 };
@@ -56,6 +61,19 @@ const assertReject = new AssertReject((
  * @param {Emitter} clusterEmitter
  */
 function bootServer(clusterEmitter: Emitter) {
+  // Note on runtime type checks: We do type checking where not doing so can
+  // harm the server or its performance. For example, if a script kiddie sends
+  // us '{ object: null }' but we expect '{ object: {} }', then the server will
+  // crash when we try to access 'object'. While we do automatically restart
+  // crashed instances, it nonetheless drastically hurts performance doing so.
+  //
+  // For cases where bad values can harm the client but not the server (such as
+  // just passing values through), the server should not care. The client
+  // should do its own checks for the values it cares about. In reality, we
+  // tend to check most everything anyway because we don't for example want to
+  // waste bandwidth forwarding a 2MB name string just for the client to reject
+  // it for being too large.
+
   socketEvent.ping.addListener(
     /**
      * @param {Object} payload
@@ -76,31 +94,40 @@ function bootServer(clusterEmitter: Emitter) {
      */
     ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.makeDiscoverable++;
-      if (!options) {
-        return callback({ error: '[makeDiscoverable] Malformed options.' });
+
+      // Requirement: 'options' must be non-null object. Arrays disallowed.
+      if (!assertReject.nonNullObject(
+        '[makeDiscoverable] "options"', options, callback,
+      )) {
+        return;
       }
 
       const { userRooms, v } = options;
-      console.log(`[makeDiscoverable] socket.id: ${socket.id}, v: ${v}, userRooms:`, userRooms);
-      if (
-        v !== MessageVersion.messageExchangeV1 ||
-        !Array.isArray(userRooms)
-      ) {
+
+      if (v !== MessageVersion.messageExchangeV1) {
         callback({
-          error: '[makeDiscoverable] Unsupported options or version.',
+          error: '[makeDiscoverable] Unsupported version.',
         });
         return;
       }
 
-      if (!socket.data.pubNames) {
-        socket.data.pubNames = {};
+      // Requirement: 'userRooms' must be and array and must contain items.
+      if (!assertReject.nonEmptyArray(
+        '[makeDiscoverable] "userRooms"', userRooms, callback,
+      )) {
+        return;
       }
 
       const rejected: number[] = [];
-      for (let i = 0, len = userRooms.length; i < len; i++) {
+      const len = Math.min(userRooms.length, userRooms.length);
+      for (let i = 0; i < len; i++) {
         const pubName = userRooms[i].pubName;
 
-        if (typeof pubName !== 'string' || pubName.length < 5 || pubName.length > 36) {
+        if (
+          typeof pubName !== 'string' ||
+          pubName.length < minPubNameLength ||
+          pubName.length > maxPubNameLength
+        ) {
           rejected.push(i);
           continue;
         }
@@ -109,7 +136,7 @@ function bootServer(clusterEmitter: Emitter) {
         socket.join(pubName);
       }
 
-      callback({ rejected });
+      callback({ rejected, ignored: userRooms.length - len });
     });
 
   socketEvent.sendInvitation.addListener(
@@ -123,9 +150,7 @@ function bootServer(clusterEmitter: Emitter) {
       runtimeStats.sendInvitation++;
 
       // Requirement: 'options' must be non-null object. Arrays disallowed.
-      if (!assertReject.nonNullObject(
-        '[sendInvitation] "options"', options, callback,
-      )) {
+      if (!assertReject.nonNullObject('[sendInvitation] "options"', options, callback)) {
         return;
       }
 
@@ -157,9 +182,9 @@ function bootServer(clusterEmitter: Emitter) {
       }
 
       // Requirement: 'greetingName' must be string or null, and no larger than
-      // greetingNameLimit.
+      // maxPubNameLength.
       if (!assertReject.stringOrNull(
-        '[sendInvitation] "greetingName"', greetingName, greetingNameLimit, callback,
+        '[sendInvitation] "greetingName"', greetingName, maxPubNameLength, callback,
       )) {
         return;
       }
