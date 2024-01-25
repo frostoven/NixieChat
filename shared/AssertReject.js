@@ -90,6 +90,26 @@ class AssertReject {
 
     return this.checkFailed(logTitle, 'not a valid object.', onError);
   }
+
+  /**
+   * @param {string} logTitle
+   * @param {string|undefined} value
+   * @param {number|undefined} [minSize]
+   * @param {function} onError
+   * @return {boolean}
+   */
+  numberGreaterThan(logTitle, value, minSize = -Infinity, onError) {
+    if (_.isNumber(value)) {
+      if (value < minSize) {
+        return this.checkFailed(logTitle, `too small.`, onError);
+      }
+      else {
+        return true;
+      }
+    }
+
+    return this.checkFailed(logTitle, `is not a valid number.`, onError);
+  }
 }
 
 module.exports = {
