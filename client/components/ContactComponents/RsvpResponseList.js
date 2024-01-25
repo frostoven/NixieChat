@@ -129,6 +129,7 @@ class RsvpResponseList extends React.Component {
 
       const {
         id,
+        error,
         time,
         rsvpAnswer,
         initiatorName,
@@ -193,7 +194,10 @@ class RsvpResponseList extends React.Component {
       // always send a response. For example, we don't respond when blocking a
       // contact, because that would immediately tell the sender that the
       // person blocking them is online, which is a privacy issue.
-      if (rsvpAnswer === accept) {
+      if (error) {
+        rightSide.push(error);
+      }
+      else if (rsvpAnswer === accept) {
         // An 8-char password with an (at-most) 14 color visual is something
         // of a joke compared to the actual massive text glob that DH
         // produces, but hey, any more complex than that and the layman just

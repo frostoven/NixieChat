@@ -54,9 +54,6 @@ const MIN_UI_TRANSITION_MS = 250;
  * * For UI stuff, use only the getStats() function and nothing else. It's
  *   React-friendly and assumes that we don't care about referencing different
  *   stages out of order.
- * * Please do not listen for client or server emitters from this class. You
- *   may emit client events from here, so long as they're not required for
- *   normal functioning (i.e. status updates are allowed).
  */
 class ContactCreator {
 
@@ -549,6 +546,13 @@ class ContactCreator {
       console.error(this.error);
     }
     else {
+      clientEmitter.on(
+        clientEmitterAction.clientDisconnected, this.handleClientReconnected,
+      );
+      clientEmitter.on(
+        clientEmitterAction.clientReconnected, this.handleClientReconnected,
+      );
+
       this.localAccountId = localAccountId;
       this.contactPublicName = contactPublicName;
       this.localSocketId = localSocketId;
@@ -573,6 +577,12 @@ class ContactCreator {
   logRoError(varName) {
     this.error = `${varName} may only be set once.`;
     console.error(`[ContactCreator] ${this.error}`);
+  }
+
+  handleClientReconnected = () => {
+    this.error = 'Connection lost; please try again.';
+    console.error('[ContactCreator] State broken due to connection reset.');
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
   }
 
   /**
@@ -949,6 +959,13 @@ class ContactCreator {
     verbose && console.log(
       `DH shared secret generated. Full password:`,
       uint8ArrayToHexString(aliceSecret),
+    );
+
+    clientEmitter.removeListener(
+      clientEmitterAction.clientReconnected, this.handleClientReconnected,
+    );
+    clientEmitter.removeListener(
+      clientEmitterAction.clientDisconnected, this.handleClientReconnected,
     );
   }
 }
