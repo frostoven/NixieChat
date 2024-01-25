@@ -1,5 +1,8 @@
 const _ = require('lodash');
 
+const { isObject, isNumber } = _;
+const isArray = Array.isArray;
+
 /**
  * Class that does runtime type and value checking. Used by the API endpoints.
  * All functions return boolean values: True if the test passed, false if it
@@ -40,7 +43,9 @@ class AssertReject {
     }
 
     if (maxLength && value.length > maxLength) {
-      return this.checkFailed(logTitle, `larger than ${maxLength} characters.`, onError);
+      return this.checkFailed(
+        logTitle, `is larger than ${maxLength} characters.`, onError,
+      );
     }
 
     return true;
@@ -72,7 +77,7 @@ class AssertReject {
       return true;
     }
 
-    return this.checkFailed(logTitle, 'bad string.', onError);
+    return this.checkFailed(logTitle, 'is a bad string.', onError);
   }
 
   /**
@@ -84,11 +89,26 @@ class AssertReject {
    * @return {boolean}
    */
   nonNullObject(logTitle, value, onError) {
-    if (_.isObject(value) && !Array.isArray(value)) {
+    if (isObject(value) && !isArray(value)) {
       return true;
     }
 
-    return this.checkFailed(logTitle, 'not a valid object.', onError);
+    return this.checkFailed(logTitle, 'is not a valid object.', onError);
+  }
+
+  /**
+   * Check if the specified value is an array, and that it holds data.
+   * @param {string} logTitle
+   * @param {array} value
+   * @param {function} onError
+   * @return {boolean}
+   */
+  nonEmptyArray(logTitle, value, onError) {
+    if (isArray(value) && value.length !== 0) {
+      return true;
+    }
+
+    return this.checkFailed(logTitle, 'is not a populated array.', onError);
   }
 
   /**
@@ -99,9 +119,9 @@ class AssertReject {
    * @return {boolean}
    */
   numberGreaterThan(logTitle, value, minSize = -Infinity, onError) {
-    if (_.isNumber(value)) {
+    if (isNumber(value)) {
       if (value < minSize) {
-        return this.checkFailed(logTitle, `too small.`, onError);
+        return this.checkFailed(logTitle, `is too small.`, onError);
       }
       else {
         return true;
