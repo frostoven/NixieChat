@@ -69,11 +69,10 @@ function bootServer(clusterEmitter: Emitter) {
   // crashed instances, it nonetheless drastically hurts performance doing so.
   //
   // For cases where bad values can harm the client but not the server (such as
-  // just passing values through), the server should not care. The client
-  // should do its own checks for the values it cares about. In reality, we
-  // tend to check most everything anyway because we don't for example want to
-  // waste bandwidth forwarding a 2MB name string just for the client to reject
-  // it for being too large.
+  // passing bad values through), the server should not care. The client should
+  // do its own checks for the values it cares about. We do care about variable
+  // size abuse (for example sending a name of 2MB) but we manage that from the
+  // internet-facing web server rather than from Node.
 
   socketEvent.ping.addListener(
     /**
@@ -164,47 +163,6 @@ function bootServer(clusterEmitter: Emitter) {
         return;
       }
 
-      // Requirement: 'source' must be string. Cannot be empty.
-      if (!assertReject.nonEmptyString('[sendInvitation] "source"', source, callback)) {
-        return;
-      }
-
-      // Requirement: 'target' must be string. Cannot be empty.
-      if (!assertReject.nonEmptyString('[sendInvitation] "target"', target, callback)) {
-        return;
-      }
-
-      // Requirement: 'greeting' must be string or null, and no larger than
-      // greetingLimit.
-      if (!assertReject.stringOrNull(
-        '[sendInvitation] "greeting"', greeting, greetingLimit, callback,
-      )) {
-        return;
-      }
-
-      // Requirement: 'greetingName' must be string or null, and no larger than
-      // maxPubNameLength.
-      if (!assertReject.stringOrNull(
-        '[sendInvitation] "greetingName"', greetingName, maxPubNameLength, callback,
-      )) {
-        return;
-      }
-
-      // Requirement: 'pubKey' must be a buffer view of reasonable size.
-      if (!assertReject.bufferSmallerThan(
-        '[sendInvitation] "pubKey"', pubKey, maxPubKeyLength, callback,
-      )) {
-        return;
-      }
-
-      // Requirement: 'time' must be number representing a date after November
-      // 2023.
-      if (!assertReject.numberGreaterThan(
-        '[sendInvitation] "time"', time, 1700000000000, callback,
-      )) {
-        return;
-      }
-
       // It's important to know how we use socket.id because we actually use
       // it for many different things simultaneously. Socket.io automatically
       // creates a room for each id, meaning it's there and ready to use. We
@@ -244,14 +202,25 @@ function bootServer(clusterEmitter: Emitter) {
      */
     ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.respondToInvite++;
-      if (!options) {
-        return callback({ error: '[respondToInvite] Malformed options.' });
+
+      // Requirement: 'options' must be non-null object. Arrays disallowed.
+      if (!assertReject.nonNullObject(
+        '[respondToInvite] "options"', options, callback,
+      )) {
+        return;
       }
 
-      console.log('=> receiveInvitationResponse:', options);
       const {
         target, answer, ownName, greetingName, greetingMessage, pubKey,
       } = options;
+
+      // Requirement: 'target' must be string. Cannot be empty.
+      if (!assertReject.nonEmptyString(
+        '[sendInvitation] "target"', target, maxPubNameLength, callback,
+      )) {
+        return;
+      }
+
       clusterEmitter.to(target).emit(target, {
         answer,
         sourceId: target,
@@ -272,25 +241,20 @@ function bootServer(clusterEmitter: Emitter) {
      */
     ({ socket, options = {}, callback = nop }: SocketEventParameters) => {
       runtimeStats.sendDhPubKey++;
-      if (!options) {
-        return callback({ error: '[sendDhPubKey] Malformed options.' });
+
+      // Requirement: 'options' must be non-null object. Arrays disallowed.
+      if (!assertReject.nonNullObject(
+        '[respondToInvite] "options"', options, callback,
+      )) {
+        return;
       }
 
-      console.log('--> Server received sendDhPubKey. Options:', options);
       const { targetId, dhPubKey, needDhReply, modGroup } = options;
 
-      if (!targetId || typeof targetId !== 'string') {
-        callback({ error: '[sendDhPubKey] Invalid target.' });
-        return;
-      }
-
-      if (!dhPubKey) {
-        callback({ error: '[sendDhPubKey] Missing key.' });
-        return;
-      }
-
-      if (!modGroup) {
-        callback({ error: '[sendDhPubKey] Missing mod group.' });
+      // Requirement: 'target' must be string. Cannot be empty.
+      if (!assertReject.nonEmptyString(
+        '[sendDhPubKey] "targetId"', targetId, maxPubNameLength, callback,
+      )) {
         return;
       }
 
