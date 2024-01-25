@@ -32,6 +32,9 @@ class RemoteCrypto {
     // We've received a DH key from someone we're in the process of becoming
     // contacts with.
     serverEmitter.on(Socket.sendDhPubKey, RemoteCrypto.receiveDhPubKey);
+
+    // Allows us to be reached by other clients.
+    RemoteCrypto.makeDiscoverable();
   }
 
   // Makes you visible to the network so that you may receive invitations.

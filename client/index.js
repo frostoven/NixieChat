@@ -41,9 +41,6 @@ if (
   });
 }
 
-// Used to ensure the remote crypto API is initialised only once.
-let apiInitStarted = false;
-
 class RootNode extends React.Component {
   static defaultState = {
     booting: true,
@@ -70,20 +67,8 @@ class RootNode extends React.Component {
     this.refreshStorage().catch(console.error);
   }
 
-  async initApi() {
-    // TODO: move to its own component.
-    if (apiInitStarted) {
-      return;
-    }
-    apiInitStarted = true;
-    RemotePlaintext.initApiListeners();
-    RemoteCrypto.initApiListeners();
-    await RemoteCrypto.makeDiscoverable();
-  }
-
   refreshStorage = async () => {
     await this.storage.initStorage();
-    await this.initApi();
     const accounts = await this.storage.buildAccountCollectionCache();
     this.setState({
       loggedIn: !!this.storage.lastActiveAccount,
