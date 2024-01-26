@@ -1,13 +1,14 @@
-import './checkSecretsPermissions';
-
 import fs from 'fs';
 import { Pool } from 'pg';
 import { Server } from 'socket.io';
 import { createAdapter } from '@socket.io/postgres-adapter';
 import { Emitter } from '@socket.io/postgres-emitter';
 import { SecretsFile } from './types/SecretsFile';
+import { enforceSafePermissions } from '../dbUtils/checkSecretsPermissions';
 
 let emitter: Emitter;
+
+enforceSafePermissions('.secrets.json');
 
 async function initPgConnection(io: Server) {
   let secretsFile: SecretsFile = {
