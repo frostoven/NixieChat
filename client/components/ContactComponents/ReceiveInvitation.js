@@ -14,7 +14,7 @@ import { ContactCreator } from '../../api/ContactCreator';
 class ReceiveInvitation extends React.Component {
   static propTypes = {
     creatorId: PropTypes.string,
-    dialog: PropTypes.object.isRequired,
+    floatingForm: PropTypes.object.isRequired,
     onSelectChoice: PropTypes.func,
   };
 
@@ -32,8 +32,8 @@ class ReceiveInvitation extends React.Component {
 
   constructor(props) {
     super(props);
-    this.dialog = props.dialog;
-    this.setupDialog(props.dialog);
+    this.floatingForm = props.floatingForm;
+    this.setupDialog(props.floatingForm);
   }
 
   componentDidMount() {
@@ -74,7 +74,7 @@ class ReceiveInvitation extends React.Component {
             'not be informed that you have rejected their invite.',
         }, (confirmedBlock) => {
           if (confirmedBlock) {
-            $dialog.deactivateModalById(this.dialog.id);
+            $floatingForm.deactivateModalById(this.floatingForm.id);
             this.props.onSelectChoice({ answer: InvitationResponse.reject });
           }
         });
@@ -91,7 +91,7 @@ class ReceiveInvitation extends React.Component {
             'be informed that you have blocked them.',
         }, (confirmedBlock) => {
           if (confirmedBlock) {
-            $dialog.deactivateModalById(this.dialog.id);
+            $floatingForm.deactivateModalById(this.floatingForm.id);
             console.warn('TODO: block RSA key.');
             this.props.onSelectChoice({ answer: InvitationResponse.block });
           }
@@ -115,7 +115,7 @@ class ReceiveInvitation extends React.Component {
           ),
         }, (confirmedPostpone) => {
           if (confirmedPostpone) {
-            $dialog.deactivateModalById(this.dialog.id);
+            $floatingForm.deactivateModalById(this.floatingForm.id);
             this.props.onSelectChoice({ answer: InvitationResponse.postpone });
           }
         });
@@ -134,16 +134,16 @@ class ReceiveInvitation extends React.Component {
           waitingForConfirmation: true,
         });
 
-        this.props.dialog.actions = [];
-        $dialog.invalidate();
+        this.props.floatingForm.actions = [];
+        $floatingForm.invalidate();
       },
       disabled: true,
       style: { marginLeft: 16 },
     },
   ];
 
-  setupDialog = (dialog) => {
-    dialog.actions = [
+  setupDialog = (floatingForm) => {
+    floatingForm.actions = [
       ...this.actions,
       <Button key="invite" disabled
               style={{ position: 'absolute', left: 4 }}>
@@ -152,7 +152,7 @@ class ReceiveInvitation extends React.Component {
     ];
 
     // Force modal to recognize button changes.
-    $dialog.invalidate();
+    $floatingForm.invalidate();
 
     // Wait 3 seconds, then make the buttons clickable. We wait to ensure the
     // user doesn't accidentally click any buttons while using the app.
@@ -160,8 +160,8 @@ class ReceiveInvitation extends React.Component {
       this.actions.forEach((action) => {
         action.disabled = false;
       });
-      dialog.actions = this.actions;
-      $dialog.invalidate();
+      floatingForm.actions = this.actions;
+      $floatingForm.invalidate();
     }, 3);
   };
 
@@ -187,7 +187,6 @@ class ReceiveInvitation extends React.Component {
   };
 
   render() {
-    console.log('rendering ReceiveInvitation');
     if (!this.state.contactStats) {
       return 'Invitation no longer valid.';
     }

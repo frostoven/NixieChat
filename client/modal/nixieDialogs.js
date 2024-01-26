@@ -1,15 +1,30 @@
 import React from 'react';
 import { ContactFinder } from '../components/ContactComponents/ContactFinder';
-import { exportRsaPublicKey, importRsaPublicKey } from '../encryption/rsa';
 import {
   ReceiveInvitation,
 } from '../components/ContactComponents/ReceiveInvitation';
 
 function showAddContactDialog() {
-  $dialog.alert({
+  const contactAdder = $floatingForm.alert({
     header: 'Add contact',
     body: <ContactFinder/>,
     actions: [],
+
+    onDimmerClick: () => {
+      const confirmation = $dialog.confirm({
+        header: 'Finding Contacts',
+        body: 'Are you sure you want to cancel the invitation process?',
+        prioritise: true,
+      }, (proceed) => {
+        if (proceed) {
+          $dialog.deactivateModalById(confirmation.id);
+          $floatingForm.deactivateModalById(contactAdder.id);
+        }
+        else {
+          $dialog.deactivateModalById(confirmation.id);
+        }
+      });
+    },
   });
 }
 
@@ -18,23 +33,21 @@ function showAddContactDialog() {
  * @return {Promise}
  */
 async function showInvitationDialog(stats) {
-  const dialog = $dialog.alert({
+  const invite = $floatingForm.alert({
     header: 'Contact Invite',
     body: 'Loading invite...',
-    hideStackCounter: true,
   });
 
-  dialog.onDimmerClick = () => {
+  invite.onDimmerClick = () => {
     // Prevent accidentally closing invitations.
     const confirmation = $dialog.confirm({
       header: 'Invite',
       body: 'Are you sure you want to reject the invite?',
       prioritise: true,
-      hideStackCounter: true,
     }, (proceed) => {
       if (proceed) {
         $dialog.deactivateModalById(confirmation.id);
-        $dialog.deactivateModalById(dialog.id);
+        $floatingForm.deactivateModalById(invite.id);
       }
       else {
         $dialog.deactivateModalById(confirmation.id);
@@ -45,10 +58,10 @@ async function showInvitationDialog(stats) {
   return new Promise((resolve) => {
     // We create this after $dialog.alert() so that we can safely pass in the
     // dialog options object.
-    dialog.body = (
+    invite.body = (
       <ReceiveInvitation
         creatorId={stats.id}
-        dialog={dialog}
+        floatingForm={invite}
         onSelectChoice={(answer) => {
           resolve(answer);
         }}
@@ -56,7 +69,7 @@ async function showInvitationDialog(stats) {
     );
 
     // Force the dialog to recognise the body change.
-    $dialog.invalidate();
+    $floatingForm.invalidate();
   });
 }
 

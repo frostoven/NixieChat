@@ -76,7 +76,7 @@ class RsvpResponseList extends React.Component {
    * Used to check if anyone's responding at all.
    */
   softTimeoutTimer = null;
-  softTimeoutAmount = 5000;
+  softTimeoutAmount = 120000;
 
   // What text is shown in statuses and buttons depends on which contact it
   // belongs to (we have a dynamic list of them). Each button and status can
