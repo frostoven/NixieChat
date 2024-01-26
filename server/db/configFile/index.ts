@@ -3,6 +3,9 @@
 
 import fs from 'fs';
 import { ConfigFileFormat } from './types/ConfigFileFormat';
+import { enforceSafePermissions } from '../dbUtils/checkSecretsPermissions';
+
+enforceSafePermissions('.config.json');
 
 const configDefaults: ConfigFileFormat = {
   // Can be 'in-memory' or 'postgres'.
