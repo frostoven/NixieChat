@@ -10,12 +10,12 @@ import PropTypes from 'prop-types';
 
 /**
  * @typedef {{
- * id: string, header: (string|JSX.Element), body: (string|JSX.Element),
- * unskippable: (boolean|undefined), prioritise: (boolean|undefined),
- * tag: (string|undefined), hideStackCounter: (boolean|undefined),
- * deactivated: (boolean|undefined), inline: (boolean|undefined),
- * renderCustomDialog: (Function|undefined), actions: (array|JSX.Element),
- * onDimmerClick: (Function|undefined),
+ * id: (string|undefined), header: (string|JSX.Element|undefined),
+ * body: (string|JSX.Element|undefined), unskippable: (boolean|undefined),
+ * prioritise: (boolean|undefined), tag: (string|undefined),
+ * hideStackCounter: (boolean|undefined), deactivated: (boolean|undefined),
+ * inline: (boolean|undefined), renderCustomDialog: (Function|undefined),
+ * actions: (array|JSX.Element|undefined), onDimmerClick: (Function|undefined),
  * }} ModalOptions
  */
 
