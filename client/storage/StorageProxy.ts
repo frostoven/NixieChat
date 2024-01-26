@@ -1,12 +1,13 @@
 import { get as idbGet, set as idbSet, del as idbDel } from 'idb-keyval';
 
-let storageInstance = null;
+let storageInstance: StorageProxy | null = null;
 
-const StorageEngine = {
-  indexedDb: 'IndexedDb',
-};
+type StorageEngine = 'unknown' | 'IndexedDb';
 
 class StorageProxy {
+  readOnly!: boolean;
+  storageEngine!: StorageEngine;
+
   static getInstance() {
     return new StorageProxy();
   }
@@ -32,15 +33,15 @@ class StorageProxy {
     }
 
     this.readOnly = false;
-    this.setStorageEngine(StorageEngine.indexedDb).catch(console.error);
+    this.setStorageEngine('IndexedDb').catch(console.error);
   }
 
-  async setStorageEngine(engineName) {
+  async setStorageEngine(engineName: StorageEngine) {
     this.storageEngine = engineName;
-    if (engineName === StorageEngine.indexedDb) {
+    if (engineName === 'IndexedDb') {
       const indexedDbAllowed = await StorageProxy.testIndexedDbStorage();
       if (!indexedDbAllowed) {
-        return $dialog.alert(
+        return window.$dialog.alert(
           'Your browser has blocked local DB storage. NixieChat will not ' +
           'function properly, and account details will be lost on refresh.',
         );
@@ -48,11 +49,7 @@ class StorageProxy {
     }
   }
 
-  /**
-   * @param keyName
-   * @return {*}
-   */
-  async fetchItem(keyName) {
+  async fetchItem(keyName: any) {
     if (this.readOnly) {
       return console.warn('Not reading data - read-only flag set.');
     }
@@ -62,7 +59,8 @@ class StorageProxy {
     if (!reader) {
       this.readOnly = true;
       console.error(`Function name ${fnName} does not exist on Storage.`);
-      return $dialog.alert({
+      // @ts-ignore
+      return window.$dialog.alert({
         header: 'Storage Error',
         body: 'Error: Cannot read storage.',
       });
@@ -71,12 +69,7 @@ class StorageProxy {
     return await reader(keyName);
   }
 
-  /**
-   * @param keyName
-   * @param value
-   * @return {*}
-   */
-  async writeItem(keyName, value) {
+  async writeItem(keyName: string, value: any) {
     if (this.readOnly) {
       return console.warn('Not writing data - read-only flag set.');
     }
@@ -86,7 +79,8 @@ class StorageProxy {
     if (!writer) {
       this.readOnly = true;
       console.error(`Function name ${fnName} does not exist on Storage.`);
-      return $dialog.alert({
+      // @ts-ignore
+      return window.$dialog.alert({
         header: 'Storage Error',
         body: 'Error: Cannot write to storage.',
       });
@@ -95,11 +89,7 @@ class StorageProxy {
     await writer(keyName, value);
   }
 
-  /**
-   * @param keyName
-   * @param defaultValue
-   */
-  async createKeyIfNotExists(keyName, defaultValue = null) {
+  async createKeyIfNotExists(keyName: any, defaultValue: any = null) {
     if (this.readOnly) {
       return console.warn('Not writing data - read-only flag set.');
     }
@@ -109,7 +99,8 @@ class StorageProxy {
     if (!writer) {
       this.readOnly = true;
       console.error(`Function name ${fnName} does not exist on Storage.`);
-      return $dialog.alert({
+      // @ts-ignore
+      return window.$dialog.alert({
         header: 'Storage Error',
         body: 'Error: Cannot write to storage.',
       });
@@ -118,29 +109,15 @@ class StorageProxy {
     await writer(keyName, defaultValue);
   }
 
-  /**
-   * @param keyName
-   * @return {*}
-   */
-  async _fetchItemIndexedDb(keyName) {
+  async _fetchItemIndexedDb(keyName: IDBValidKey) {
     return await idbGet(keyName);
   }
 
-  /**
-   * @param keyName
-   * @param value
-   * @return {*}
-   */
-  async _writeItemIndexedDb(keyName, value) {
+  async _writeItemIndexedDb(keyName: IDBValidKey, value: any) {
     await idbSet(keyName, value);
   }
 
-  /**
-   * @param keyName
-   * @param defaultValue
-   * @return {*}
-   */
-  async _createKeyIfNotExistsIndexedDb(keyName, defaultValue) {
+  async _createKeyIfNotExistsIndexedDb(keyName: IDBValidKey, defaultValue: any) {
     const item = await idbGet(keyName);
     if (typeof item === 'undefined') {
       await idbSet(keyName, defaultValue);

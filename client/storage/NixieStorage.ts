@@ -2,15 +2,20 @@ import { StorageProxy } from './StorageProxy';
 import { CollectionCache } from './types/CollectionCache';
 import { get256RandomBits, sha256 } from '../utils';
 
-let instance = null;
+let instance: NixieStorage | null = null;
 
-let NX;
+let NX: typeof NixieStorage;
 
 class NixieStorage extends StorageProxy {
   static DEVICE_TAG_KEY = 'device_tag';
   static ACCOUNT_COLLECTION_KEY = 'account_collection';
-  static LAST_ACTIVE_ACCOUNT_KEY = 'last_active_account';
+  static LAST_ACTIVE_ACCOUNT_KEY: string | null = 'last_active_account';
   static SETTINGS_KEY = 'settings_collection';
+
+  initialized!: boolean;
+  lastActiveAccount!: string;
+  accountCollectionCache!: CollectionCache;
+  settingsCache!: object | null;
 
   constructor() {
     if (!instance) {
@@ -21,9 +26,6 @@ class NixieStorage extends StorageProxy {
       return instance;
     }
 
-    // TODO: consider whether or not we need this. It could maybe be used as a
-    //  persistent salt, but it really seems pointless at this stage.
-    this.lastKnownDeviceTag = null;
     this.lastActiveAccount = '';
     this.accountCollectionCache = new CollectionCache();
     this.settingsCache = null;
@@ -46,7 +48,6 @@ class NixieStorage extends StorageProxy {
     await this.createKeyIfNotExists(NX.ACCOUNT_COLLECTION_KEY, {});
 
     // Set up default values.
-    await this.setupDeviceTag();
     await this.buildAccountCollectionCache();
     await this.fetchSettings();
 
@@ -59,7 +60,7 @@ class NixieStorage extends StorageProxy {
     this.lastActiveAccount = await this.fetchItem(NX.LAST_ACTIVE_ACCOUNT_KEY);
     if (!this.lastActiveAccount && this.accountCollectionCache.length) {
       this.lastActiveAccount = this.accountCollectionCache.allEntryNames[0];
-      await this.writeItem(NX.LAST_ACTIVE_ACCOUNT_KEY, this.lastActiveAccount);
+      await this.writeItem(NX.LAST_ACTIVE_ACCOUNT_KEY as string, this.lastActiveAccount);
     }
   }
 
@@ -70,20 +71,6 @@ class NixieStorage extends StorageProxy {
     const accounts = await this.fetchItem(NX.ACCOUNT_COLLECTION_KEY);
     this.accountCollectionCache.updateCache(accounts);
     return accounts;
-  }
-
-  async setupDeviceTag() {
-    const tag = await this.fetchItem(NX.DEVICE_TAG_KEY);
-    if (!tag) {
-      // The device tag is 64 bits (8 bytes).
-      const byteArray = new Uint8Array(8);
-      const deviceTag = crypto.getRandomValues(byteArray);
-      this.lastKnownDeviceTag = deviceTag;
-      await this.writeItem(NX.DEVICE_TAG_KEY, deviceTag);
-    }
-    else {
-      this.lastKnownDeviceTag = tag;
-    }
   }
 
   async buildAccountCollectionCache() {
@@ -140,7 +127,7 @@ class NixieStorage extends StorageProxy {
     return this.settingsCache;
   }
 
-  async writeSettings(settings) {
+  async writeSettings(settings: object) {
     this.settingsCache = settings;
     await this.writeItem(NX.SETTINGS_KEY, settings);
   }
