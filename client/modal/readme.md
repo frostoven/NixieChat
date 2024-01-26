@@ -2,7 +2,18 @@
 
 Offers a non-blocking API that resembles DOM dialog functions.
 
-That this was (with permission) taken from the Cosmosis game project.
+NixieChat currently uses two Modal instances:
+* `window.$dialog`
+* `window.$floatingForm`
+
+`$dialog` is a priority modal and shown above `$floatingForm` windows. You
+should use `$dialog` for confirmation boxes, fatal errors, and so forth.
+`$floatingForm` is for more complex forms requires more than a few seconds of
+the user's attention.
+
+Legal:<br>
+That this was taken (with permission) from the Cosmosis game project. The Modal
+class code is release under the MIT license.
 
 _Dev note: When the modal system is busy, no other control systems should
 process input. This can be checked via `$dialog.allowExternalListeners`._
