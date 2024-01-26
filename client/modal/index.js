@@ -60,6 +60,13 @@ style.innerHTML = `
 `;
 document.getElementsByTagName('head')[0].appendChild(style);
 
+// These null assignment help with auto-completion. Their set to Modal
+// instances when the UI boots.
+/** @type Modal */
+window.$dialog = null;
+/** @type Modal */
+window.$floatingForm = null;
+
 // Create the $dialog root node.
 const dialog = document.createElement('div');
 dialog.className = '__kosmModalRoot';
@@ -79,4 +86,3 @@ ReactDOM.render(
   <Modal className="kosmFormDialog" globalName="$floatingForm"/>,
   floatingForm,
 );
-
