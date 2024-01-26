@@ -1,0 +1,9 @@
+{
+  "/**": "Optional config file. The below show the application defaults. Save",
+  " * ": "a copy of this as .config.json for your changes to take effect.",
+  " */": "===================================================================",
+  "//5": "Can be 'in-memory' or 'postgres'",
+  "dbType": "in-memory",
+  "//7":  "This can also be overridden from the commandline with PORT=[N] [command]",
+  "serverPort": 42069
+}
