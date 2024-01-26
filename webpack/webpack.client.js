@@ -6,7 +6,6 @@ const { clearInterval } = require('node:timers');
 const exec = require('child_process').exec;
 
 module.exports = {
-  watch: process.env.NODE_ENV !== 'production',
   target: 'web',
 
   // This drastically increases bundle size. The reason we do this is so that
@@ -14,6 +13,10 @@ module.exports = {
   optimization: {
     minimize: false,
   },
+
+  // We control the watch flag from the commandline for a more controlled dev
+  // workflow.
+  watch: false,
 
   // Note: Leaving devtool undefined causes eval statements to show up in the
   // bundle. As far as I can tell, JS engines cannot optimize for eval

@@ -5,13 +5,16 @@
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
-  watch: process.env.NODE_ENV !== 'production',
   target: 'node',
   node: {
     // Webpack has the power to change what __dirname means. We don't want that
     // server-side.
     __dirname: false,
   },
+
+  // We control the watch flag from the commandline for a more controlled dev
+  // workflow.
+  watch: false,
 
   // This causes the bundler to not bundle node_modules for server-side code.
   // This both drastically increases bundle time and fixes some issues caused
