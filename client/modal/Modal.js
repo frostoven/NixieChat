@@ -6,6 +6,7 @@ import React from 'react';
 import { Input, Modal as SemanticModal } from 'semantic-ui-react';
 import { Button } from 'semantic-ui-react';
 import { Settings } from '../storage/cacheFrontends/Settings';
+import PropTypes from 'prop-types';
 
 // Unique name used to identify modals.
 const thisMenu = 'modal';
@@ -15,8 +16,6 @@ export const icons = {
   number: 'numbered list',
 };
 
-// Used to detect bad recreations.
-let totalInstances = 0;
 // Used to generate modal IDs.
 let totalModalsCreated = 0;
 
@@ -26,6 +25,16 @@ const nop = () => {
 
 export default class Modal extends React.Component {
   static allowExternalListeners = true;
+
+  static propTypes = {
+    className: PropTypes.string,
+    globalName: PropTypes.string,
+  };
+
+  static defaultProps = {
+    className: 'kosmDialog',
+    globalName: '$dialog',
+  };
 
   static defaultState = {
     isVisible: false,
@@ -37,7 +46,7 @@ export default class Modal extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = Modal.defaultState;
+    this.state = { ...Modal.defaultState };
     this._currentMenu = null;
     this._modalQueue = [];
     this.modalById = {};
@@ -47,23 +56,25 @@ export default class Modal extends React.Component {
   }
 
   componentDidMount() {
-    if (++totalInstances > 1) {
-      console.warn(
-        'More than one modal component has been mounted. This will likely ' +
-        'cause bugs. Please investigate.',
+    // The global name we use for easy modal access.
+    const modalName = this.props.globalName;
+    if (window[modalName]) {
+      console.error(
+        `Multiple modals detected with the name ${modalName}. This is ` +
+        'likely to cause bugs; please investigate.',
       );
     }
 
-    // Replace all window.$modal placeholder boot functions with the real, now
+    // Replace all window.$dialog placeholder boot functions with the real, now
     // loaded ones.
-    window.$modal = this;
-    window.$modal.static = Modal;
+    window[modalName] = this;
+    window[modalName].static = Modal;
   }
 
   componentWillUnmount() {
-    totalInstances--;
     console.warn('Modal component unmounted. This is probably a bug.');
-    delete window.$modal;
+    const modalName = this.props.globalName;
+    delete window[modalName];
   }
 
   _reprocessQueue = (optionalCallback) => {
@@ -214,7 +225,10 @@ export default class Modal extends React.Component {
       // It's unfortunate just how hard semantic makes it to interact with
       // dimmers if you don't copy their examples line by line. A simple
       // onDimmerClick would have been really fucking nice.
-      const dimmers = document.getElementsByClassName('ui dimmer');
+      const className = this.props.className;
+      const dimmers = document.querySelectorAll(
+        `.ui.page.modals.dimmer:has(.${className})`,
+      );
       for (let i = 0, len = dimmers.length; i < len; i++) {
         /** @type HTMLDivElement */
         const dimmer = dimmers[i];
@@ -323,7 +337,7 @@ export default class Modal extends React.Component {
     const modalCount = this._modalQueue.length;
     if (this._modalQueue.hideStackCounter && modalCount < 20) {
       // We cap this at 20 in case legit spam happens.
-      return ''
+      return '';
     }
     if (modalCount <= 1) {
       return '';
@@ -337,7 +351,7 @@ export default class Modal extends React.Component {
   }
 
   /**
-   * Force $modal to redraw its top-most dialog.
+   * Force $dialog to redraw its top-most dialog.
    * @param callback
    */
   invalidate(callback) {
@@ -545,13 +559,19 @@ export default class Modal extends React.Component {
       return renderCustomDialog();
     }
 
+    const className = this.props.className || '';
     const selected = this.state.selectionIndex || 0;
     const modalCountText = this._getModalCountText();
     const darkMode = Settings.isDarkModeEnabled();
 
+    // Remove props not intended to flow lower down the component chain.
+    const modalProps = { ...this.props };
+    delete modalProps.className;
+    delete modalProps.globalName;
+
     return (
       <SemanticModal
-        className={`kosm-modal${darkMode ? '' : ' inverted'}`}
+        className={`kosm-modal${darkMode ? '' : ' inverted'} ${className}`}
         open={!!this._modalQueue.length}
       >
         <SemanticModal.Header>
@@ -562,7 +582,7 @@ export default class Modal extends React.Component {
           {activeModal.body}
         </SemanticModal.Content>
         <div
-          {...this.props}
+          {...modalProps}
         >
           <div className="kosm-modal-actions">
             {activeModal?.actions?.map((menuEntry, index) => {
