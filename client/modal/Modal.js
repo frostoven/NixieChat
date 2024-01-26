@@ -8,7 +8,18 @@ import { Button } from 'semantic-ui-react';
 import { Settings } from '../storage/cacheFrontends/Settings';
 import PropTypes from 'prop-types';
 
-// Unique name used to identify modals.
+/**
+ * @typedef {{
+ * id: string, header: (string|JSX.Element), body: (string|JSX.Element),
+ * unskippable: (boolean|undefined), prioritise: (boolean|undefined),
+ * tag: (string|undefined), hideStackCounter: (boolean|undefined),
+ * deactivated: (boolean|undefined), inline: (boolean|undefined),
+ * renderCustomDialog: (Function|undefined), actions: (array|JSX.Element),
+ * onDimmerClick: (Function|undefined),
+ * }} ModalOptions
+ */
+
+  // Unique name used to identify modals.
 const thisMenu = 'modal';
 
 export const icons = {
@@ -161,13 +172,8 @@ export default class Modal extends React.Component {
 
   /**
    * Creates a modal based on the specified options.
-   * @param {string|object} options
-   * @param {string|JSX.Element} options.header - Title at top of dialog.
-   * @param {string|JSX.Element} options.body - The core content.
-   * @param {undefined|Object[]} options.actions - Div containing buttons or status info.
-   * @param {boolean} [options.unskippable] - If true, dialog cannot be skipped. Avoid where possible.
-   * @param {boolean} [options.prioritise] - If true, pushes the dialog to the front. Avoid where possible.
-   * @returns {Modal}
+   * @param {ModalOptions} options
+   * @return {ModalOptions}
    */
   buildModal = (
     {
@@ -363,8 +369,8 @@ export default class Modal extends React.Component {
 
   /**
    * Retrieves the active modal from the modal queue.
-   * @returns {Object|undefine} The active modal object, or undefined if the
-   * queue is empty.
+   * @returns {ModalOptions|undefined} The active modal object, or undefined if
+   * the queue is empty.
    */
   getActiveModal = () => {
     return this._modalQueue[0];
@@ -372,11 +378,9 @@ export default class Modal extends React.Component {
 
   /**
    * Backwards compatible with window.alert.
-   * @param {string|object} options
-   * @param {string|JSX.Element} options.header
-   * @param {string|JSX.Element} options.body
-   * @param {undefined|JSX.Element} options.actions
-   * @param [optionalCallback]
+   * @param {string|ModalOptions} [options]
+   * @param {undefined|function} [optionalCallback] - Optional. Omit if using options.
+   * @return {ModalOptions}
    */
   alert = (options, optionalCallback) => {
     if (typeof options === 'string') {
@@ -401,13 +405,9 @@ export default class Modal extends React.Component {
   };
 
   /**
-   * @param {string|object} options
+   * @param {string|ModalOptions} [options]
    * @param {undefined|function} [callback] - Optional. Omit if using options.
-   * @param {string|JSX.Element} options.header
-   * @param {string|JSX.Element} options.body
-   * @param {undefined|JSX.Element} options.actions
-   * @param {undefined|string} options.yesText - Text to use for positive button.
-   * @param {undefined|string} options.noText - Text to use for negative button.
+   * @return {ModalOptions}
    */
   confirm = (options, callback) => {
     if (typeof options === 'string') {
@@ -446,10 +446,9 @@ export default class Modal extends React.Component {
    * Intended to be used in place of dropdowns, which in their standard form
    * are somewhat difficult to get right when allowing for peripherals other
    * than the mouse.
-   * @param {object} options
-   * @param {string|JSX.Element} options.header
-   * @param {undefined|JSX.Element} options.actions
-   * @param callback
+   * @param {ModalOptions} [options]
+   * @param {undefined|function} [callback] - Optional. Omit if using options.
+   * @return {ModalOptions}
    */
   buttonPrompt = (options = {}, callback) => {
     if (typeof callback !== 'function') {
@@ -476,11 +475,9 @@ export default class Modal extends React.Component {
   };
 
   /**
-   * @param {string|object} options
+   * @param {string|ModalOptions} [options]
    * @param {undefined|function} [callback] - Optional. Omit if using options.
-   * @param {string|JSX.Element} options.header
-   * @param {string|JSX.Element} options.body
-   * @param {undefined|JSX.Element} options.actions
+   * @return {ModalOptions}
    */
   prompt = (options, callback) => {
     let recordedText = '';
@@ -539,7 +536,7 @@ export default class Modal extends React.Component {
   /**
    * Changes the contents of the specified modal.
    * @param {number} modalId
-   * @param {object} newOptions
+   * @param {ModalOptions} newOptions
    */
   modifyModal = (modalId, newOptions) => {
     const options = this.modalById[modalId];
