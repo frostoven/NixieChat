@@ -6,6 +6,7 @@ import { sharedConfig } from '../../shared/config';
 import { AssertReject } from '../../shared/AssertReject';
 import { runtimeStats } from './runtimeStats';
 import { Emitter } from '@socket.io/postgres-emitter';
+import { Socket } from 'socket.io';
 
 // Constants used to impose limits.
 const {
@@ -49,10 +50,14 @@ const assertReject = new AssertReject((
  * Responds to all client requests.
  */
 class NixieApi {
-  private clusterEmitter: Emitter;
+  clusterEmitter: Emitter | null = null;
 
-  constructor(clusterEmitter: Emitter) {
+  constructor(clusterEmitter: Emitter | null) {
     this.clusterEmitter = clusterEmitter;
+  }
+
+  getEmitter(socket: Socket): Emitter | Socket {
+    return this.clusterEmitter || socket;
   }
 
   ping({ socket }: SocketEventParameters) {
@@ -149,7 +154,7 @@ class NixieApi {
     // utilize built-ins but still have a different reply address with each
     // new invite. This also drives home the idea that ids should not be
     // relied on for permanence, as per Socket.io docs recommendation.
-    this.clusterEmitter.to(target).emit(target, {
+    this.getEmitter(socket).to(target).emit(target, {
       source,
       greeting,
       greetingName,
@@ -185,7 +190,7 @@ class NixieApi {
       return;
     }
 
-    this.clusterEmitter.to(target).emit(target, {
+    this.getEmitter(socket).to(target).emit(target, {
       answer,
       sourceId: target,
       publicName: ownName,
@@ -218,7 +223,7 @@ class NixieApi {
       return;
     }
 
-    this.clusterEmitter.to(targetId).emit(CryptoMessageType.sendDhPubKey, {
+    this.getEmitter(socket).to(targetId).emit(CryptoMessageType.sendDhPubKey, {
       sourceId: socket.id,
       dhPubKey,
       needDhReply,

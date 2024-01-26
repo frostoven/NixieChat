@@ -3,7 +3,6 @@
 let config = Object.freeze({
   server: Object.freeze({
     name: 'NixieChat',
-    listeningPort: process.env.NODE_PORT || 42069,
   }),
 
   logging: Object.freeze({

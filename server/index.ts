@@ -1,11 +1,12 @@
 'use strict';
 
 import express from 'express';
-import { server as serverConfig } from './config/server';
 import http from 'http';
 import { Server } from 'socket.io';
+import { configFile } from './db/configFile';
 import { getPgClusterEmitter, initPgConnection } from './db/postgres';
 import { initSocketApi } from './socketProcessing';
+import { Emitter } from '@socket.io/postgres-emitter';
 
 if (process.env.NODE_ENV === 'development') {
   // Force unhandled promise rejections to throw errors during dev testing.
@@ -28,10 +29,16 @@ const io = new Server(server, {
 // });
 
 async function initDb() {
-  return await initPgConnection(io);
+  if (configFile.dbType === 'postgres') {
+    await initPgConnection(io);
+    return getPgClusterEmitter();
+  }
+  else {
+    return null;
+  }
 }
 
-function buildRoutes() {
+function buildRoutes(clusterEmitter: Emitter | null) {
   // Our custom routes.
   app.use(require('./routes/assets.server.route'));
   app.use(require('./routes/default.server.route'));
@@ -42,7 +49,7 @@ function buildRoutes() {
   // Show boot message.
   console.log('=================================================================');
   console.log('Client can be accessed at:\n',
-    `http://localhost:${serverConfig.listeningPort}`,
+    `http://localhost:${configFile.serverPort}`,
   );
   if (process.env.NODE_ENV === 'development') {
     console.log('Note: WebPack will need a bit of time to finish booting.');
@@ -50,7 +57,7 @@ function buildRoutes() {
   console.log('=================================================================');
 
   // Readies the websocket listeners.
-  initSocketApi(getPgClusterEmitter());
+  initSocketApi(clusterEmitter);
 
   const lookupSocketRoute = require('./routes/websocket.route');
 
@@ -59,7 +66,7 @@ function buildRoutes() {
     lookupSocketRoute(socket);
   });
 
-  server.listen(serverConfig.listeningPort);
+  server.listen(configFile.serverPort);
 }
 
 (function start() {

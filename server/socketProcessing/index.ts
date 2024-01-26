@@ -7,7 +7,7 @@ import { NixieApi } from './NixieApi';
 /**
  * @param {Emitter} clusterEmitter
  */
-function initSocketApi(clusterEmitter: Emitter) {
+function initSocketApi(clusterEmitter: Emitter | null) {
   const api = new NixieApi(clusterEmitter);
   socketEvent.ping.addListener(api.ping.bind(api));
   socketEvent.makeDiscoverable.addListener(api.makeDiscoverable.bind(api));
