@@ -9,7 +9,7 @@ import { RsaPreview } from '../Generic/RsaPreview';
 import { RsvpResponseList } from './RsvpResponseList';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
-import { ContactCreator } from '../../api/ContactCreator';
+import { Invitation } from '../../api/Invitation';
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
@@ -27,7 +27,7 @@ class ReceiveInvitation extends React.Component {
     greetingName: '',
     greetingMessage: '',
     waitingForConfirmation: false,
-    contactStats: null,
+    invitationInfo: null,
   };
 
   constructor(props) {
@@ -43,19 +43,19 @@ class ReceiveInvitation extends React.Component {
     this.rebuild();
   }
 
-  /** @param {ContactCreatorStats} stats */
-  updateContactCreatorViews = (stats) => {
-    if (this.props.creatorId === stats.id) {
+  /** @param {InvitationInfo} info */
+  updateContactCreatorViews = (info) => {
+    if (this.props.creatorId === info.id) {
       this.rebuild();
     }
   };
 
   rebuild = () => {
-    const contactStats = ContactCreator.getStatsById(this.props.creatorId);
-    const newState = { contactStats };
+    const invitationInfo = Invitation.getInfoById(this.props.creatorId);
+    const newState = { invitationInfo };
 
     if (!this.state.greetingName) {
-      newState.greetingName = this.getGreetingName(contactStats);
+      newState.greetingName = this.getGreetingName(invitationInfo);
     }
 
     this.setState(newState);
@@ -166,16 +166,16 @@ class ReceiveInvitation extends React.Component {
   };
 
   /**
-   * @param {ContactCreatorStats} stats
+   * @param {InvitationInfo} info
    * @return {string}
    */
-  getGreetingName = (stats) => {
-    if (!stats) {
+  getGreetingName = (info) => {
+    if (!info) {
       return '';
     }
 
     let replyingAccount = Accounts.findAccountById({
-      id: stats.localAccountId,
+      id: info.localAccountId,
     });
 
     if (replyingAccount.publicName) {
@@ -187,12 +187,12 @@ class ReceiveInvitation extends React.Component {
   };
 
   render() {
-    if (!this.state.contactStats) {
+    if (!this.state.invitationInfo) {
       return 'Invitation no longer valid.';
     }
 
-    /** @type ContactCreatorStats */
-    const stats = this.state.contactStats;
+    /** @type InvitationInfo */
+    const info = this.state.invitationInfo;
     const {
       greetingName, greetingMessage, waitingForConfirmation,
     } = this.state;
@@ -204,14 +204,14 @@ class ReceiveInvitation extends React.Component {
       contactGreetingName,
       contactPubKey,
       contactPemKey,
-    } = stats;
+    } = info;
 
     if (this.state.waitingForConfirmation) {
       return (
         <RsvpResponseList
           key={`RsvpResponseList-${this.props.creatorId}`}
           overrideLoaderMessage={'Waiting for confirmation...'}
-          invitationIds={[ stats.id ]}
+          invitationIds={[ info.id ]}
         />
       );
     }

@@ -7,7 +7,7 @@ import { RsaPreview } from '../Generic/RsaPreview';
 import { SharedPin } from '../Generic/SharedPin';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
-import { ContactCreator } from '../../api/ContactCreator';
+import { Invitation } from '../../api/Invitation';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
 
 /** @type React.CSSProperties */
@@ -55,7 +55,7 @@ const selectedNameStyle = {
 
 class RsvpResponseList extends React.Component {
   static propTypes = {
-    /** @type ContactCreatorStats[] */
+    /** @type InvitationInfo[] */
     invitationIds: PropTypes.array,
     // The message to show on the left of the responses screen.
     overrideLoaderMessage: PropTypes.string,
@@ -123,24 +123,24 @@ class RsvpResponseList extends React.Component {
   };
 
   /**
-   * @param {ContactCreatorStats} stats
+   * @param {InvitationInfo} info
    * @return {Promise<void>}
    */
-  startVerification = async (stats) => {
-    await RemoteCrypto.startVerification({ creatorId: stats.id });
+  startVerification = async (info) => {
+    await RemoteCrypto.startVerification({ creatorId: info.id });
   };
 
-  /** @param {ContactCreatorStats} stats */
-  updateDhStatus = (stats) => {
+  /** @param {InvitationInfo} info */
+  updateDhStatus = (info) => {
     this.forceUpdate();
   };
 
-  saveContact = ({ pubKey, initialSharedSecret }) => {
+  saveContact = () => {
     console.log('tbd');
   };
 
   render() {
-    /** @type ContactCreatorStats[] */
+    /** @type InvitationInfo[] */
     const invitationIds = this.props.invitationIds;
     const darkMode = Settings.isDarkModeEnabled();
 
@@ -153,7 +153,7 @@ class RsvpResponseList extends React.Component {
     const rightSide = [];
 
     for (let i = 0, len = invitationIds.length; i < len; i++) {
-      let responseOptions = ContactCreator.getStatsById(invitationIds[i]);
+      let invitation = Invitation.getInfoById(invitationIds[i]);
       const isSelected = selected === i;
 
       const {
@@ -173,7 +173,7 @@ class RsvpResponseList extends React.Component {
         dhPrepStatusMessage,
         contactDhPubKey,
         sharedSecret,
-      } = responseOptions;
+      } = invitation;
 
       let name;
       if (contactGreetingName && contactGreetingName !== contactPublicName) {
@@ -213,7 +213,7 @@ class RsvpResponseList extends React.Component {
         <Button
           fluid
           disabled={!readyToConnect}
-          onClick={() => this.startVerification(responseOptions)}
+          onClick={() => this.startVerification(invitation)}
         >
           {readyToConnect ? 'Connect' : dhPrepStatusMessage}
         </Button>
@@ -265,7 +265,7 @@ class RsvpResponseList extends React.Component {
                 />
                 <br/><br/>
 
-                <Button fluid onClick={this.saveContact}>
+                <Button fluid onClick={() => this.saveContact(invitation)}>
                   Add Contact
                 </Button>
               </>}
@@ -332,7 +332,7 @@ class RsvpResponseList extends React.Component {
                 />
                 <br/><br/>
 
-                <Button fluid onClick={this.saveContact}>
+                <Button fluid onClick={() => this.saveContact(invitation)}>
                   Add Contact
                 </Button>
               </>}

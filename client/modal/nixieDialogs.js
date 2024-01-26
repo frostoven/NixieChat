@@ -29,10 +29,10 @@ function showAddContactDialog() {
 }
 
 /**
- * @param {ContactCreatorStats} stats
+ * @param {InvitationInfo} info
  * @return {Promise}
  */
-async function showInvitationDialog(stats) {
+async function showInvitationDialog(info) {
   const invite = $floatingForm.alert({
     header: 'Contact Invite',
     body: 'Loading invite...',
@@ -60,7 +60,7 @@ async function showInvitationDialog(stats) {
     // dialog options object.
     invite.body = (
       <ReceiveInvitation
-        creatorId={stats.id}
+        creatorId={info.id}
         floatingForm={invite}
         onSelectChoice={(answer) => {
           resolve(answer);

@@ -6,7 +6,7 @@ import { ClientMessageType } from '../emitters/ClientMessageType';
 import {
   clientEmitterAction as Action,
 } from '../emitters/clientEmitterAction';
-import { ContactCreator } from './ContactCreator';
+import { Invitation } from './Invitation';
 import { logConfig } from '../config/logging';
 
 const verbose = logConfig.verboseHandshakeLogs;
@@ -98,7 +98,7 @@ class RemoteCrypto {
   ) {
     // Sending out an invitation is a first (local) contact creation step, so
     // create a new instance to track it.
-    const contactCreator = new ContactCreator({
+    const contactCreator = new Invitation({
       localAccountId,
       localSocketId: serverEmitter.id,
       localGreetingName,
@@ -155,7 +155,7 @@ class RemoteCrypto {
 
     // Receiving an invitation at random is a first (local) contact creation
     // step, so create a new instance to track it.
-    const contactCreator = new ContactCreator({
+    const contactCreator = new Invitation({
       localAccountId: account.accountId,
       localSocketId: serverEmitter.id,
       contactPublicName: source,
@@ -169,7 +169,7 @@ class RemoteCrypto {
     }).catch(console.error);
 
     verbose && console.log('Sending invitation response.');
-    clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+    clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getInfo());
     serverEmitter.emit(Socket.respondToInvite, responseObject);
   }
 
@@ -198,7 +198,7 @@ class RemoteCrypto {
       verbose && console.log('Received RSVP from', sourceId);
     }
 
-    /** @type ContactCreator */
+    /** @type Invitation */
     const contactCreator = RemoteCrypto.namesPendingInvites[publicName];
     // Ticket used up; forget.
     // TODO: maybe with new system instead set flag? or maybe not.
@@ -213,7 +213,7 @@ class RemoteCrypto {
       replyAddress,
     }).catch(console.error);
 
-    clientEmitter.emit(ClientMessageType.receiveRsvpResponse, contactCreator.getStats());
+    clientEmitter.emit(ClientMessageType.receiveRsvpResponse, contactCreator.getInfo());
   }
 
   /**
@@ -221,7 +221,7 @@ class RemoteCrypto {
    * socket ID. Returns the generated key.
    */
   static async createAndSendDhPubKey({ targetId, modGroup }) {
-    /** @type ContactCreator */
+    /** @type Invitation */
     const contactCreator = RemoteCrypto.trackedInvitesById[targetId];
     if (!contactCreator) {
       return console.error(
@@ -237,7 +237,7 @@ class RemoteCrypto {
 
     RemoteCrypto.trackedInvitesById[contactCreator.contactSocketId] = contactCreator;
 
-    clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+    clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getInfo());
     verbose && console.log(`Sending DH key to prospective contact (automatic).`);
     serverEmitter.emit(Socket.sendDhPubKey, responseObject);
   }
@@ -247,7 +247,7 @@ class RemoteCrypto {
   static async receiveDhPubKey(options) {
     const { sourceId, dhPubKey, needDhReply, modGroup } = options;
 
-    /** @type ContactCreator */
+    /** @type Invitation */
     const contactCreator = RemoteCrypto.trackedInvitesById[sourceId];
     if (!contactCreator) {
       return console.error(
@@ -271,16 +271,16 @@ class RemoteCrypto {
       responseObject.needDhReply = false;
 
       verbose && console.log(`Sending DH key to prospective contact (as per request).`);
-      clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+      clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getInfo());
       serverEmitter.emit(Socket.sendDhPubKey, responseObject);
     }
     else {
-      clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getStats());
+      clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getInfo());
     }
   }
 
   static async startVerification({ creatorId }) {
-    const contactCreator = ContactCreator.getInstanceById(creatorId);
+    const contactCreator = Invitation.getInstanceById(creatorId);
     const id = contactCreator.contactSocketId;
     if (!RemoteCrypto.trackedInvitesById[contactCreator.contactSocketId]) {
       console.error('[RemoteCrypto] Cannot start verification - ID mismatch.');
@@ -288,7 +288,7 @@ class RemoteCrypto {
     }
 
     await contactCreator.stage4_computeSharedSecret();
-    verbose && console.log('Final handshake state:', contactCreator.getStats());
+    verbose && console.log('Final handshake state:', contactCreator.getInfo());
   }
 }
 

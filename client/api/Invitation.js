@@ -4,7 +4,7 @@ import { clientEmitter } from '../emitters/comms';
 import { showInvitationDialog } from '../modal/nixieDialogs';
 import { InvitationResponse } from '../../shared/InvitationResponse';
 import { getDiffieHellman } from 'diffie-hellman';
-import { KeyStrength, KeyStrengthFriendly } from '../../shared/KeyStrength';
+import { KeyStrengthFriendly } from '../../shared/KeyStrength';
 import { clientEmitterAction } from '../emitters/clientEmitterAction';
 import {
   get256RandomBits,
@@ -41,7 +41,7 @@ const MIN_UI_TRANSITION_MS = 250;
  *   localDhPubKey: (null|ArrayBuffer), contactDhPubKey: (null|ArrayBuffer),
  *   contactPemKey: (null|string), initiatorSocketId: (null|string),
  *   receiverSocketId: (null|string)
- * }} ContactCreatorStats
+ * }} InvitationInfo
  */
 
 /**
@@ -51,11 +51,11 @@ const MIN_UI_TRANSITION_MS = 250;
  * * For non-UI stuff, never reference the underscored variables at all, even
  *   from within the class. Use their getters and setters instead as they've
  *   been set up to check for possible problems extremely strictly.
- * * For UI stuff, use only the getStats() function and nothing else. It's
+ * * For UI stuff, use only the getInfo() function and nothing else. It's
  *   React-friendly and assumes that we don't care about referencing different
  *   stages out of order.
  */
-class ContactCreator {
+class Invitation {
 
   /* == Class vars ============================================== */
 
@@ -110,7 +110,7 @@ class ContactCreator {
 
   /**
    * 0: not yet started; 1: finished. Note that there's no public accessor for
-   * this; it's exposed via getStats() only. Currently used by the UI to update
+   * this; it's exposed via getInfo() only. Currently used by the UI to update
    * status.
    * @type {number}
    * @private
@@ -119,7 +119,7 @@ class ContactCreator {
 
   /**
    * Written description of _dhPrepPercentage. Note that there's no public
-   * accessor for this; it's exposed via getStats() only. Currently used by the
+   * accessor for this; it's exposed via getInfo() only. Currently used by the
    * UI to update status.
    * @type {string}
    * @private
@@ -128,7 +128,7 @@ class ContactCreator {
 
   /**
    * Method computed by both parties; never shared over the network. Note that
-   * there's no public accessor for this; it's exposed via getStats() only.
+   * there's no public accessor for this; it's exposed via getInfo() only.
    * @type {null|Uint8Array}
    * @private
    */
@@ -477,9 +477,9 @@ class ContactCreator {
 
   /**
    * Returns a one-sided React-friendly representation of this object.
-   * @return ContactCreatorStats
+   * @return InvitationInfo
    */
-  getStats() {
+  getInfo() {
     // Dev note: For most of these values you should avoid referencing
     // strict-section getters from this function because they will log warnings
     // if their values are null (which exists to hint at devs that they've
@@ -539,7 +539,7 @@ class ContactCreator {
     localGreeting,
     contactPublicName,
   } = {}) {
-    ContactCreator._instanceFromId[this._id] = this;
+    Invitation._instanceFromId[this._id] = this;
 
     if (!contactPublicName || !localAccountId || !localAccountId) {
       this.error = '[ContactCreator] Invalid options specified.';
@@ -582,25 +582,25 @@ class ContactCreator {
   handleClientReconnected = () => {
     this.error = 'Connection lost; please try again.';
     console.error('[ContactCreator] State broken due to connection reset.');
-    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
-  }
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
+  };
 
   /**
    * @param id
-   * @return {ContactCreator|null}
+   * @return {Invitation|null}
    */
   static getInstanceById(id) {
-    return ContactCreator._instanceFromId[id] || null;
+    return Invitation._instanceFromId[id] || null;
   }
 
   /**
    * @param id
-   * @return {ContactCreatorStats|null}
+   * @return {InvitationInfo|null}
    */
-  static getStatsById(id) {
-    const instance = ContactCreator._instanceFromId[id];
+  static getInfoById(id) {
+    const instance = Invitation._instanceFromId[id];
     if (instance) {
-      return instance.getStats();
+      return instance.getInfo();
     }
     return null;
   }
@@ -738,7 +738,7 @@ class ContactCreator {
     this.contactPubKey = pubKey;
     this.time = time;
 
-    const ownResponse = await showInvitationDialog(this.getStats());
+    const ownResponse = await showInvitationDialog(this.getInfo());
 
     // Find the account associated with the requested public name.
     const receivingAccount = Accounts.findAccountByPublicName({
@@ -882,7 +882,7 @@ class ContactCreator {
       return console.error(`Received invalid DH public key from ${targetId}.`);
     }
     this._dhPrepStatusMessage = `Ready to connect`;
-    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
   }
 
   async stage3_prepareDhKey({ modGroup }) {
@@ -901,7 +901,7 @@ class ContactCreator {
 
     this._dhPrepPercentage = 0.1;
     this._dhPrepStatusMessage = `(1/2) Loading ${this.dhModGroup} group...`;
-    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
 
     // Wait a bit so that the UI doesn't move too fast and bewilder the user.
     await setPromiseTimeout(MIN_UI_TRANSITION_MS);
@@ -910,7 +910,7 @@ class ContactCreator {
     this._dhPrepPercentage = 0.25;
     this._dhPrepStatusMessage =
       `(2/2) Generating ${groupFriendly} ephemeral key pair...`;
-    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
 
     alice.generateKeys();
     verbose && console.log(`DH key generation complete...`);
@@ -920,7 +920,7 @@ class ContactCreator {
 
     this._dhPrepPercentage = 0.5;
     this._dhPrepStatusMessage = `Waiting for contact DH key...`;
-    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
 
     this.localDhKeyExchange = alice;
 
@@ -934,7 +934,7 @@ class ContactCreator {
   async stage4_computeSharedSecret() {
     this._dhPrepPercentage = 0.75;
     this._dhPrepStatusMessage = `Computing shared secret...`;
-    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
 
     // Give the UI time to update for we lock the main thread.
     await setPromiseTimeout(50);
@@ -954,7 +954,7 @@ class ContactCreator {
 
     this._dhPrepPercentage = 1;
     this._dhPrepStatusMessage = `Ready`;
-    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
 
     verbose && console.log(
       `DH shared secret generated. Full hex string:`,
@@ -971,5 +971,5 @@ class ContactCreator {
 }
 
 export {
-  ContactCreator,
+  Invitation,
 };

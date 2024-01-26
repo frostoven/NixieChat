@@ -80,7 +80,7 @@ class ContactFinder extends React.Component {
   }
 
   /**
-   * @param {ContactCreatorStats} rsvp
+   * @param {InvitationInfo} rsvp
    */
   receiveRsvpResponse = (rsvp) => {
     this.invitationItems[rsvp.id] = {
@@ -99,13 +99,13 @@ class ContactFinder extends React.Component {
 
   /**
    * See comment for this.sendDhKeys.
-   * @param {ContactCreatorStats} stats
+   * @param {InvitationInfo} info
    */
-  updateContactCreatorViews = (stats) => {
-    if (!this.invitationItems[stats.id]) {
-      this.invitationItems[stats.id] = {};
+  updateContactCreatorViews = (info) => {
+    if (!this.invitationItems[info.id]) {
+      this.invitationItems[info.id] = {};
     }
-    this.invitationItems[stats.id].id = stats.id;
+    this.invitationItems[info.id].id = info.id;
     _.defer(() => this.forceUpdate());
   };
 
@@ -115,7 +115,7 @@ class ContactFinder extends React.Component {
   // how things are currently set up.
   // TODO: Set up a dispatch system system, and integrate me into it.
   /**
-   * @param {ContactCreatorStats} rsvp
+   * @param {InvitationInfo} rsvp
    */
   async sendDhKey(rsvp) {
     if (this.invitationItems[rsvp.id].dhKeySent) {
