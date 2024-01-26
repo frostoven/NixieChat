@@ -59,6 +59,7 @@ typings/
 # dotenv environment variables and secrets files
 .env
 .secrets.json
+.config.json
 
 # IntelliJ
 .idea
