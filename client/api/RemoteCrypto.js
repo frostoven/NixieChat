@@ -116,7 +116,7 @@ class RemoteCrypto {
       .catch(console.error);
     responseObject.v = MessageVersion.sendInvitationV1;
 
-    serverEmitter.timeout(120000).emit(
+    serverEmitter.timeout(20000).emit(
       Socket.sendInvitation,
       responseObject,
       (socketError, { error, results = [] } = {}) => {

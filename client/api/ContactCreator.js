@@ -747,7 +747,7 @@ class ContactCreator {
 
     if (!receivingAccount) {
       this.error = 'Failed to receive invite. Please try again.';
-      return $modal.alert({
+      return $dialog.alert({
         header: 'Invite Response Failed',
         body: 'Could not respond to invite because none of your accounts ' +
           `appear to have the public name "${this.localPublicName}" ` +
@@ -845,7 +845,7 @@ class ContactCreator {
     if (isNaN(time) || !time || time < oldestAllowedTime) {
       this.error = 'System time appears to be invalid.';
       console.error('[ContactCreator] Invalid time:', time);
-      $modal.alert({
+      $dialog.alert({
         prioritise: true,
         header: 'Error',
         body: 'An error occurred while processing the response - invalid time',

@@ -24,7 +24,7 @@ if (
   location.protocol === 'http:' &&
   ![ 'localhost', '127.0.0.1' ].includes(location.hostname)
 ) {
-  $modal.alert({
+  $dialog.alert({
     header: 'Cryptographic Error',
     body: (
       <div>

@@ -1,6 +1,8 @@
 import React from 'react';
 
 interface Props {
+  numberExample: number,
+  stringExample: number,
 }
 
 class Template extends React.Component<Props> {
@@ -13,10 +15,10 @@ class Template extends React.Component<Props> {
       <div>
         //
       </div>
-    )
+    );
   }
 }
 
 export {
   Template,
-}
+};

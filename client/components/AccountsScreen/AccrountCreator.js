@@ -27,7 +27,7 @@ class AccountCreator extends React.Component {
 
   create = () => {
     if (!this.state.accountName) {
-      $modal.confirm(
+      $dialog.confirm(
         'An account name is required. Would you like one randomly generated?',
         (shouldCreateAccount) => {
           if (shouldCreateAccount) {
@@ -52,7 +52,7 @@ class AccountCreator extends React.Component {
         keyPair = await createSigningKeyPair();
       }
       catch (error) {
-        $modal.alert({
+        $dialog.alert({
           header: 'Error generating account',
           body: error.toString(),
         });

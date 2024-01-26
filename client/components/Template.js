@@ -15,10 +15,10 @@ class Template extends React.Component {
       <div>
         //
       </div>
-    )
+    );
   }
 }
 
 export {
   Template,
-}
+};

@@ -6,7 +6,7 @@ import {
 } from '../components/ContactComponents/ReceiveInvitation';
 
 function showAddContactDialog() {
-  $modal.alert({
+  $dialog.alert({
     header: 'Add contact',
     body: <ContactFinder/>,
     actions: [],
@@ -18,7 +18,7 @@ function showAddContactDialog() {
  * @return {Promise}
  */
 async function showInvitationDialog(stats) {
-  const dialog = $modal.alert({
+  const dialog = $dialog.alert({
     header: 'Contact Invite',
     body: 'Loading invite...',
     hideStackCounter: true,
@@ -26,24 +26,24 @@ async function showInvitationDialog(stats) {
 
   dialog.onDimmerClick = () => {
     // Prevent accidentally closing invitations.
-    const confirmation = $modal.confirm({
+    const confirmation = $dialog.confirm({
       header: 'Invite',
       body: 'Are you sure you want to reject the invite?',
       prioritise: true,
       hideStackCounter: true,
     }, (proceed) => {
       if (proceed) {
-        $modal.deactivateModalById(confirmation.id);
-        $modal.deactivateModalById(dialog.id);
+        $dialog.deactivateModalById(confirmation.id);
+        $dialog.deactivateModalById(dialog.id);
       }
       else {
-        $modal.deactivateModalById(confirmation.id);
+        $dialog.deactivateModalById(confirmation.id);
       }
     });
   };
 
   return new Promise((resolve) => {
-    // We create this after $modal.alert() so that we can safely pass in the
+    // We create this after $dialog.alert() so that we can safely pass in the
     // dialog options object.
     dialog.body = (
       <ReceiveInvitation
@@ -56,7 +56,7 @@ async function showInvitationDialog(stats) {
     );
 
     // Force the dialog to recognise the body change.
-    $modal.invalidate();
+    $dialog.invalidate();
   });
 }
 

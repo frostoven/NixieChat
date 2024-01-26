@@ -5,7 +5,7 @@ Offers a non-blocking API that resembles DOM dialog functions.
 That this was (with permission) taken from the Cosmosis game project.
 
 _Dev note: When the modal system is busy, no other control systems should
-process input. This can be checked via `$modal.allowExternalListeners`._
+process input. This can be checked via `$dialog.allowExternalListeners`._
 
 ## Special keys
 
@@ -24,7 +24,7 @@ advanced dialog builder. Displays a message.
 #### Simple alert:
 
 ```javascript
-$modal.alert('Your message here.');
+$dialog.alert('Your message here.');
 ```
 
 #### Callback on user accept:
@@ -32,7 +32,7 @@ $modal.alert('Your message here.');
 ```javascript
 // Placing a callback as a last option will notify you when the user selects
 // the built-in OK button.
-$modal.alert('Your message here.', () => {
+$dialog.alert('Your message here.', () => {
   console.log('The user has selected "OK".');
 });
 ```
@@ -40,7 +40,7 @@ $modal.alert('Your message here.', () => {
 #### Alert with custom header:
 
 ```javascript
-$modal.alert({
+$dialog.alert({
   header: 'I Am The Header',
   body: 'Your message here.',
 });
@@ -49,32 +49,32 @@ $modal.alert({
 #### Alert with custom text on its button:
 
 ```javascript
-$modal.alert({
+$dialog.alert({
   header: 'Info',
   body: 'The Earth can fit eight times inside Saturn\'s hexigon storm.',
   actions: [
-    { name: 'Damn, ok..', onSelect: () => $modal.deactivateModal() },
+    { name: 'Damn, ok..', onSelect: () => $dialog.deactivateModal() },
   ]
 });
 ```
 
 #### Alerts can be used as generic dialog builders:
 
-_**Note:** `$modal.confirm()` would be better suited than this next example as
+_**Note:** `$dialog.confirm()` would be better suited than this next example as
 it's more concise. This is just to showcase the alert builder._
 
 ```javascript
-$modal.alert({
+$dialog.alert({
   header: 'Question',
   body: 'Left or right?',
   actions: [
     {
       name: 'Left',
-      onSelect: () => console.log('left') || $modal.deactivateModal()
+      onSelect: () => console.log('left') || $dialog.deactivateModal()
     },
     {
       name: 'Right',
-      onSelect: () => console.log('right') || $modal.deactivateModal()
+      onSelect: () => console.log('right') || $dialog.deactivateModal()
     },
   ]
 });
@@ -88,7 +88,7 @@ advanced dialog builder. Asks the user to approve or confirm something.
 #### Simple confirmation window:
 
 ```javascript
-$modal.confirm('Are you want to proceed?', (answer) => {
+$dialog.confirm('Are you want to proceed?', (answer) => {
   // true if 'Yes', false if 'No'. 
   console.log(answer);
 });
@@ -97,7 +97,7 @@ $modal.confirm('Are you want to proceed?', (answer) => {
 #### Confirm with custom header:
 
 ```javascript
-$modal.confirm({
+$dialog.confirm({
   header: 'I Am The Header',
   body: 'Are you want to proceed?',
 }, (answer) => {
@@ -108,13 +108,13 @@ $modal.confirm({
 #### Confirm with custom buttons:
 
 ```javascript
-$modal.confirm({
+$dialog.confirm({
   body: 'Left or right?',
   actions: [
-    { name: 'Left, to Dark Woods', onSelect: () => $modal.deactivateModal() },
+    { name: 'Left, to Dark Woods', onSelect: () => $dialog.deactivateModal() },
     {
       name: 'Right, to Werewolf Mountain',
-      onSelect: () => $modal.deactivateModal()
+      onSelect: () => $dialog.deactivateModal()
     },
   ]
 });
@@ -126,7 +126,7 @@ Can be used as a simple replacement for `window.prompt()` , or as a more
 advanced dialog builder. Prompts the user for text.
 
 ```javascript
-$modal.prompt('Please enter your call sign:', (value) => {
+$dialog.prompt('Please enter your call sign:', (value) => {
   if (value === null) {
     console.log('[ user cancelled input ]');
   }
@@ -139,13 +139,13 @@ $modal.prompt('Please enter your call sign:', (value) => {
 As with all other modals, headers and buttons can be customised:
 
 ```javascript
-$modal.prompt({
+$dialog.prompt({
   header: 'I Am The Header',
   body: 'Please enter your ship\'s name:',
   actions: [
-    { name: 'Randomize', onSelect: () => $modal.deactivateModal() },
-    { name: 'Accept', onSelect: () => $modal.deactivateModal() },
-    { name: 'Cancel', onSelect: () => $modal.deactivateModal() },
+    { name: 'Randomize', onSelect: () => $dialog.deactivateModal() },
+    { name: 'Accept', onSelect: () => $dialog.deactivateModal() },
+    { name: 'Cancel', onSelect: () => $dialog.deactivateModal() },
   ]
 });
 ```
@@ -155,7 +155,7 @@ $modal.prompt({
 Offers a list of buttons to select from.
 
 ```javascript
-$modal.buttonPrompt({
+$dialog.buttonPrompt({
   body: 'Please select an action:',
   actions: [
     { name: 'Start new session', value: 1 },
@@ -176,9 +176,9 @@ controller-friendly substitute for dropdowns, or situations where the amount of
 selectable options are quite large.
 
 ```javascript
-$modal.listPrompt({
+$dialog.listPrompt({
   // Note: setting enableAnimations forces it on or off. If not specified,
-  // $modal will disable animations if the amount of actions are large (20
+  // $dialog will disable animations if the amount of actions are large (20
   // items at the time of writing). Enabling animations with 30+ actions in the
   // list is incredibly slow and will hard-freeze the interface when scrolling.
   enableAnimations: true,
@@ -208,21 +208,21 @@ functions can break code that runs later on.
 #### Variables
 
 The only variables you'll really want to care about for most situations is are
-the static ones. You can reach them by importing Modal, or via `$modal.static`.
+the static ones. You can reach them by importing Modal, or via `$dialog.static`.
 
 * `Modal.allowExternalListeners` - while this is false, you should avoid
   letting your own listeners handle input.
 * 
 #### Methods
 
-* `$modal.deactivateModal(optionalCallback)` - closes the top-most modal. If
+* `$dialog.deactivateModal(optionalCallback)` - closes the top-most modal. If
   you want to do additional modal work immediately after  `deactivateModal()`,
   be sure to wrap it inside `optionalCallback` to ensure your code doesn't
   suffer state-update timing issues.
-* `$modal.buildModal(options)` - used internally by all the other modal
+* `$dialog.buildModal(options)` - used internally by all the other modal
    functions in the Examples section above to create modals.
-* `$modal.modifyModal(modalOptions)` - replaces the active modal with the
+* `$dialog.modifyModal(modalOptions)` - replaces the active modal with the
   contents of the specified `modalOptions`; especially useful when used with
-  `$modal.getActiveModal()`, which will return the active modal options.
-* `$modal.getActiveModal()` - gets the object that defines the actively
+  `$dialog.getActiveModal()`, which will return the active modal options.
+* `$dialog.getActiveModal()` - gets the object that defines the actively
   displayed dialog, or undefined if nothing is being shown.

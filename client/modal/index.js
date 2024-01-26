@@ -41,12 +41,42 @@ style.innerHTML = `
   .inverted .kosm-modal-actions .ui.secondary.button {
     background-color: #53ad39;
   }
+
+  /* z-index for $dialog */
+  .ui.page.modals.dimmer:has(.kosmPriorityDialog) {
+    z-index: 1000;
+  }
+  .kosmPriorityDialog {
+    z-index: 1001;
+  }
+
+  /* z-index for $FormDialog */
+  .ui.page.modals.dimmer:has(.kosmFormDialog) {
+    z-index: 997;
+  }
+  .kosmFormDialog {
+    z-index: 998;
+  }
 `;
 document.getElementsByTagName('head')[0].appendChild(style);
 
-// Create the modal root node.
-const div = document.createElement('div');
-div.className = '__kosmModalRoot';
-div.style.position = 'fixed';
-document.body.append(div);
-ReactDOM.render(<Modal/>, div);
+// Create the $dialog root node.
+const dialog = document.createElement('div');
+dialog.className = '__kosmModalRoot';
+dialog.style.position = 'fixed';
+document.body.append(dialog);
+ReactDOM.render(
+  <Modal className="kosmPriorityDialog" globalName="$dialog"/>,
+  dialog,
+);
+
+// Create the floatingForm root node.
+const floatingForm = document.createElement('div');
+floatingForm.className = '__kosmModalRoot';
+floatingForm.style.position = 'fixed';
+document.body.append(floatingForm);
+ReactDOM.render(
+  <Modal className="kosmFormDialog" globalName="$floatingForm"/>,
+  floatingForm,
+);
+

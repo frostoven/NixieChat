@@ -32,8 +32,8 @@ class ReceiveInvitation extends React.Component {
 
   constructor(props) {
     super(props);
-      this.dialog = props.dialog;
-      this.setupDialog(props.dialog);
+    this.dialog = props.dialog;
+    this.setupDialog(props.dialog);
   }
 
   componentDidMount() {
@@ -52,7 +52,7 @@ class ReceiveInvitation extends React.Component {
 
   rebuild = () => {
     const contactStats = ContactCreator.getStatsById(this.props.creatorId);
-    const newState = { contactStats, };
+    const newState = { contactStats };
 
     if (!this.state.greetingName) {
       newState.greetingName = this.getGreetingName(contactStats);
@@ -67,14 +67,14 @@ class ReceiveInvitation extends React.Component {
     {
       name: 'Reject Invite',
       onSelect: () => {
-        $modal.confirm({
+        $dialog.confirm({
           prioritise: true,
           header: 'Reject Invite',
           body: 'Are you sure you want to reject this contact? They will ' +
             'not be informed that you have rejected their invite.',
         }, (confirmedBlock) => {
           if (confirmedBlock) {
-            $modal.deactivateModalById(this.dialog.id);
+            $dialog.deactivateModalById(this.dialog.id);
             this.props.onSelectChoice({ answer: InvitationResponse.reject });
           }
         });
@@ -84,14 +84,14 @@ class ReceiveInvitation extends React.Component {
     {
       name: 'Block Account',
       onSelect: () => {
-        $modal.confirm({
+        $dialog.confirm({
           prioritise: true,
           header: 'Permanent Block',
           body: 'Are you sure you want to block this contact? They will not ' +
             'be informed that you have blocked them.',
         }, (confirmedBlock) => {
           if (confirmedBlock) {
-            $modal.deactivateModalById(this.dialog.id);
+            $dialog.deactivateModalById(this.dialog.id);
             console.warn('TODO: block RSA key.');
             this.props.onSelectChoice({ answer: InvitationResponse.block });
           }
@@ -102,7 +102,7 @@ class ReceiveInvitation extends React.Component {
     {
       name: 'Ask Me Later',
       onSelect: () => {
-        $modal.confirm({
+        $dialog.confirm({
           prioritise: true,
           header: 'Postpone',
           body: (
@@ -115,7 +115,7 @@ class ReceiveInvitation extends React.Component {
           ),
         }, (confirmedPostpone) => {
           if (confirmedPostpone) {
-            $modal.deactivateModalById(this.dialog.id);
+            $dialog.deactivateModalById(this.dialog.id);
             this.props.onSelectChoice({ answer: InvitationResponse.postpone });
           }
         });
@@ -135,7 +135,7 @@ class ReceiveInvitation extends React.Component {
         });
 
         this.props.dialog.actions = [];
-        $modal.invalidate();
+        $dialog.invalidate();
       },
       disabled: true,
       style: { marginLeft: 16 },
@@ -152,7 +152,7 @@ class ReceiveInvitation extends React.Component {
     ];
 
     // Force modal to recognize button changes.
-    $modal.invalidate();
+    $dialog.invalidate();
 
     // Wait 3 seconds, then make the buttons clickable. We wait to ensure the
     // user doesn't accidentally click any buttons while using the app.
@@ -161,7 +161,7 @@ class ReceiveInvitation extends React.Component {
         action.disabled = false;
       });
       dialog.actions = this.actions;
-      $modal.invalidate();
+      $dialog.invalidate();
     }, 3);
   };
 
@@ -187,6 +187,7 @@ class ReceiveInvitation extends React.Component {
   };
 
   render() {
+    console.log('rendering ReceiveInvitation');
     if (!this.state.contactStats) {
       return 'Invitation no longer valid.';
     }
@@ -199,6 +200,7 @@ class ReceiveInvitation extends React.Component {
     const darkMode = Settings.isDarkModeEnabled();
 
     const {
+      time,
       localPublicName,
       contactGreetingName,
       contactPubKey,
@@ -224,7 +226,6 @@ class ReceiveInvitation extends React.Component {
         decline this request. Only accept contacts you trust; they can resend
         the invitation at any time (unless you block them).
         <br/><br/>
-        This invite expires in 120 seconds.
 
         <Segment inverted={!darkMode}>
           <Form>

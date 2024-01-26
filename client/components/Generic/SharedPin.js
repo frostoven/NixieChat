@@ -61,7 +61,7 @@ function char255toPinGroup(numberArray) {
     const error = 'Bug detected: The character pin group is not 32 ' +
       'character. Refusing to proceed.';
     console.error(error);
-    $modal.alert({
+    $dialog.alert({
       prioritise: true,
       header: 'Error',
       body: error,
@@ -249,7 +249,7 @@ class SharedPin extends React.Component {
       this.forceUpdate();
     }).catch((error) => {
       console.error(error);
-      $modal.alert({
+      $dialog.alert({
         prioritise: true,
         header: 'Error Generating Pin',
         body: 'Could not generate shared pin. Please restart NixieChat and ' +

@@ -40,7 +40,7 @@ class StorageProxy {
     if (engineName === StorageEngine.indexedDb) {
       const indexedDbAllowed = await StorageProxy.testIndexedDbStorage();
       if (!indexedDbAllowed) {
-        return $modal.alert(
+        return $dialog.alert(
           'Your browser has blocked local DB storage. NixieChat will not ' +
           'function properly, and account details will be lost on refresh.',
         );
@@ -62,7 +62,7 @@ class StorageProxy {
     if (!reader) {
       this.readOnly = true;
       console.error(`Function name ${fnName} does not exist on Storage.`);
-      return $modal.alert({
+      return $dialog.alert({
         header: 'Storage Error',
         body: 'Error: Cannot read storage.',
       });
@@ -86,7 +86,7 @@ class StorageProxy {
     if (!writer) {
       this.readOnly = true;
       console.error(`Function name ${fnName} does not exist on Storage.`);
-      return $modal.alert({
+      return $dialog.alert({
         header: 'Storage Error',
         body: 'Error: Cannot write to storage.',
       });
@@ -109,7 +109,7 @@ class StorageProxy {
     if (!writer) {
       this.readOnly = true;
       console.error(`Function name ${fnName} does not exist on Storage.`);
-      return $modal.alert({
+      return $dialog.alert({
         header: 'Storage Error',
         body: 'Error: Cannot write to storage.',
       });
