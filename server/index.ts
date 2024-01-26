@@ -4,7 +4,7 @@ import express from 'express';
 import { server as serverConfig } from './config/server';
 import http from 'http';
 import { Server } from 'socket.io';
-import { getPgClusterEmitter, initPgConnection } from './db';
+import { getPgClusterEmitter, initPgConnection } from './db/postgres';
 import { initSocketApi } from './socketProcessing';
 
 if (process.env.NODE_ENV === 'development') {
