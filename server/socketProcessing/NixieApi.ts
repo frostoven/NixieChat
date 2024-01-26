@@ -56,6 +56,15 @@ class NixieApi {
     this.clusterEmitter = clusterEmitter;
   }
 
+  /**
+   * This method is used to dynamically switch between single-server and
+   * clustered-server setups. If we have a clusterEmitter defined, we're in a
+   * cluster and need to respond accordingly.
+   *
+   * Note that cluster emitters have far fewer features than single-server
+   * emitters. Please develop for clusters by default as they'll usually
+   * degrade gracefully to single-server, but not the other way around.
+   */
   getEmitter(socket: Socket): Emitter | Socket {
     return this.clusterEmitter || socket;
   }

@@ -957,7 +957,7 @@ class ContactCreator {
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getStats());
 
     verbose && console.log(
-      `DH shared secret generated. Full password:`,
+      `DH shared secret generated. Full hex string:`,
       uint8ArrayToHexString(aliceSecret),
     );
 
