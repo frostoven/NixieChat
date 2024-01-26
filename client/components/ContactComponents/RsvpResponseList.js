@@ -72,20 +72,49 @@ class RsvpResponseList extends React.Component {
     // Set to true once Diffie-Hellman secret and keys have been generated.
   };
 
+  /**
+   * Used to check if anyone's responding at all.
+   */
+  softTimeoutTimer = null;
+  softTimeoutAmount = 5000;
+
   // What text is shown in statuses and buttons depends on which contact it
   // belongs to (we have a dynamic list of them). Each button and status can
   // have a different state and its text modified by updateDhStatus().
   // connectButtonText = new Map();
 
   componentDidMount() {
+    this.softTimeoutTimer = setTimeout(this.softTimeout, this.softTimeoutAmount);
     clientEmitter.on(clientEmitterAction.updateDhStatus, this.updateDhStatus);
   }
 
   componentWillUnmount() {
+    clearTimeout(this.softTimeoutTimer);
     clientEmitter.removeListener(
       clientEmitterAction.updateDhStatus, this.updateDhStatus,
     );
   }
+
+  softTimeout = () => {
+    if (this.props.invitationIds?.length) {
+      // Message we're about to show is no longer relevant; quit out.
+      return;
+    }
+
+    const elapsed = (this.softTimeoutAmount * 0.001).toFixed(0);
+    $dialog.alert({
+      prioritise: true,
+      header: 'No Response',
+      body: (
+        <div>
+          You've had no responses after {elapsed} seconds. It's likely that
+          the recipient did not get your invite.
+          <br/><br/>
+          It's recommended you cancel and try again.
+        </div>
+      )
+    });
+  };
 
   selectName = (index) => {
     this.setState({
