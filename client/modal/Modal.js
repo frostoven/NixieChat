@@ -40,11 +40,13 @@ export default class Modal extends React.Component {
   static propTypes = {
     className: PropTypes.string,
     globalName: PropTypes.string,
+    happyTitle: PropTypes.bool,
   };
 
   static defaultProps = {
     className: 'kosmDialog',
     globalName: '$dialog',
+    happyTitle: false,
   };
 
   static defaultState = {
@@ -560,6 +562,7 @@ export default class Modal extends React.Component {
     const selected = this.state.selectionIndex || 0;
     const modalCountText = this._getModalCountText();
     const darkMode = Settings.isDarkModeEnabled();
+    const happyTitle = this.props.happyTitle ? 'happy' : '';
 
     // Remove props not intended to flow lower down the component chain.
     const modalProps = { ...this.props };
@@ -571,7 +574,7 @@ export default class Modal extends React.Component {
         className={`kosm-modal${darkMode ? '' : ' inverted'} ${className}`}
         open={!!this._modalQueue.length}
       >
-        <SemanticModal.Header>
+        <SemanticModal.Header className={happyTitle}>
           {modalCountText}
           {activeModal.header}
         </SemanticModal.Header>

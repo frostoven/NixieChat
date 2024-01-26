@@ -29,6 +29,16 @@ style.innerHTML = `
     background-color: #fff;
   }
 
+  .kosm-modal > .header.happy {
+    color: #000;
+    background-color: #c8c0ff;
+  }
+
+  .kosm-modal.inverted > .header.happy {
+    color: #000;
+    background-color: #ffc0cb;
+  }
+
   .kosm-modal-actions {
     text-align: right;
     padding-bottom: 4px;
@@ -73,7 +83,11 @@ dialog.className = '__kosmModalRoot';
 dialog.style.position = 'fixed';
 document.body.append(dialog);
 ReactDOM.render(
-  <Modal className="kosmPriorityDialog" globalName="$dialog"/>,
+  <Modal
+    className="kosmPriorityDialog"
+    globalName="$dialog"
+    happyTitle={true}
+  />,
   dialog,
 );
 
@@ -83,6 +97,10 @@ floatingForm.className = '__kosmModalRoot';
 floatingForm.style.position = 'fixed';
 document.body.append(floatingForm);
 ReactDOM.render(
-  <Modal className="kosmFormDialog" globalName="$floatingForm"/>,
+  <Modal
+    className="kosmFormDialog"
+    globalName="$floatingForm"
+    happyTitle={false}
+  />,
   floatingForm,
 );
