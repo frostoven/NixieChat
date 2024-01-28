@@ -12,7 +12,9 @@
     "build-prod": "npm-run-all --parallel build-prod-server build-prod-client",
     "run-dev-server": "nodemon --watch server/.build --inspect server/.build/server.js",
     "dev": "NODE_ENV=development npm-run-all build-dev-server --parallel watch-dev-client watch-dev-server run-dev-server",
-    "start": "NODE_ENV=production node server/.build/server.js"
+    "start": "NODE_ENV=production node server/.build/server.js",
+    "start-node": "npm start",
+    "start-bun": "NODE_ENV=production bun server/.build/server.js"
   },
   "devDependencies": {
     "@babel/core": "7.21.3",
