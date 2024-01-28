@@ -36,3 +36,17 @@ npm run dev
 
 Once the build commences, please give Webpack a few seconds to finish booting.
 Once done, you may access the server at `http://localhost:42069`.
+
+## Clustered setup
+
+#### External web servers
+Normal Socket.io rules on
+[sticky sessions](https://socket.io/docs/v4/using-multiple-nodes)
+apply.
+
+#### Multi-Node setup
+
+NixieChat supports PostgreSQL as an optional back-end for managing inter-server
+device notifications. We currently don't have a guide on setting this up. Please
+[raise an issue](https://github.com/frostoven/NixieChat/issues)
+on GitHub if you'd like us to prioritize making such a guide.
