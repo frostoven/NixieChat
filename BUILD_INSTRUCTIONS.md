@@ -37,6 +37,21 @@ npm run dev
 Once the build commences, please give Webpack a few seconds to finish booting.
 Once done, you may access the server at `http://localhost:42069`.
 
+## Configs and overrides
+
+The `.[name].example.json` files are example config files. You may copy-paste
+them, remove the `.example` part from their names, and you'll have working
+configs populated with defaults ready to go.
+
+Additionally, there are some environment variables you can set that will always
+override whatever is in the config files:
+```
+PORT=number          | Changes the server's web listening port.
+NO_COLOR=1           | Disables terminal colors and ASCII characters.
+NODE_ENV=development | Makes the application and build processes run in dev mode.
+NODE_ENV=production  | Makes the application and build processes run in prod mode.
+``` 
+
 ## Clustered setup
 
 #### External web servers
