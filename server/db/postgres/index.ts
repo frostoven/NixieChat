@@ -36,10 +36,10 @@ async function initPgConnection(io: Server) {
     process.exit(1);
   }
 
-  console.log('=================================================================');
   const pg = secretsFile.pgConnection;
   console.log(
-    `Initiating PG connection: ${pg.user}@${pg.host}:${pg.port}/${pg.database}`,
+    '\nInitiating PG connection:\n ' +
+    `${pg.user}@${pg.host}:${pg.port}/${pg.database}`,
   );
   const pool = new Pool(secretsFile.pgConnection);
 

@@ -7,6 +7,7 @@ import { configFile } from './db/configFile';
 import { getPgClusterEmitter, initPgConnection } from './db/postgres';
 import { initSocketApi } from './socketProcessing';
 import { Emitter } from '@socket.io/postgres-emitter';
+import { ascii } from './utils/ascii';
 
 if (process.env.NODE_ENV === 'development') {
   // Force unhandled promise rejections to throw errors during dev testing.
@@ -47,14 +48,19 @@ function buildRoutes(clusterEmitter: Emitter | null) {
   app.use(require('./routes/error.server.route'));
 
   // Show boot message.
-  console.log('=================================================================');
-  console.log('Client can be accessed at:\n',
-    `http://localhost:${configFile.serverPort}`,
-  );
+  ascii.log('').dark().drawLine().reset();
+  console.log('Client can be accessed at:');
+  ascii.bold().green().log(
+    ` http://localhost:${configFile.serverPort}`,
+  ).reset();
+
   if (process.env.NODE_ENV === 'development') {
-    console.log('Note: WebPack will need a bit of time to finish booting.');
+    ascii.italic().log(
+      'Note: WebPack will need a bit of time to finish booting.',
+    ).reset();
   }
-  console.log('=================================================================');
+
+  ascii.dark().drawLine().reset().log('');
 
   // Readies the websocket listeners.
   initSocketApi(clusterEmitter);
