@@ -91,6 +91,8 @@ class Accounts {
   }
 }
 
+window.$nixieDebugUtils.accounts = Accounts;
+
 export {
   Accounts,
 };

@@ -30,6 +30,8 @@ class Settings {
   }
 }
 
+window.$nixieDebugUtils.settings = Settings;
+
 export {
   Settings,
 };

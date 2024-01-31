@@ -75,7 +75,9 @@ async function sha256(stringOrBuffer, returnAsString = true) {
 }
 
 try {
-  window.NixieDebugUtils = {
+  window.$nixieDebugUtils = {
+    ...window.$nixieDebugUtils,
+    getRandomBits,
     get256RandomBits,
     getSafeRandomIntInclusive,
     sha256,
