@@ -568,6 +568,7 @@ export default class Modal extends React.Component {
     const modalProps = { ...this.props };
     delete modalProps.className;
     delete modalProps.globalName;
+    delete modalProps.happyTitle;
 
     return (
       <SemanticModal
