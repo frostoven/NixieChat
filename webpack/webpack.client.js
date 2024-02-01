@@ -2,8 +2,19 @@
 //  Client bundle                                                            //
 // ========================================================================= //
 
+const webpack = require('webpack');
 const { clearInterval } = require('node:timers');
 const exec = require('child_process').exec;
+
+let dbDriver;
+switch (process.env.PLATFORM) {
+  case 'desktop':
+    dbDriver = 'sqlite';
+    break;
+  case 'web':
+  default:
+    dbDriver = 'indexeddb';
+}
 
 module.exports = {
   target: 'web',
@@ -30,7 +41,7 @@ module.exports = {
 
   output: {
     path: __dirname + '/../client/.build',
-    publicPath: 'client/.build/',
+    publicPath: 'build/',
     filename: '[name].js',
   },
 
@@ -75,6 +86,33 @@ module.exports = {
   },
 
   plugins: [
+    /**
+     * This acts like a string find-replace mechanism within the bundle. We use
+     * this to allow bundling desktop-only libs (such as SQLite) into the
+     * desktop client while using IndexedDB in the browser (we avoid IndexedDB
+     * because it has poor support and a spec that's still changing). The
+     * reason this plugin is useful is that the web version won't bundle
+     * desktop-only code, and vice-versa.
+     *
+     * @example
+     * export default function getDbByPlatform() {
+     *   // @ts-ignore - __DB_IMPORT__ is dynamically set by Webpack at build time.
+     *   switch (__DB_IMPORT__) {
+     *     case 'indexeddb':
+     *       return import('./indexeddb_module_name');
+     *     case 'sqlite':
+     *       return import('./sqlite_module_name');
+     *   }
+     * }
+     *
+     * export {
+     *   getDbByPlatform,
+     * }
+     */
+    new webpack.DefinePlugin({
+      __DB_IMPORT__: `'${dbDriver}'`,
+    }),
+
     // Update the terminal title with build info.
     {
       apply: (compiler) => {
