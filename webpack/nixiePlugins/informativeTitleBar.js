@@ -1,3 +1,7 @@
+/**
+ * This file released by Frostoven under the MIT License.
+ */
+
 const { exec } = require('child_process');
 const { clearInterval } = require('node:timers');
 
