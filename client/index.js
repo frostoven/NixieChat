@@ -20,6 +20,11 @@ import { clientEmitterAction } from './emitters/clientEmitterAction';
  *  * create a SHA-256 address of the person's public key.
  */
 
+// import { getDbByPlatform } from './storage/EncryptedAccountStorage/driver';
+// getDbByPlatform().then((driver) => {
+//   driver.run();
+// }).catch(console.error);
+
 if (
   location.protocol === 'http:' &&
   ![ 'localhost', '127.0.0.1' ].includes(location.hostname)
