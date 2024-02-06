@@ -10,6 +10,10 @@ type KeyMapSignature = { [key: string]: Function };
  * of focus to prevent multiple visible components from taking keyboard input
  * all at once.
  *
+ * Additionally, attempts to track certain states such as Caps Lock, though
+ * this isn't guaranteed to work reliably, and only updates state when *other*
+ * keys are pressed.
+ *
  * Meant to be used within React components that respond to key bindings.
  *
  * @example
@@ -33,6 +37,9 @@ type KeyMapSignature = { [key: string]: Function };
  *   };
  */
 class AutoKeyMap {
+  // Attempt at tracking Caps Lock.
+  static capsLockOn = false;
+
   // Used to keep track of what has focus.
   private static _windowStackOrder: string[] = [];
 
@@ -86,6 +93,11 @@ class AutoKeyMap {
   }
 
   handleKey = (event: KeyboardEvent) => {
+    // Update CapsLock state.
+    if (event.getModifierState!) {
+      AutoKeyMap.capsLockOn = event.getModifierState('CapsLock');
+    }
+
     if (!this._keyMap || this._destroyed) {
       return;
     }
