@@ -1,5 +1,5 @@
 import React from 'react';
-import { NxField } from '../Generic/NxField';
+import { NxField } from './NxField';
 import {
   Button,
   Form,
@@ -24,7 +24,7 @@ interface Props {
 }
 
 class PasswordChooser extends React.Component<Props> {
-  autoKeyMap = new AutoKeyMap();
+  autoKeyMap = new AutoKeyMap({ stealFocus: true });
   state = {
     password: '',
     confirmPassword: '',

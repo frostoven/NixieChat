@@ -5,6 +5,9 @@
 /** Function signature. */
 type KeyMapSignature = { [key: string]: Function };
 
+/** The total amount of instances that have been created since app boot. */
+let totalInstances = 0;
+
 /**
  * Convenience class for quickly binding keys to handlers. Also has a concept
  * of focus to prevent multiple visible components from taking keyboard input
@@ -17,6 +20,8 @@ type KeyMapSignature = { [key: string]: Function };
  * Meant to be used within React components that respond to key bindings.
  *
  * @example
+ *   autoKeyMap = new AutoKeyMap();
+ *
  *   componentDidMount() {
  *     this.autoKeyMap.bindKeys({
  *       Enter: this.handleAccept,
@@ -60,7 +65,7 @@ class AutoKeyMap {
     stealFocus?: boolean,
   } = {}) {
     if (!windowId) {
-      windowId = `${Math.random()}`;
+      windowId = `${totalInstances++}${Math.random()}`;
     }
     this._windowId = windowId;
 
