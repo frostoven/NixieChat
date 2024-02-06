@@ -10,6 +10,8 @@ class NxField extends React.Component {
     placeholder: PropTypes.any,
     value: PropTypes.any,
     autoFocus: PropTypes.bool,
+    isPassword: PropTypes.bool,
+    visible: PropTypes.bool,
     onChange: PropTypes.func,
   };
 
@@ -18,13 +20,19 @@ class NxField extends React.Component {
     help: null,
     placeholder: null,
     autoFocus: false,
+    isPassword: false,
+    visible: true,
     onChange: () => {
     },
   };
 
   render() {
+    if (!this.props.visible) {
+      return null;
+    }
+
     const {
-      label, help, placeholder, value, autoFocus, onChange,
+      label, help, placeholder, value, autoFocus, isPassword, onChange,
     } = this.props;
     return (
       <Form.Field>
@@ -37,7 +45,9 @@ class NxField extends React.Component {
           autoFocus={autoFocus}
           placeholder={placeholder}
           value={value}
-          onChange={this.props.onChange}
+          type={isPassword ? 'password' : null}
+          autoComplete={isPassword ? 'on' : null}
+          onChange={onChange}
         />
       </Form.Field>
     );
