@@ -96,6 +96,11 @@
   border-color: #212121 transparent transparent !important;
 }
 
+.ui.inverted.input > input {
+  color: #000 !important;
+  background-color: #fff !important;
+}
+
 /* Slow the default down loader, which is quite frantic. */
 .ui.loader:after {
   animation: loader 6.25s linear infinite;
