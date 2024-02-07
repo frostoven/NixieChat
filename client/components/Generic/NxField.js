@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Form } from 'semantic-ui-react';
+import { Form, Input } from 'semantic-ui-react';
 import { ContextualHelp } from './ContextualHelp';
+import { Settings } from '../../storage/cacheFrontends/Settings';
 
 class NxField extends React.Component {
   static propTypes = {
     label: PropTypes.any,
     help: PropTypes.any,
+    rightSideComponent: PropTypes.any,
     placeholder: PropTypes.any,
     value: PropTypes.any,
     autoFocus: PropTypes.bool,
@@ -18,6 +20,7 @@ class NxField extends React.Component {
   static defaultProps = {
     label: '',
     help: null,
+    rightSideComponent: null,
     placeholder: null,
     autoFocus: false,
     isPassword: false,
@@ -31,8 +34,11 @@ class NxField extends React.Component {
       return null;
     }
 
+    const darkMode = Settings.isDarkModeEnabled() || false;
+
     const {
-      label, help, placeholder, value, autoFocus, isPassword, onChange,
+      label, help, rightSideComponent, placeholder, value, autoFocus,
+      isPassword, onChange,
     } = this.props;
     return (
       <Form.Field>
@@ -41,14 +47,19 @@ class NxField extends React.Component {
           &nbsp;
           {help ? <ContextualHelp>{help}</ContextualHelp> : null}
         </label>
-        <input
+        <Input
+          inverted={!darkMode}
+          action={!!rightSideComponent}
           autoFocus={autoFocus}
           placeholder={placeholder}
           value={value}
-          type={isPassword ? 'password' : null}
+          type={isPassword ? 'password' : 'text'}
           autoComplete={isPassword ? 'on' : null}
           onChange={onChange}
-        />
+        >
+          <input/>
+          {rightSideComponent}
+        </Input>
       </Form.Field>
     );
   }
