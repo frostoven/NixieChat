@@ -17,29 +17,7 @@ import { NxField } from '../Generic/NxField';
 import { setPromiseTimeout } from '../../utils';
 import { KeyStrength } from '../../../shared/KeyStrength';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
-
-// Used to pick a server error message at random. The reason we randomise them
-// is that they all look pretty, and all look like valid error message
-// candidates due to their bright backgrounds.
-function randomErrorColor() {
-  const options = [
-    'orange', 'olive', 'teal', 'blue', 'violet', 'purple', 'pink',
-  ];
-  return options[~~(options.length * Math.random())];
-}
-
-// Used for situations where the user has not given themselves a private name.
-// Generates a random name that changes every time the 'Add contact' screen is
-// launched.
-// Example output: 'Phantom 69'
-function randomLocalName() {
-  const nameTypes = [ 'Phantom', 'Shade', 'Nameless', 'Kraken', 'Wolfe' ];
-  return (
-    nameTypes[~~(nameTypes.length * Math.random())] +
-    ' ' +
-    `${Math.random()}`.slice(-2)
-  );
-}
+import { randomAccountName, randomErrorColor } from '../../../shared/textGen';
 
 class ContactFinder extends React.Component {
   state = {
@@ -55,7 +33,7 @@ class ContactFinder extends React.Component {
   constructor(props) {
     super(props);
     const acc = Accounts.getActiveAccount();
-    this.state.localGreetingName = acc.publicName || randomLocalName();
+    this.state.localGreetingName = acc.publicName || randomAccountName();
     this.invitationItems = {};
   }
 
