@@ -12,7 +12,9 @@ class NxField extends React.Component {
     placeholder: PropTypes.any,
     value: PropTypes.any,
     autoFocus: PropTypes.bool,
+    usernameHint: PropTypes.string,
     isPassword: PropTypes.bool,
+    autoComplete: PropTypes.string,
     visible: PropTypes.bool,
     onChange: PropTypes.func,
   };
@@ -23,7 +25,9 @@ class NxField extends React.Component {
     rightSideComponent: null,
     placeholder: null,
     autoFocus: false,
+    usernameHint: '',
     isPassword: false,
+    autoComplete: 'on',
     visible: true,
     onChange: () => {
     },
@@ -38,10 +42,30 @@ class NxField extends React.Component {
 
     const {
       label, help, rightSideComponent, placeholder, value, autoFocus,
-      isPassword, onChange,
+      autoComplete, usernameHint, isPassword, onChange,
     } = this.props;
     return (
       <Form.Field>
+        {
+          // This spoofs a username field to allow password managers to
+          // associate account names with passwords.
+          // Further reading:
+          // https://www.chromium.org/developers/design-documents/form-styles-that-chromium-understands/
+          // https://www.chromium.org/developers/design-documents/create-amazing-password-forms/
+          usernameHint ?
+            <input
+              id="username"
+              type="text"
+              name="username"
+              autoComplete="username"
+              required
+              value={usernameHint}
+              style={{ display: 'none' }}
+              onChange={() => {
+              }}
+            /> :
+            null
+        }
         <label>
           {label}
           &nbsp;
@@ -54,7 +78,7 @@ class NxField extends React.Component {
           placeholder={placeholder}
           value={value}
           type={isPassword ? 'password' : 'text'}
-          autoComplete={isPassword ? 'on' : null}
+          autoComplete={isPassword ? autoComplete : null}
           onChange={onChange}
         >
           <input/>

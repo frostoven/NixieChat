@@ -22,6 +22,8 @@ interface Props {
   body: JSX.Element | string | null,
   help?: JSX.Element | string | null | undefined,
   noConfirm?: boolean,
+  usernameHint?: string,
+  autoComplete?: string,
   onChoosePassword: Function,
 }
 
@@ -63,7 +65,9 @@ class PasswordChooser extends React.Component<Props> {
   };
 
   render() {
-    const { header, body, help, noConfirm } = this.props;
+    const {
+      header, body, help, noConfirm, autoComplete, usernameHint,
+    } = this.props;
     const { password, confirmPassword, error } = this.state;
     const labelText = noConfirm ? 'Password' : 'Password (leave empty to skip)';
     const darkMode = Settings.isDarkModeEnabled();
@@ -79,7 +83,9 @@ class PasswordChooser extends React.Component<Props> {
             autoFocus
             placeholder={noConfirm ? 'Password' : 'Optional Password'}
             value={password}
+            usernameHint={usernameHint}
             isPassword={true}
+            autoComplete={autoComplete || 'on'}
             onChange={(event: { target: { value: string; }; }) => {
               this.setState({ password: event.target.value });
             }}
@@ -91,6 +97,7 @@ class PasswordChooser extends React.Component<Props> {
             placeholder={'Confirm Password'}
             value={confirmPassword}
             isPassword={true}
+            autoComplete={'on'}
             onChange={(event: { target: { value: string; }; }) => {
               this.setState({ confirmPassword: event.target.value });
             }}
