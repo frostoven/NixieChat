@@ -19,7 +19,9 @@ const capsLockWarnStyle: React.CSSProperties = {
 
 interface Props {
   header: JSX.Element | string,
-  body: JSX.Element | string,
+  body: JSX.Element | string | null,
+  help?: JSX.Element | string | null | undefined,
+  noConfirm?: boolean,
   onChoosePassword: Function,
 }
 
@@ -43,7 +45,8 @@ class PasswordChooser extends React.Component<Props> {
   }
 
   handleSubmit = () => {
-    if (this.state.password !== this.state.confirmPassword) {
+    const noConfirm = this.props.noConfirm;
+    if (!noConfirm && (this.state.password !== this.state.confirmPassword)) {
       return this.setState({
         error: 'Passwords do not match.',
       });
@@ -60,9 +63,9 @@ class PasswordChooser extends React.Component<Props> {
   };
 
   render() {
-    console.log('Caps state:', AutoKeyMap.capsLockOn);
-    const { header, body } = this.props;
+    const { header, body, help, noConfirm } = this.props;
     const { password, confirmPassword, error } = this.state;
+    const labelText = noConfirm ? 'Password' : 'Password (leave empty to skip)';
     const darkMode = Settings.isDarkModeEnabled();
     return (
       <Segment style={{ textAlign: 'left' }} inverted={!darkMode}>
@@ -71,13 +74,10 @@ class PasswordChooser extends React.Component<Props> {
 
         <Form>
           <NxField
-            label="Password (leave empty to skip)"
-            help={
-              'This will encrypt your contacts list, account info, and chat ' +
-              'passwords.'
-            }
+            label={labelText}
+            help={help}
             autoFocus
-            placeholder={'Optional Password'}
+            placeholder={noConfirm ? 'Password' : 'Optional Password'}
             value={password}
             isPassword={true}
             onChange={(event: { target: { value: string; }; }) => {
@@ -87,7 +87,7 @@ class PasswordChooser extends React.Component<Props> {
 
           <NxField
             label="Confirm Password"
-            visible={!!password}
+            visible={!!password && !noConfirm}
             placeholder={'Confirm Password'}
             value={confirmPassword}
             isPassword={true}
