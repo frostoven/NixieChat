@@ -25,26 +25,6 @@ const oldestAllowedTime = 1700000000000;
 const MIN_UI_TRANSITION_MS = 250;
 
 /**
- * Represents a one-sided React-friendly representation of a ContactCreator
- * object.
- *
- * @typedef {{
- *   isOutbound: (boolean|null), greeting: string, localAccountId: string,
- *   contactPublicName: (string|null), contactGreetingName: (string|null),
- *   contactPubKey: (CryptoKey|null), contactSocketId: (null|string), time: number,
- *   localPublicName: (string|null), error: (string|null), id: (string),
- *   localPubKey: (Buffer|null), rsvpAnswer: (InvitationResponse|null),
- *   receiverName: (null|string), initiatorName: (null|string),
- *   dhPrepPercentage: (number), dhPrepStatusMessage: (string),
- *   sharedSecret: (null|Uint8Array), localGreetingName: (null|string),
- *   contactGreetingMessage: (string), localGreeting: string,
- *   localDhPubKey: (null|ArrayBuffer), contactDhPubKey: (null|ArrayBuffer),
- *   contactPemKey: (null|string), initiatorSocketId: (null|string),
- *   receiverSocketId: (null|string)
- * }} InvitationInfo
- */
-
-/**
  * Used for both inbound and outbound invitations.
  *
  * Dev note:
