@@ -15,16 +15,18 @@ function stringToUtf8Uint8Array(string) {
   return new TextEncoder().encode(string);
 }
 
+/**
+ * @param {Uint8Array} uint8Array
+ * @return {string}
+ */
 function uint8ArrayToHexString(uint8Array) {
   return Array.from(uint8Array).map(
     b => b.toString(16).padStart(2, '0'),
   ).join('');
 }
 
-// Intended purpose: Ephemeral message IDs.
-// Returns a 256 bit string, or the equivalent Uint8Array if `false` is passed in.
-function get256RandomBits(returnAsString = true) {
-  const uint8Array = new Uint8Array(32);
+function getRandomBits(count = 256, returnAsString = true) {
+  const uint8Array = new Uint8Array(count / 8);
   const rng = crypto.getRandomValues(uint8Array);
   if (returnAsString) {
     return uint8ArrayToHexString(rng);
@@ -32,6 +34,12 @@ function get256RandomBits(returnAsString = true) {
   else {
     return rng;
   }
+}
+
+// Returns a 256 bit string, or the equivalent Uint8Array if `false` is passed
+// in.
+function get256RandomBits(returnAsString = true) {
+  return getRandomBits(256, returnAsString);
 }
 
 // This function under the MIT license. Taken from:
@@ -91,7 +99,7 @@ catch (error) {
 /**
  * Merges multiple instances of Uint8Array into a single Uint8Array.
  * @param {Uint8Array[]} arrayOfArrays - An array that contains uint8 arrays.
- * @return {Uint8Array}
+ * @return {Uint8Array|null}
  */
 function mergeUint8Arrays(arrayOfArrays) {
   let totalLength = 0;
@@ -100,7 +108,12 @@ function mergeUint8Arrays(arrayOfArrays) {
   // Unsure if there's a way of doing without looping twice, seeing as we need
   // total length upfront. Looping this way is fast anyhow.
   for (let i = 0, len = arrayOfArrays.length; i < len; i++) {
-    totalLength += arrayOfArrays[i].length
+    const view = arrayOfArrays[i];
+    if (!ArrayBuffer.isView(view)) {
+      console.error('[mergeUint8Arrays] Received non-view item:', view);
+      return null;
+    }
+    totalLength += view.length;
   }
 
   // Will contain all our other arrays' contents.
@@ -126,6 +139,7 @@ export {
   stringToArrayBuffer,
   arrayBufferToString,
   uint8ArrayToHexString,
+  getRandomBits,
   get256RandomBits,
   getSafeRandomIntInclusive,
   sha256,
