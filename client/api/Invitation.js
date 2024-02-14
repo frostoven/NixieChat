@@ -7,6 +7,7 @@ import { getDiffieHellman } from 'diffie-hellman';
 import { KeyStrengthFriendly } from '../../shared/KeyStrength';
 import { clientEmitterAction } from '../emitters/clientEmitterAction';
 import {
+  getRandomBits,
   get256RandomBits,
   setPromiseTimeout,
   uint8ArrayToHexString,
@@ -123,6 +124,8 @@ class Invitation {
   _localAccountId = null;
   _receiverName = null;
   _initiatorName = null;
+  _receiverSalt = null;
+  _initiatorSalt = null;
   _contactSocketId = null;
   _localSocketId = null;
   _time = 0;
@@ -200,6 +203,42 @@ class Invitation {
       return this.logRoError('initiatorName');
     }
     this._initiatorName = value;
+  }
+
+  /**
+   * @return {null|Uint8Array}
+   */
+  get receiverSalt() {
+    this._receiverSalt === null && this.logNullRead('receiverSalt');
+    return this._receiverSalt;
+  }
+
+  /**
+   * @return {null|Uint8Array}
+   */
+  set receiverSalt(value) {
+    if (this._receiverSalt !== null) {
+      return this.logRoError('receiverSalt');
+    }
+    this._receiverSalt = value;
+  }
+
+  /**
+   * @return {null|Uint8Array}
+   */
+  get initiatorSalt() {
+    this._initiatorSalt === null && this.logNullRead('initiatorSalt');
+    return this._initiatorSalt;
+  }
+
+  /**
+   * @return {null|Uint8Array}
+   */
+  set initiatorSalt(value) {
+    if (this._initiatorSalt !== null) {
+      return this.logRoError('initiatorSalt');
+    }
+    this._initiatorSalt = value;
   }
 
   /**
@@ -486,6 +525,8 @@ class Invitation {
       receiverName: this._receiverName,
       receiverSocketId:
         this._isOutbound ? this._contactSocketId : this._localSocketId,
+      initiatorSalt: this._initiatorSalt,
+      receiverSalt: this._receiverSalt,
 
       /* Contact info */
       contactSocketId: this._contactSocketId,
@@ -851,9 +892,10 @@ class Invitation {
    * key. The originating process should trigger between stages 2 and 3, though
    * this will usually only arrive after 3 has completed.
    * @param dhPubKey
+   * @param {string} salt
    * @return {Promise<void>}
    */
-  async stageless_receiveDhPubKey({ dhPubKey }) {
+  async stageless_receiveDhPubKey({ dhPubKey, salt }) {
     const targetId = this.contactSocketId;
     dhPubKey && (this.contactDhPubKey = dhPubKey);
     if (!this.contactDhPubKey) {
@@ -863,6 +905,13 @@ class Invitation {
     }
     this._dhPrepStatusMessage = `Ready to connect`;
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
+
+    if (this.isOutbound) {
+      this.receiverSalt = new Uint8Array(salt);
+    }
+    else {
+      this.initiatorSalt = new Uint8Array(salt);
+    }
   }
 
   async stage3_prepareDhKey({ modGroup }) {
@@ -904,10 +953,21 @@ class Invitation {
 
     this.localDhKeyExchange = alice;
 
+    // To help with randomness, each client produces a salt for later use.
+    const salt = getRandomBits(512, false);
+    if (this.isOutbound) {
+      this.initiatorSalt = new Uint8Array(salt);
+    }
+    else {
+      this.receiverSalt = new Uint8Array(salt);
+    }
+
     return {
       targetId,
       dhPubKey: alice.getPublicKey(),
       modGroup: this.dhModGroup,
+      needDhReply: null,
+      salt,
     };
   }
 

@@ -223,7 +223,7 @@ class NixieApi {
       return;
     }
 
-    const { targetId, dhPubKey, needDhReply, modGroup } = options;
+    const { targetId, dhPubKey, needDhReply, modGroup, salt } = options;
 
     // Requirement: 'target' must be string. Cannot be empty.
     if (!assertReject.nonEmptyString(
@@ -237,6 +237,7 @@ class NixieApi {
       dhPubKey,
       needDhReply,
       modGroup,
+      salt,
     });
   }
 }
