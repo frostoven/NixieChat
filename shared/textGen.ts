@@ -8,8 +8,8 @@ function randomAccountName(
   // Set: Creature types, but not character names.
   const nameTypes = [
     'Phantom', 'Shade', 'Nameless', 'Kraken', 'Wolfe', 'Manticore', 'Raptor',
-    'Hecatoncheires', 'Minotaur', 'Hydra', 'Pegasus', 'Chimera', 'Fox',
-    'Feline',
+    'Hecatoncheires', 'Minotaur', 'Hydra', 'Pegasus', 'Chimera', 'Kitsune',
+    'Fox', 'Feline',
     ...additionalNames,
   ];
 
