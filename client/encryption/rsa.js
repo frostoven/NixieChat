@@ -249,24 +249,30 @@ function signDataRsa(privateKey, data) {
   return signData(privateKey, data);
 }
 
-function exportPublicKey(keys, format = 'raw') {
+/**
+ * @return {Promise<Uint8Array>}
+ */
+async function exportPublicKey(keys, format = 'raw') {
   if (format === 'raw') {
-    return exportPublicKeyRaw(keys);
+    return await exportPublicKeyRaw(keys);
   }
   else if (format === 'pem' || !format) {
-    return exportPublicKeyString(keys);
+    return await exportPublicKeyString(keys);
   }
   else {
     console.error('Support export formats params are "raw" and null.');
   }
 }
 
-function exportPrivateKey(keys, format = 'raw') {
+/**
+ * @return {Promise<Uint8Array>}
+ */
+async function exportPrivateKey(keys, format = 'raw') {
   if (format === 'raw') {
-    return exportPrivateKeyRaw(keys);
+    return await exportPrivateKeyRaw(keys);
   }
   else if (format === 'pem' || !format) {
-    return exportPrivateKeyString(keys);
+    return await exportPrivateKeyString(keys);
   }
   else {
     console.error('Support export formats params are "raw" and null.');
