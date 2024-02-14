@@ -1,4 +1,4 @@
-import { StoreInterface } from '../../type/StoreInterface';
+import { StoreInterface } from '../../types/StoreInterface';
 
 class SqliteStorage implements StoreInterface {
   isDbReady() {

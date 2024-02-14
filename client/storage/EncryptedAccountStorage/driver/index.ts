@@ -1,6 +1,6 @@
 // Automatically imports database connector most appropriate to the current
 // platform.
-import { StoreInterface } from '../type/StoreInterface';
+import { StoreInterface } from '../types/StoreInterface';
 
 type CompatibleStore = { new(): StoreInterface };
 
