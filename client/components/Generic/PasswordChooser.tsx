@@ -38,6 +38,7 @@ class PasswordChooser extends React.Component<Props> {
   componentDidMount() {
     this.autoKeyMap.bindKeys({
       Enter: this.handleSubmit,
+      NumpadEnter: this.handleSubmit,
       Escape: this.handleClear,
     });
   }
