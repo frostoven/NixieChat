@@ -11,7 +11,6 @@ const serverEmitter: Socket = io(`ws://${location.host}`);
 async function refreshStorage() {
   const storage = new NixieStorage();
   await storage.initStorage();
-  await storage.buildAccountCollectionCache();
   clientEmitter.emit(clientEmitterAction.reloadApp);
 }
 
