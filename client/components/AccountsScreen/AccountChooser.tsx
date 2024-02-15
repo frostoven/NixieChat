@@ -80,17 +80,16 @@ class AccountChooser extends React.Component<Props, State> {
   checkForAutoLogin = () => {
     const accountStorage = this.accountStorage;
     const allAccounts = accountStorage.getAllAccountNames();
-    console.log('--------> all account names:', allAccounts, '| login count:', accountStorage.loginCount);
     // Note: This can happen immediately after app boot if the user has only
     // one account, and it's passwordless or has auto-login enabled.
     if (allAccounts.length === 1 && accountStorage.loginCount === 1) {
-      accountStorage.setActiveAccount(Object.keys(allAccounts)[0]);
+      accountStorage.setActiveAccount(allAccounts[0]);
       return this.props.onAccountActivated();
     }
   };
 
   getStatusIcon = (account: AccountCache) => {
-    if (account.decryptedAccount === null) {
+    if (account.decryptedData === null) {
       return <Icon name="lock"/>;
     }
     else {
@@ -99,7 +98,7 @@ class AccountChooser extends React.Component<Props, State> {
   };
 
   decryptionFriendly = (account: AccountCache) => {
-    if (account.decryptedAccount === null) {
+    if (account.decryptedData === null) {
       return '(locked)';
     }
     else {
@@ -134,7 +133,6 @@ class AccountChooser extends React.Component<Props, State> {
 
       if (success) {
         this.accountStorage.setActiveAccount(accountName);
-        console.log('Decrypted:', this.accountStorage.getActiveAccount());
         this.props.onAccountActivated();
       }
       else {
@@ -152,7 +150,6 @@ class AccountChooser extends React.Component<Props, State> {
     const loginCount = this.accountStorage.loginCount;
     const totalAccounts = this.accountStorage.totalAccounts;
     const plural = totalAccounts === 1 ? '' : 's';
-    console.log({ allAccounts });
 
     const {
       requestPasswordFor,

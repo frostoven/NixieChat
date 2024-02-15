@@ -8,7 +8,9 @@ import {
 } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
-import { Accounts } from '../../storage/cacheFrontends/Accounts';
+import {
+  EncryptedAccountStorage
+} from '../../storage/EncryptedAccountStorage';
 import { sharedConfig } from '../../../shared/config';
 import { clientEmitter } from '../../emitters/comms';
 import { ClientMessageType } from '../../emitters/ClientMessageType';
@@ -18,6 +20,8 @@ import { setPromiseTimeout } from '../../utils';
 import { KeyStrength } from '../../../shared/KeyStrength';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { randomAccountName, randomErrorColor } from '../../../shared/textGen';
+
+const accountStorage = new EncryptedAccountStorage();
 
 class ContactFinder extends React.Component {
   state = {
@@ -32,7 +36,7 @@ class ContactFinder extends React.Component {
 
   constructor(props) {
     super(props);
-    const acc = Accounts.getActiveAccount();
+    const acc = accountStorage.getActiveAccount().decryptedData;
     this.state.localGreetingName = acc.publicName || randomAccountName();
     this.invitationItems = {};
   }
@@ -122,7 +126,8 @@ class ContactFinder extends React.Component {
     }, async () => {
       const greetingName = this.state.localGreetingName || '(No name specified)';
       const { contactPublicName, localGreeting } = this.state;
-      const accountId = Accounts.getActiveAccount().accountId;
+      const activeAccount = accountStorage.getActiveAccount();
+      const accountId = activeAccount.decryptedData.accountId;
 
       await RemoteCrypto.sendInvitation(
         accountId, contactPublicName, localGreeting, greetingName,

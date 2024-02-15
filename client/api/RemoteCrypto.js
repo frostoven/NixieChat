@@ -1,7 +1,7 @@
 import { clientEmitter, serverEmitter } from '../emitters/comms';
 import { CryptoMessageType as Socket } from '../../shared/CryptoMessageType';
 import { MessageVersion } from '../../shared/MessageVersion';
-import { Accounts } from '../storage/cacheFrontends/Accounts';
+import { EncryptedAccountStorage } from '../storage/EncryptedAccountStorage';
 import { ClientMessageType } from '../emitters/ClientMessageType';
 import {
   clientEmitterAction as Action,
@@ -13,6 +13,8 @@ const verbose = logConfig.verboseHandshakeLogs;
 
 const nop = () => {
 };
+
+const accountStorage = new EncryptedAccountStorage();
 
 class RemoteCrypto {
   static namesPendingInvites = {};
@@ -39,19 +41,24 @@ class RemoteCrypto {
 
   // Makes you visible to the network so that you may receive invitations.
   static makeDiscoverable() {
-    /** @type CollectionCache */
-    const accountCollection = Accounts.getAccountCollection();
-    if (!accountCollection.length) {
+    /** @type {AccountCache[]} */
+    const accounts = accountStorage.getAllAccountsAsArray();
+    if (!accounts.length) {
       return console.log('No accounts on this device; skipping registration.');
     }
 
     const userRooms = [];
 
-    const accounts = accountCollection.asArray;
     for (let i = 0, len = accounts.length; i < len; i++) {
+      /** @type {AccountCache} */
+      const accountCache = accounts[i];
+      if (!accountCache.decryptedData) {
+        console.log(`-> Skipping registration of '${accountCache.accountName}' - not logged in.`);
+        continue;
+      }
       const {
         accountName, publicName, privateKey, publicKey, modulusHash,
-      } = accounts[i];
+      } = accountCache.decryptedData;
       if (publicName) {
         userRooms.push({
           pubName: publicName,
@@ -75,14 +82,14 @@ class RemoteCrypto {
           console.error('Socket error:', socketError);
         }
         else if (error) {
-          console.error('Error:', error);
+          console.error('Server error:', error);
         }
         else if (!rejected.length) {
           verbose && console.log('[makeDiscoverable] Success.');
         }
         else {
           console.warn(
-            '[makeDiscoverable] Some public names were rejected. Indexes:',
+            '[makeDiscoverable] Server rejected some public names. Indexes:',
             rejected,
           );
         }
@@ -112,8 +119,7 @@ class RemoteCrypto {
     // TODO: check from class instead.
     RemoteCrypto.namesPendingInvites[contactPublicName] = contactCreator;
 
-    const responseObject = await contactCreator.stage1_prepareInvitation()
-      .catch(console.error);
+    const responseObject = await contactCreator.stage1_prepareInvitation();
     responseObject.v = MessageVersion.sendInvitationV1;
 
     serverEmitter.timeout(20000).emit(
@@ -140,7 +146,7 @@ class RemoteCrypto {
   static async receiveInvitation(receiverName, {
     source, greetingName, greeting, pubKey, time, replyAddress,
   }) {
-    const account = Accounts.findAccountByPublicName({
+    const account = accountStorage.findAccountByPublicName({
       publicName: receiverName,
     });
 
@@ -156,7 +162,7 @@ class RemoteCrypto {
     // Receiving an invitation at random is a first (local) contact creation
     // step, so create a new instance to track it.
     const contactCreator = new Invitation({
-      localAccountId: account.accountId,
+      localAccountId: account.decryptedData.accountId,
       localSocketId: serverEmitter.id,
       contactPublicName: source,
     });
@@ -166,7 +172,7 @@ class RemoteCrypto {
 
     const responseObject = await contactCreator.stage1_prepareInvitationResponse({
       replyAddress, pubKey, time, greetingName, greeting,
-    }).catch(console.error);
+    });
 
     verbose && console.log('Sending invitation response.');
     clientEmitter.emit(Action.updateContactCreatorViews, contactCreator.getInfo());
@@ -211,7 +217,7 @@ class RemoteCrypto {
       greetingName,
       pubKey,
       replyAddress,
-    }).catch(console.error);
+    });
 
     clientEmitter.emit(ClientMessageType.receiveRsvpResponse, contactCreator.getInfo());
   }
@@ -232,7 +238,7 @@ class RemoteCrypto {
 
     const responseObject = await contactCreator.stage3_prepareDhKey({
       modGroup,
-    }).catch(console.error);
+    });
     responseObject.needDhReply = true;
 
     RemoteCrypto.trackedInvitesById[contactCreator.contactSocketId] = contactCreator;
@@ -245,7 +251,7 @@ class RemoteCrypto {
   // We've received a DH key from someone that we're in the process of becoming
   // contacts with.
   static async receiveDhPubKey(options) {
-    const { sourceId, dhPubKey, needDhReply, modGroup } = options;
+    const { sourceId, dhPubKey, needDhReply, modGroup, salt } = options;
 
     /** @type Invitation */
     const contactCreator = RemoteCrypto.trackedInvitesById[sourceId];
@@ -261,13 +267,13 @@ class RemoteCrypto {
     }
 
     await contactCreator.stageless_receiveDhPubKey({
-      dhPubKey,
-    }).catch(console.error);
+      dhPubKey, salt,
+    });
 
     if (needDhReply) {
       const responseObject = await contactCreator.stage3_prepareDhKey({
         modGroup,
-      }).catch(console.error);
+      });
       responseObject.needDhReply = false;
 
       verbose && console.log(`Sending DH key to prospective contact (as per request).`);

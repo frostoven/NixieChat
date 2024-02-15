@@ -3,8 +3,12 @@ import { Grid } from 'semantic-ui-react';
 import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
 import { Settings } from '../../storage/cacheFrontends/Settings';
-import { Accounts } from '../../storage/cacheFrontends/Accounts';
+import {
+  EncryptedAccountStorage
+} from '../../storage/EncryptedAccountStorage';
 import { CreateFirstContact } from '../ContactComponents/CreateFirstContact';
+
+const accountsStorage = new EncryptedAccountStorage();
 
 /** @type React.CSSProperties */
 const newAccountOptionsStyle = {
@@ -39,12 +43,12 @@ const columnRightStyle = {
 class ContactsAndChatGrid extends React.Component {
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const account = Accounts.getActiveAccount();
+    const account = accountsStorage.getActiveAccount().decryptedData;
 
     // If the user has no chats:
     // return <CreateFirstChat/>;
 
-    if (!account.contacts.length) {
+    if (!account?.contacts?.length) {
       return (
         <>
           <div style={newAccountOptionsStyle}>

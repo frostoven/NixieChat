@@ -45,7 +45,7 @@ class Settings {
   // flag is set, the app will attempt to decrypt all accounts with '0000'
   // during boot, only ask for password unlocks for those that fail to decrypt.
   static async setOneOrMoreAccountsUnencrypted(value) {
-    const cache = storage.settingsCache;
+    const cache = storage.settingsCache || {};
     cache.oneOrMoreAccountsUnencrypted = !!value;
     await storage.writeSettings(cache);
   }

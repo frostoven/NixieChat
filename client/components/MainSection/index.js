@@ -8,6 +8,10 @@ import {
 } from 'semantic-ui-react';
 import { ContactsAndChatGrid } from './ContactsAndChatGrid';
 import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  EncryptedAccountStorage,
+} from '../../storage/EncryptedAccountStorage';
+import { AccountsScreen } from '../AccountsScreen';
 
 const overlayStyle = {
   position: 'fixed',
@@ -174,11 +178,19 @@ const sidebarItems = () => {
 };
 
 const rightItems = () => [
-  { as: 'a', content: 'Button', key: 'doSomethingWithMe' },
+  { as: 'a', content: 'Become Invisible', key: 'becomeInvisible' },
 ];
 
 class MainSection extends React.Component {
+  accountStorage = new EncryptedAccountStorage();
+
   render() {
+    if (this.accountStorage.getActiveAccount() === null) {
+      return <AccountsScreen onAccountActivated={() => {
+        this.forceUpdate();
+      }}/>;
+    }
+
     return (
       <NavBar sidebarItems={sidebarItems()} rightItems={rightItems()}>
         <ContactsAndChatGrid/>

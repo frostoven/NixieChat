@@ -2,13 +2,13 @@ import { FrozenPasswordStore } from './PasswordStore';
 
 interface AccountCache {
   accountName: string,
-  decryptedAccount: DecryptedAccount | null,
+  decryptedData: DecryptedData | null,
   encryptedAccountBlob: Uint8Array,
   encryptedAccountIv: Uint8Array,
   passwordStore: FrozenPasswordStore,
 }
 
-interface DecryptedAccount {
+interface DecryptedData {
   accountId: string,
   accountName: string,
   personalName: string,
@@ -21,5 +21,5 @@ interface DecryptedAccount {
 
 export {
   AccountCache,
-  DecryptedAccount,
+  DecryptedData,
 };

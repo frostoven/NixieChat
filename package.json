@@ -52,6 +52,7 @@
     "semantic-ui-forest-themes": "1.0.3",
     "semantic-ui-react": "2.0.3",
     "socket.io-client": "4.7.2",
+    "sqlite3": "5.1.7",
     "webpack": "4.28.4",
     "webpack-cli": "3.3.12"
   },

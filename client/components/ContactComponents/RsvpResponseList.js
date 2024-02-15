@@ -135,8 +135,21 @@ class RsvpResponseList extends React.Component {
     this.forceUpdate();
   };
 
-  saveContact = () => {
-    console.log('tbd');
+  /** @param {InvitationInfo} info */
+  saveContact = (info) => {
+    console.log('save using:', info);
+    const {
+      localAccountId,
+      contactGreetingName,
+      contactPublicName,
+      contactPubKey,
+      contactPemKey,
+    } = info;
+
+    const name = contactGreetingName || contactPublicName;
+
+    // TODO: implement a createChat function.
+    console.log('chat creation tbd');
   };
 
   render() {

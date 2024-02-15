@@ -1,9 +1,13 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { AccountChooser } from './AccountChooser';
 import { AccountCreator } from './AccrountCreator';
-import { Accounts } from '../../storage/cacheFrontends/Accounts';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Button } from 'semantic-ui-react';
+import { NixieStorage } from '../../storage/NixieStorage';
+import {
+  EncryptedAccountStorage
+} from '../../storage/EncryptedAccountStorage';
 
 const headerStyle = {
   textAlign: 'center',
@@ -18,6 +22,7 @@ const accountsScreenStyle = {
   textAlign: 'center',
   margin: 0,
   overflow: 'auto',
+  zIndex: 1,
 };
 
 const chatBgStyle = {
@@ -27,7 +32,7 @@ const chatBgStyle = {
 };
 
 const chatBgStyleInverted = {
-  backgroundImage: 'revert',
+  backgroundColor: '#464646',
   ...accountsScreenStyle,
 };
 
@@ -36,27 +41,45 @@ const themeButtonStyle = {
   right: 8,
   top: 12,
   fontSize: '75%',
+  zIndex: 1,
 };
 
 class AccountsScreen extends React.Component {
+  static propTypes = {
+    onAccountActivated: PropTypes.func.isRequired,
+  };
+
+  plaintextStorage = new NixieStorage();
+  accountStorage = new EncryptedAccountStorage();
+
   render() {
+    const { onAccountActivated } = this.props;
     const darkMode = Settings.isDarkModeEnabled();
-    const accounts = Accounts.getAccountCollection();
+    const formStyle = darkMode ? chatBgStyleInverted : chatBgStyle;
+    const totalAccounts = this.accountStorage.totalAccounts;
+
     return (
-      <>
-        <div style={darkMode ? chatBgStyleInverted : chatBgStyle}>
+      <div>
+        <div className="f1adeInDown" style={formStyle}>
           <h3 style={headerStyle}>
-            NixieChat
+            Frostoven's NixieChat
           </h3>
           <div style={{ maxWidth: 640, margin: 'auto' }}>
-            {accounts.length ? <AccountChooser/> : <AccountCreator/>}
+            {
+              totalAccounts ?
+                <AccountChooser onAccountActivated={onAccountActivated}/> :
+                <AccountCreator onAccountActivated={onAccountActivated}/>
+            }
           </div>
         </div>
 
-        <Button style={themeButtonStyle} onClick={Settings.toggleDarkMode}>
+        <Button
+          secondary style={themeButtonStyle}
+          onClick={Settings.toggleDarkMode}
+        >
           Dark Mode
         </Button>
-      </>
+      </div>
     );
   }
 }

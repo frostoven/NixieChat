@@ -4,6 +4,7 @@ let storageInstance: StorageProxy | null = null;
 
 type StorageEngine = 'unknown' | 'IndexedDb';
 
+// TODO: Rename to UnencryptedStorage?
 class StorageProxy {
   readOnly!: boolean;
   storageEngine!: StorageEngine;

@@ -9,11 +9,15 @@ import {
   sha256,
 } from '../../utils';
 import { aesGcmDecrypt, aesGcmEncrypt } from '../../encryption/crypto-aes-gcm';
-import { exportRsaPrivateKey, exportRsaPublicKey } from '../../encryption/rsa';
+import {
+  exportRsaPrivateKey,
+  exportRsaPublicKey, importRsaPrivateKey,
+  importRsaPublicKey,
+} from '../../encryption/rsa';
 import { Settings } from '../cacheFrontends/Settings';
 import { getPasswordStore } from './getPasswordStore';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
-import { clientEmitter } from '../../emitters/comms';
+import { clientEmitter, initServerConnection } from '../../emitters/comms';
 import { AccountCache } from './types/AccountCache';
 
 let singletonInstance: EncryptedAccountStorage;
@@ -53,11 +57,12 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
 
   async createAccount(options: InitialStoreParamCreateAccount) {
     if (!options.password) {
-      // To ensure people don't pick encryptionless for the sake of a speed
-      // improvements alone, we always do encryption. 0000 is a good
-      // middle-ground: it's as insecure as using no password, but isn't more
-      // performant than actually using a password. Also gives us more
-      // transparent code as we account for non-encryption far less.
+      // When the user chooses to not have an account password, we just use
+      // "0000". It's as insecure as not having a password, but offers more
+      // transparent code use. Also ensures people don't pick passwordless for
+      // speed improvements alone (which is ridiculous anyway; it takes on
+      // average 0.7ms for an account to decrypt on my 2019 era laptop, or
+      // 0.4ms post-boot).
       options.password = '0000';
       await Settings.setOneOrMoreAccountsUnencrypted(true);
     }
@@ -77,8 +82,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     const blob = {
       ...options,
       accountId: get256RandomBits(true) as string,
-      publicKey: await exportRsaPublicKey(keyPair, 'raw'),
-      privateKey: await exportRsaPrivateKey(keyPair, 'raw'),
+      publicKey: await exportRsaPublicKey(keyPair, 'pem'),
+      privateKey: await exportRsaPrivateKey(keyPair, 'pem'),
       privateContactIdSalt: getRandomBits(768, true) as string,
       privateChatIdSalt: getRandomBits(768, true) as string,
     };
@@ -136,7 +141,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
           accountName,
           encryptedAccountBlob,
           encryptedAccountIv,
-          decryptedAccount: null,
+          decryptedData: null,
           passwordStore: getPasswordStore(),
         };
         this._accountCaches[accountName] = accountCache;
@@ -156,7 +161,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
           await this.attemptAccountDecryption({
             accountName,
             password: '0000',
-          })
+          });
         }
         catch (error) {
           console.error(error);
@@ -170,22 +175,23 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   }: {
     accountName: string, password: string,
   }) {
+    const account = this._accountCaches[accountName];
     const {
       encryptedAccountBlob,
       encryptedAccountIv,
-    } = this._accountCaches[accountName];
+    } = account;
 
-    let decryptedAccount: string | null = await aesGcmDecrypt(
+    let decryptedData: string | null = await aesGcmDecrypt(
       password,
       encryptedAccountBlob,
       encryptedAccountIv,
       true,
     );
 
-    if (decryptedAccount !== null) {
+    if (decryptedData !== null) {
       try {
-        this._accountCaches[accountName].decryptedAccount = JSON.parse(
-          decryptedAccount,
+        account.decryptedData = JSON.parse(
+          decryptedData,
         );
       }
       catch (error) {
@@ -193,8 +199,23 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
         return false;
       }
 
-      this._accountCaches[accountName].passwordStore.setPassword(password);
+      if (!account.decryptedData) {
+        console.error(`Failed to decrypt "${accountName}" - skipping.`);
+        return false;
+      }
+
+      // Convert stored PEM keys to CryptoKey.
+      account.decryptedData.publicKey = await importRsaPublicKey(
+        account.decryptedData.publicKey, 'pem',
+      );
+      account.decryptedData.privateKey = await importRsaPrivateKey(
+        account.decryptedData.privateKey, 'pem',
+      );
+
+      account.passwordStore.setPassword(password);
       this.loginCount++;
+      // This function is idempotent; it does nothing on duplicate calls.
+      initServerConnection();
       return true;
     }
     return false;
@@ -224,7 +245,14 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   }
 
   findAccountById({ id }: { id: string }) {
-    console.log('not yet implemented');
+    const accounts = this.getAllAccountsAsArray();
+    for (let i = 0, len = accounts.length; i < len; i++) {
+      const account = accounts[i];
+      if (account.decryptedData?.accountId === id) {
+        return account;
+      }
+    }
+    return null;
   }
 
   addContact() {
@@ -236,7 +264,15 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   getAccountByPublicName() {
   }
 
-  findAccountByPublicName({ publicName: source }) {
+  findAccountByPublicName({ publicName }) {
+    const accounts = this.getAllAccountsAsArray();
+    for (let i = 0, len = accounts.length; i < len; i++) {
+      const account = accounts[i];
+      if (account.decryptedData?.publicName === publicName) {
+        return account;
+      }
+    }
+    return null;
   }
 
   retrieveAllContacts() {

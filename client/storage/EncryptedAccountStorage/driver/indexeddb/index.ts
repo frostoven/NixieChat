@@ -65,7 +65,6 @@ class IdbAccountStorage implements StoreInterface {
         }
 
         db = target.result;
-        console.log('Accounts store ready.');
         return resolve(null);
       };
 
@@ -152,8 +151,6 @@ class IdbAccountStorage implements StoreInterface {
         return resolve(null);
       }
 
-      console.log('entering getAllEncryptedAccounts');
-
       const request = db!
         .transaction([ 'accounts' ], 'readonly')
         .objectStore('accounts')
@@ -161,7 +158,6 @@ class IdbAccountStorage implements StoreInterface {
 
       request.onsuccess = (event: Event) => {
         const target: IDBRequest = event.target as IDBRequest;
-        console.log('-> getAllEncryptedAccounts:', { event, target });
         resolve(target.result);
       };
 

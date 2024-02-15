@@ -1,4 +1,4 @@
-import { Accounts } from '../storage/cacheFrontends/Accounts';
+import { EncryptedAccountStorage } from '../storage/EncryptedAccountStorage';
 import { exportRsaPublicKey, importRsaPublicKey } from '../encryption/rsa';
 import { clientEmitter } from '../emitters/comms';
 import { showInvitationDialog } from '../modal/nixieDialogs';
@@ -24,6 +24,8 @@ const oldestAllowedTime = 1700000000000;
  * @type {number}
  */
 const MIN_UI_TRANSITION_MS = 250;
+
+const accountStorage = new EncryptedAccountStorage();
 
 /**
  * Used for both inbound and outbound invitations.
@@ -586,8 +588,8 @@ class Invitation {
         this.localGreeting = localGreeting
       );
 
-      const account = Accounts.findAccountById({ id: localAccountId });
-      this.localPublicName = account.publicName;
+      const account = accountStorage.findAccountById({ id: localAccountId });
+      this.localPublicName = account.decryptedData.publicName;
     }
   }
 
@@ -647,7 +649,7 @@ class Invitation {
     }
 
     const source = this.localPublicName.trim();
-    const localAccount = Accounts.findAccountByPublicName({
+    const localAccount = accountStorage.findAccountByPublicName({
       publicName: source,
     });
 
@@ -663,7 +665,7 @@ class Invitation {
 
     this.isOutbound = true;
     this.localPubKey = await exportRsaPublicKey({
-      publicKey: localAccount.publicKey,
+      publicKey: localAccount.decryptedData.publicKey,
     });
 
     this.initiatorName = this.localPublicName;
@@ -727,7 +729,6 @@ class Invitation {
     this.isOutbound = false;
     this._dhPrepStatusMessage = 'Awaiting the sender\'s public key...';
 
-
     this.initiatorName = this.contactPublicName;
     this.receiverName = this.localPublicName;
 
@@ -762,7 +763,7 @@ class Invitation {
     const ownResponse = await showInvitationDialog(this.getInfo());
 
     // Find the account associated with the requested public name.
-    const receivingAccount = Accounts.findAccountByPublicName({
+    const receivingAccount = accountStorage.findAccountByPublicName({
       publicName: this.localPublicName,
     });
 
@@ -778,7 +779,7 @@ class Invitation {
     }
 
     const localPubKey = await exportRsaPublicKey({
-      publicKey: receivingAccount.publicKey,
+      publicKey: receivingAccount.decryptedData.publicKey,
     });
 
     this.localPubKey = localPubKey;

@@ -3,13 +3,17 @@ import PropTypes from 'prop-types';
 import { Button, Form, Segment } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { InvitationResponse } from '../../../shared/InvitationResponse';
-import { Accounts } from '../../storage/cacheFrontends/Accounts';
+import {
+  EncryptedAccountStorage
+} from '../../storage/EncryptedAccountStorage';
 import { NxField } from '../Generic/NxField';
 import { RsaPreview } from '../Generic/RsaPreview';
 import { RsvpResponseList } from './RsvpResponseList';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Invitation } from '../../api/Invitation';
+
+const accountsStorage = new EncryptedAccountStorage();
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
@@ -174,15 +178,15 @@ class ReceiveInvitation extends React.Component {
       return '';
     }
 
-    let replyingAccount = Accounts.findAccountById({
+    let replyingAccount = accountsStorage.findAccountById({
       id: info.localAccountId,
     });
 
-    if (replyingAccount.publicName) {
-      return replyingAccount.publicName;
+    if (replyingAccount.decryptedData.publicName) {
+      return replyingAccount.decryptedData.publicName;
     }
     else {
-      return replyingAccount.personalName;
+      return replyingAccount.decryptedData.personalName;
     }
   };
 
