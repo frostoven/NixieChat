@@ -48,6 +48,7 @@ override whatever is in the config files:
 ```
 PORT=number          | Changes the server's web listening port.
 NO_COLOR=1           | Disables terminal colors and ASCII characters.
+PLATFORM=web|desktop | Use 'desktop' for SQLite support, 'web' uses IndexedDB.
 NODE_ENV=development | Makes the application and build processes run in dev mode.
 NODE_ENV=production  | Makes the application and build processes run in prod mode.
 ``` 
