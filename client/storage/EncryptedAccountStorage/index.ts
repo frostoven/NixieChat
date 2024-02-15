@@ -1,7 +1,7 @@
 import getDbByPlatform from './driver';
 import {
   StoreInterface,
-  InitialStoreParamCreateAccount,
+  AccountCreationParamsSignature,
 } from './types/StoreInterface';
 import {
   get256RandomBits,
@@ -19,6 +19,7 @@ import { getPasswordStore } from './getPasswordStore';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { clientEmitter, initServerConnection } from '../../emitters/comms';
 import { AccountCache } from './types/AccountCache';
+import { InvitationInfo } from '../../api/types/InvitationInfo';
 
 let singletonInstance: EncryptedAccountStorage;
 
@@ -55,7 +56,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     await this.dbStore.prepareAccountsStore();
   }
 
-  async createAccount(options: InitialStoreParamCreateAccount) {
+  async createAccount(options: AccountCreationParamsSignature) {
     if (!options.password) {
       // When the user chooses to not have an account password, we just use
       // "0000". It's as insecure as not having a password, but offers more

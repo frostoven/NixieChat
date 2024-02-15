@@ -1,14 +1,16 @@
+import { BasicAccountSignature } from "./AccountCache";
+
 interface StoreInterface {
   isDbReady: Function,
   prepareAccountsStore: Function,
-  createAccount: (options: AccountBlob) => Promise<any>,
+  createAccount: (options: BasicAccountSignature) => Promise<any>,
   getAllEncryptedAccounts: () => Promise<any[]|null>,
   getAccountsStore: Function,
   addContact: Function,
   retrieveAllContacts: Function,
 }
 
-interface InitialStoreParamCreateAccount {
+interface AccountCreationParamsSignature {
   accountName: string,
   personalName: string,
   publicName: string,
@@ -26,25 +28,6 @@ interface InitialStoreParamCreateAccount {
   // difficult to identify which chats belong to which accounts without
   // storing chats and accounts in the same encrypted blob.
   privateChatIdSalt: string,
-}
-
-interface FullStoreParamCreateAccount extends InitialStoreParamCreateAccount {
-  accountId: string,
-  modulusHash: Uint8Array,
-}
-
-/**
- * An encrypted blob describing everything about a specific account.
- * For IndexedDb, this represents one entry in a JS object.
- * For SQLite, this represents a single row in a table.
- */
-interface AccountBlob {
-  // Name used to identify the account before decryption. Note that this name
-  // is private; we never share this name with contacts as it can be used to
-  // identify encrypted accounts.
-  accountName: string,
-  encryptedAccountBlob: Uint8Array,
-  encryptedAccountIv: Uint8Array,
 }
 
 /**
@@ -86,9 +69,8 @@ interface MessageBlob {
 
 export {
   StoreInterface,
-  InitialStoreParamCreateAccount,
-  FullStoreParamCreateAccount,
-  AccountBlob,
+  AccountCreationParamsSignature,
+  BasicAccountSignature,
   ContactsBlob,
   ChatBlob,
 };
