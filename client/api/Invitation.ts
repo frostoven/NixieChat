@@ -14,6 +14,10 @@ import {
 } from '../utils';
 import { logConfig } from '../config/logging';
 
+// Note: We use this only for TS typing. The DH browser library we use mirrors
+// the node:crypto API. Node calls don't actually get bundled into the client.
+import { DiffieHellmanGroup } from 'node:crypto';
+
 const verbose = logConfig.verboseHandshakeLogs;
 const oldestAllowedTime = 1700000000000;
 
@@ -21,7 +25,6 @@ const oldestAllowedTime = 1700000000000;
  * Updates are sometimes sent out at sub-millisecond speed. Where UI updates
  * are involved, it helps to pause a bit so the user doesn't see frantic UI
  * movements.
- * @type {number}
  */
 const MIN_UI_TRANSITION_MS = 250;
 
@@ -30,13 +33,14 @@ const accountStorage = new EncryptedAccountStorage();
 /**
  * Used for both inbound and outbound invitations.
  *
- * Dev note:
+ * Imporant notes:
  * * For non-UI stuff, never reference the underscored variables at all, even
- *   from within the class. Use their getters and setters instead as they've
- *   been set up to check for possible problems extremely strictly.
+ *   from within this class. Use their getters and setters instead as they've
+ *   been set up to check for possible problems and are extremely strict about
+ *   preventing duplicate writes.
  * * For UI stuff, use only the getInfo() function and nothing else. It's
  *   React-friendly and assumes that we don't care about referencing different
- *   stages out of order.
+ *   stages out of order (which doubles are a progress-checking mechanism).
  */
 class Invitation {
 
@@ -46,76 +50,64 @@ class Invitation {
    * Stores all ContactCreator instances by ID. They are removed from this
    * object once the contact is added.
    */
-  static _instanceFromId = {};
+  private static _instanceFromId: { [key: string]: Invitation } = {};
 
   /**
    * String containing an error, or null if no error has occurred thus far. If
    * this is a string, then the player should redo the contact-adding process.
    * @type {null|string}
    */
-  error = null;
+  error: string | null = null;
 
   /**
    * True if an invitation has been sent out.
-   * @type {boolean}
    */
   invitationSent = false;
 
   /**
    * True if an invitation was received from an external party.
-   * @type {boolean}
    */
   invitationReceived = false;
 
   /**
    * If true, we've sent out and invitation and received a response.
-   * @type {boolean}
    */
   inviteResponseReceived = false;
 
   /**
    * The supposed real name of the contact.
-   * @type {string}
    */
   contactGreeting = '';
 
   /**
    * The greeting message we send out.
-   * @type {string}
    */
   localGreeting = '';
 
   /**
    * Number uniquely defining this instance.
-   * @type {string}
    */
-  _id = get256RandomBits();
+  private _id = get256RandomBits() as string;
 
   /**
    * 0: not yet started; 1: finished. Note that there's no public accessor for
    * this; it's exposed via getInfo() only. Currently used by the UI to update
    * status.
-   * @type {number}
-   * @private
    */
-  _dhPrepPercentage = 0;
+  private _dhPrepPercentage = 0;
 
   /**
    * Written description of _dhPrepPercentage. Note that there's no public
    * accessor for this; it's exposed via getInfo() only. Currently used by the
    * UI to update status.
-   * @type {string}
-   * @private
    */
-  _dhPrepStatusMessage = 'Preparing...';
+  private _dhPrepStatusMessage = 'Preparing...';
 
   /**
    * Method computed by both parties; never shared over the network. Note that
    * there's no public accessor for this; it's exposed via getInfo() only.
-   * @type {null|Uint8Array}
-   * @private
    */
-  _sharedSecret = null;
+  private _sharedSecret: Uint8Array | null = null;
 
   /* == Vars referenced by accessors  =========================== */
 
@@ -123,26 +115,26 @@ class Invitation {
   // getters. This is done so that the IDE can offer interactive docs (e.g.
   // Ctrl+Q with a selected variable in WebStorm).
 
-  _localAccountId = null;
-  _receiverName = null;
-  _initiatorName = null;
-  _receiverSalt = null;
-  _initiatorSalt = null;
-  _contactSocketId = null;
-  _localSocketId = null;
-  _time = 0;
-  _contactPublicName = null;
-  _contactGreetingName = null;
-  _localGreetingName = null;
-  _localPublicName = null;
-  _rsvpAnswer = null;
-  _isOutbound = null;
+  _localAccountId: string | null = null;
+  _receiverName: string | null = null;
+  _initiatorName: string | null = null;
+  _receiverSalt: Uint8Array | null = null;
+  _initiatorSalt: Uint8Array | null = null;
+  _contactSocketId: string | null = null;
+  _localSocketId: string | null = null;
+  _contactPublicName: string | null = null;
+  _contactGreetingName: string | null = null;
+  _localGreetingName: string | null = null;
+  _localPublicName: string | null = null;
+  _rsvpAnswer: number | null = null;
+  _isOutbound: boolean | null = null;
   _contactPubKey = null;
   _contactPemKey = null;
   _contactDhPubKey = null;
-  _localPubKey = null;
-  _localDhKeyExchange = null;
+  _localPubKey: Uint8Array| null = null;
+  _localDhKeyExchange: DiffieHellmanGroup | null = null;
   _dhModGroup = null;
+  _time = 0;
 
   /* == Strict getters and setters ============================== */
 
@@ -151,7 +143,7 @@ class Invitation {
   }
 
   set id(_) {
-    return console.error('[ContactCreator] Instance id is read-only.');
+    console.error('[ContactCreator] Instance id is read-only.');
   }
 
   /**
@@ -165,7 +157,8 @@ class Invitation {
 
   set localAccountId(value) {
     if (this._localAccountId !== null) {
-      return this.logRoError('localAccountId');
+      this.logRoError('localAccountId');
+      return;
     }
     this._localAccountId = value;
   }
@@ -185,7 +178,8 @@ class Invitation {
 
   set receiverName(value) {
     if (this._receiverName !== null) {
-      return this.logRoError('receiverName');
+      this.logRoError('receiverName');
+      return;
     }
     this._receiverName = value;
   }
@@ -202,43 +196,34 @@ class Invitation {
 
   set initiatorName(value) {
     if (this._initiatorName !== null) {
-      return this.logRoError('initiatorName');
+      this.logRoError('initiatorName');
+      return;
     }
     this._initiatorName = value;
   }
 
-  /**
-   * @return {null|Uint8Array}
-   */
   get receiverSalt() {
     this._receiverSalt === null && this.logNullRead('receiverSalt');
     return this._receiverSalt;
   }
 
-  /**
-   * @return {null|Uint8Array}
-   */
   set receiverSalt(value) {
     if (this._receiverSalt !== null) {
-      return this.logRoError('receiverSalt');
+      this.logRoError('receiverSalt');
+      return;
     }
     this._receiverSalt = value;
   }
 
-  /**
-   * @return {null|Uint8Array}
-   */
   get initiatorSalt() {
     this._initiatorSalt === null && this.logNullRead('initiatorSalt');
     return this._initiatorSalt;
   }
 
-  /**
-   * @return {null|Uint8Array}
-   */
   set initiatorSalt(value) {
     if (this._initiatorSalt !== null) {
-      return this.logRoError('initiatorSalt');
+      this.logRoError('initiatorSalt');
+      return;
     }
     this._initiatorSalt = value;
   }
@@ -254,7 +239,8 @@ class Invitation {
 
   set time(value) {
     if (this._time !== 0) {
-      return this.logRoError('time');
+      this.logRoError('time');
+      return;
     }
     this._time = value;
   }
@@ -270,7 +256,8 @@ class Invitation {
 
   set contactPublicName(value) {
     if (this._contactPublicName !== null) {
-      return this.logRoError('contactPublicName');
+      this.logRoError('contactPublicName');
+      return;
     }
     this._contactPublicName = value;
   }
@@ -286,7 +273,8 @@ class Invitation {
 
   set contactGreetingName(value) {
     if (this._contactGreetingName !== null) {
-      return this.logRoError('contactGreetingName');
+      this.logRoError('contactGreetingName');
+      return;
     }
     this._contactGreetingName = value;
   }
@@ -302,7 +290,8 @@ class Invitation {
 
   set localGreetingName(value) {
     if (this._localGreetingName !== null) {
-      return this.logRoError('localGreetingName');
+      this.logRoError('localGreetingName');
+      return;
     }
     this._localGreetingName = value;
   }
@@ -323,7 +312,8 @@ class Invitation {
 
   set contactSocketId(value) {
     if (this._contactSocketId !== null) {
-      return this.logRoError('contactSocketId');
+      this.logRoError('contactSocketId');
+      return;
     }
     this._contactSocketId = value;
   }
@@ -342,7 +332,8 @@ class Invitation {
 
   set localSocketId(value) {
     if (this._localSocketId !== null) {
-      return this.logRoError('localSocketId');
+      this.logRoError('localSocketId');
+      return;
     }
     this._localSocketId = value;
   }
@@ -359,7 +350,8 @@ class Invitation {
 
   set rsvpAnswer(value) {
     if (this._rsvpAnswer !== null) {
-      return this.logRoError('rsvpAnswer');
+      this.logRoError('rsvpAnswer');
+      return;
     }
     this._rsvpAnswer = value;
   }
@@ -375,7 +367,8 @@ class Invitation {
 
   set contactPubKey(value) {
     if (this._contactPubKey !== null) {
-      return this.logRoError('contactPubKey');
+      this.logRoError('contactPubKey');
+      return;
     }
     this._contactPubKey = value;
   }
@@ -391,7 +384,8 @@ class Invitation {
 
   set contactPemKey(value) {
     if (this._contactPemKey !== null) {
-      return this.logRoError('contactPemKey');
+      this.logRoError('contactPemKey');
+      return;
     }
     this._contactPemKey = value;
   }
@@ -407,7 +401,8 @@ class Invitation {
 
   set localPubKey(value) {
     if (this._localPubKey !== null) {
-      return this.logRoError('localPubKey');
+      this.logRoError('localPubKey');
+      return;
     }
     this._localPubKey = value;
   }
@@ -423,7 +418,8 @@ class Invitation {
 
   set contactDhPubKey(value) {
     if (this._contactDhPubKey !== null) {
-      return this.logRoError('contactDhPubKey');
+      this.logRoError('contactDhPubKey');
+      return;
     }
     this._contactDhPubKey = value;
   }
@@ -439,7 +435,8 @@ class Invitation {
 
   set localDhKeyExchange(value) {
     if (this._localDhKeyExchange !== null) {
-      return this.logRoError('localDhKeyExchange');
+      this.logRoError('localDhKeyExchange');
+      return;
     }
     this._localDhKeyExchange = value;
   }
@@ -456,7 +453,8 @@ class Invitation {
 
   set dhModGroup(value) {
     if (this._dhModGroup !== null) {
-      return this.logRoError('dhModGroup');
+      this.logRoError('dhModGroup');
+      return;
     }
     this._dhModGroup = value;
   }
@@ -473,7 +471,8 @@ class Invitation {
 
   set isOutbound(value) {
     if (this._isOutbound !== null) {
-      return this.logRoError('isOutbound');
+      this.logRoError('isOutbound');
+      return;
     }
     this._isOutbound = value;
   }
@@ -489,7 +488,8 @@ class Invitation {
 
   set localPublicName(value) {
     if (this._localPublicName !== null) {
-      return this.logRoError('localPublicName');
+      this.logRoError('localPublicName');
+      return;
     }
     this._localPublicName = value;
   }
@@ -561,7 +561,13 @@ class Invitation {
     localGreetingName = null,
     localGreeting,
     contactPublicName,
-  } = {}) {
+  }: {
+    localAccountId: string,
+    localSocketId: string,
+    localGreetingName: string | null,
+    localGreeting: string,
+    contactPublicName: string,
+  }) {
     Invitation._instanceFromId[this._id] = this;
 
     if (!contactPublicName || !localAccountId || !localAccountId) {
@@ -584,20 +590,27 @@ class Invitation {
         this.localGreetingName = localGreetingName
       );
 
+      // Dev note: Your IDE might complain this line shouldn't be checked for
+      // string because it's always string. I disagree; we're receiving this
+      // from the internet.
       typeof localGreeting === 'string' && (
         this.localGreeting = localGreeting
       );
 
       const account = accountStorage.findAccountById({ id: localAccountId });
+      if (account === null || account.decryptedData === null) {
+        this.error = 'It appears your account has been logged out';
+        return;
+      }
       this.localPublicName = account.decryptedData.publicName;
     }
   }
 
-  logNullRead(varName) {
+  logNullRead(varName: string) {
     console.warn(`[ContactCreator] Reading ${varName} before it's been set.`);
   }
 
-  logRoError(varName) {
+  logRoError(varName: string) {
     this.error = `${varName} may only be set once.`;
     console.error(`[ContactCreator] ${this.error}`);
   }
@@ -608,19 +621,11 @@ class Invitation {
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
   };
 
-  /**
-   * @param id
-   * @return {Invitation|null}
-   */
-  static getInstanceById(id) {
+  static getInstanceById(id: string) {
     return Invitation._instanceFromId[id] || null;
   }
 
-  /**
-   * @param id
-   * @return {InvitationInfo|null}
-   */
-  static getInfoById(id) {
+  static getInfoById(id: string) {
     const instance = Invitation._instanceFromId[id];
     if (instance) {
       return instance.getInfo();
@@ -648,19 +653,19 @@ class Invitation {
       );
     }
 
-    const source = this.localPublicName.trim();
+    const source = this.localPublicName?.trim();
     const localAccount = accountStorage.findAccountByPublicName({
       publicName: source,
     });
 
-    if (!localAccount) {
+    if (!localAccount || !localAccount.decryptedData) {
       this.error =
         `You don't have any account with the public name '${source}'`;
       return console.error(this.error);
     }
 
     const time = this.time = Date.now();
-    const target = this.contactPublicName.trim();
+    const target = this.contactPublicName?.trim();
     const greeting = this.localGreeting.trim();
 
     this.isOutbound = true;
@@ -710,6 +715,9 @@ class Invitation {
     }
 
     if (
+      // Dev note: Your IDE might complain this line shouldn't be checked for
+      // string because it's always string. I disagree; we're receiving this
+      // from the internet.
       typeof replyAddress !== 'string' ||
       !(pubKey instanceof ArrayBuffer) ||
       typeof time !== 'number'
@@ -767,9 +775,10 @@ class Invitation {
       publicName: this.localPublicName,
     });
 
-    if (!receivingAccount) {
+    if (!receivingAccount || !receivingAccount.decryptedData) {
       this.error = 'Failed to receive invite. Please try again.';
-      return $dialog.alert({
+      // @ts-ignore - JSDoc is not descriptive enough to appease TS.
+      return window.$dialog.alert({
         header: 'Invite Response Failed',
         body: 'Could not respond to invite because none of your accounts ' +
           `appear to have the public name "${this.localPublicName}" ` +
@@ -867,7 +876,8 @@ class Invitation {
     if (isNaN(time) || !time || time < oldestAllowedTime) {
       this.error = 'System time appears to be invalid.';
       console.error('[ContactCreator] Invalid time:', time);
-      $dialog.alert({
+      // @ts-ignore - JSDoc is not descriptive enough to appease TS.
+      window.$dialog.alert({
         prioritise: true,
         header: 'Error',
         body: 'An error occurred while processing the response - invalid time',
@@ -892,9 +902,6 @@ class Invitation {
    * doing DH computations etc. while we wait for the other side to send their
    * key. The originating process should trigger between stages 2 and 3, though
    * this will usually only arrive after 3 has completed.
-   * @param dhPubKey
-   * @param {string} salt
-   * @return {Promise<void>}
    */
   async stageless_receiveDhPubKey({ dhPubKey, salt }) {
     const targetId = this.contactSocketId;
@@ -955,12 +962,12 @@ class Invitation {
     this.localDhKeyExchange = alice;
 
     // To help with randomness, each client produces a salt for later use.
-    const salt = getRandomBits(512, false);
+    const salt = getRandomBits(512, false) as Uint8Array;
     if (this.isOutbound) {
-      this.initiatorSalt = new Uint8Array(salt);
+      this.initiatorSalt = salt;
     }
     else {
-      this.receiverSalt = new Uint8Array(salt);
+      this.receiverSalt = salt;
     }
 
     return {
@@ -987,7 +994,7 @@ class Invitation {
       );
     }
 
-    const alice = this.localDhKeyExchange;
+    const alice = this.localDhKeyExchange!;
     const bobPublicKey = new Uint8Array(this.contactDhPubKey);
     // const aliceSecret = uint8ArrayToHexString(alice.computeSecret(bobPublicKey));
     const aliceSecret = alice.computeSecret(bobPublicKey);
