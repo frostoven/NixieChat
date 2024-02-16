@@ -116,6 +116,7 @@ class Invitation {
   // Ctrl+Q with a selected variable in WebStorm).
 
   _localAccountId: string | null = null;
+  _localAccountName: string | null = null;
   _receiverName: string | null = null;
   _initiatorName: string | null = null;
   _receiverSalt: Uint8Array | null = null;
@@ -131,7 +132,7 @@ class Invitation {
   _contactPubKey = null;
   _contactPemKey = null;
   _contactDhPubKey = null;
-  _localPubKey: Uint8Array| null = null;
+  _localPubKey: Uint8Array | null = null;
   _localDhKeyExchange: DiffieHellmanGroup | null = null;
   _dhModGroup = null;
   _time = 0;
@@ -148,7 +149,6 @@ class Invitation {
 
   /**
    * Unique identifier of our own account.
-   * @type {null|string}
    */
   get localAccountId() {
     this._localAccountId === null && this.logNullRead('localAccountId');
@@ -161,6 +161,22 @@ class Invitation {
       return;
     }
     this._localAccountId = value;
+  }
+
+  /**
+   * Unique name of our own account.
+   */
+  get localAccountName() {
+    this._localAccountName === null && this.logNullRead('localAccountName');
+    return this._localAccountName;
+  }
+
+  set localAccountName(value) {
+    if (this._localAccountName !== null) {
+      this.logRoError('localAccountName');
+      return;
+    }
+    this._localAccountName = value;
   }
 
   /**
@@ -523,7 +539,7 @@ class Invitation {
       time: this._time,
       initiatorName: this._initiatorName,
       initiatorSocketId:
-        this._isOutbound ? this._localSocketId : this.contactSocketId,
+        this._isOutbound ? this._localSocketId : this._contactSocketId,
       receiverName: this._receiverName,
       receiverSocketId:
         this._isOutbound ? this._contactSocketId : this._localSocketId,
@@ -545,6 +561,7 @@ class Invitation {
       // accounts screens and rapidly switch between them. Storing copies in
       // this class makes it clear which account is involved.
       localAccountId: this._localAccountId,
+      localAccountName: this._localAccountName,
       localGreeting: this.localGreeting,
       localPublicName: this._localPublicName,
       localGreetingName: this._localGreetingName,
@@ -557,12 +574,14 @@ class Invitation {
 
   constructor({
     localAccountId,
+    localAccountName,
     localSocketId,
     localGreetingName = null,
     localGreeting,
     contactPublicName,
   }: {
     localAccountId: string,
+    localAccountName: string,
     localSocketId: string,
     localGreetingName: string | null,
     localGreeting: string,
@@ -570,8 +589,14 @@ class Invitation {
   }) {
     Invitation._instanceFromId[this._id] = this;
 
-    if (!contactPublicName || !localAccountId || !localAccountId) {
-      this.error = '[ContactCreator] Invalid options specified.';
+    if (
+      !contactPublicName || !localGreetingName || !localAccountId || !localAccountName
+    ) {
+      this.error = '[ContactCreator] Received malformed invitation ';
+      !contactPublicName && (this.error += `(contact name: "${contactPublicName}") `);
+      !localGreetingName && (this.error += `(greeting: "${localGreetingName}") `);
+      !localAccountId && (this.error += `(account ID: "${localAccountId}") `);
+      !localAccountName && (this.error += `(Own name: "${localAccountName}") `);
       console.error(this.error);
     }
     else {
@@ -583,16 +608,17 @@ class Invitation {
       );
 
       this.localAccountId = localAccountId;
+      this.localAccountName = localAccountName;
       this.contactPublicName = contactPublicName;
       this.localSocketId = localSocketId;
-
-      typeof localGreetingName === 'string' && (
-        this.localGreetingName = localGreetingName
-      );
 
       // Dev note: Your IDE might complain this line shouldn't be checked for
       // string because it's always string. I disagree; we're receiving this
       // from the internet.
+      typeof localGreetingName === 'string' && (
+        this.localGreetingName = localGreetingName
+      );
+
       typeof localGreeting === 'string' && (
         this.localGreeting = localGreeting
       );
@@ -637,6 +663,10 @@ class Invitation {
    * Prepares an invitation to be sent to another device.
    */
   async stage1_prepareInvitation() {
+    if (this.error) {
+      return;
+    }
+
     if (this.invitationSent) {
       this.error = 'Failed to send invite. Please try again.';
       return console.error(
@@ -698,6 +728,10 @@ class Invitation {
     time,
     greeting,
   }) {
+    if (this.error) {
+      return;
+    }
+
     if (this.invitationSent) {
       this.error = 'Failed to receive invite. Please try again.';
       return console.error(
@@ -715,9 +749,6 @@ class Invitation {
     }
 
     if (
-      // Dev note: Your IDE might complain this line shouldn't be checked for
-      // string because it's always string. I disagree; we're receiving this
-      // from the internet.
       typeof replyAddress !== 'string' ||
       !(pubKey instanceof ArrayBuffer) ||
       typeof time !== 'number'
@@ -847,6 +878,10 @@ class Invitation {
     pubKey,
     replyAddress,
   }) {
+    if (this.error) {
+      return;
+    }
+
     if (this.inviteResponseReceived) {
       console.warn('Seems we received a duplicate invitation response.');
       return;
@@ -904,6 +939,10 @@ class Invitation {
    * this will usually only arrive after 3 has completed.
    */
   async stageless_receiveDhPubKey({ dhPubKey, salt }) {
+    if (this.error) {
+      return;
+    }
+
     const targetId = this.contactSocketId;
     dhPubKey && (this.contactDhPubKey = dhPubKey);
     if (!this.contactDhPubKey) {
@@ -923,6 +962,10 @@ class Invitation {
   }
 
   async stage3_prepareDhKey({ modGroup }) {
+    if (this.error) {
+      return;
+    }
+
     if (!modGroup) {
       this.error = 'Invalid modGroup: ' + modGroup;
       return console.error('[ContactCreator] Invalid modGroup:', modGroup);
@@ -980,6 +1023,10 @@ class Invitation {
   }
 
   async stage4_computeSharedSecret() {
+    if (this.error) {
+      return;
+    }
+
     this._dhPrepPercentage = 0.75;
     this._dhPrepStatusMessage = `Computing shared secret...`;
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());

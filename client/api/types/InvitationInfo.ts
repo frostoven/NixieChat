@@ -16,6 +16,7 @@ interface InvitationInfo {
   initiatorSalt: (null | Uint8Array),
   receiverSalt: (null | Uint8Array),
   localAccountId: string,
+  localAccountName: string,
   contactGreetingName: (string | null),
   contactPubKey: (CryptoKey | null),
   contactSocketId: (null | string),
