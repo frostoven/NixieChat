@@ -212,6 +212,7 @@ class RsvpResponseList extends React.Component {
         receiverName,
         receiverSocketId,
         localPubKey,
+        localPemKey,
         contactPublicName,
         contactGreetingName,
         contactGreetingMessage,
@@ -298,7 +299,11 @@ class RsvpResponseList extends React.Component {
                 )
               }
 
-              <RsaPreview pubKey={contactPubKey} pemKey={contactPemKey}/>
+              <RsaPreview
+                contactPubKey={contactPubKey} contactPemKey={contactPemKey}
+                localPubKey={localPubKey} localPemKey={localPemKey}
+                contactName={contactGreetingName}
+              />
 
               {!sharedSecret && <>
                 Click 'Connect' to start the connection process. Please beware
@@ -364,7 +369,11 @@ class RsvpResponseList extends React.Component {
                 that this takes some time.
               </>}
 
-              <RsaPreview pubKey={contactPubKey} pemKey={contactPemKey}/>
+              <RsaPreview
+                contactPubKey={contactPubKey} contactPemKey={contactPemKey}
+                localPubKey={localPubKey} localPemKey={localPemKey}
+                contactName={contactGreetingName}
+              />
 
               <InitHandshake/>
 

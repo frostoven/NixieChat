@@ -219,6 +219,8 @@ class ReceiveInvitation extends React.Component {
       contactGreetingMessage,
       contactPubKey,
       contactPemKey,
+      localPubKey,
+      localPemKey,
     } = info;
 
     if (this.state.waitingForConfirmation) {
@@ -288,7 +290,11 @@ class ReceiveInvitation extends React.Component {
             />
           </Form>
         </Segment>
-        <RsaPreview pubKey={contactPubKey} pemKey={contactPemKey}/>
+        <RsaPreview
+          contactPubKey={contactPubKey} contactPemKey={contactPemKey}
+          localPubKey={localPubKey} localPemKey={localPemKey}
+          contactName={contactGreetingName}
+        />
       </div>
     );
   }

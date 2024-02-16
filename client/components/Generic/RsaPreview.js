@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Settings } from '../../storage/cacheFrontends/Settings';
-import { Accordion, Icon, Segment } from 'semantic-ui-react';
+import { Accordion, Button, Icon, Segment } from 'semantic-ui-react';
 import randomart from 'randomart';
 
 const asciiArtSymbols = {
@@ -61,28 +61,82 @@ const pemContainerStyle = {
   textAlign: 'center',
 };
 
+const MiniButton = ({ children, onClick }) => {
+  return (
+    <div
+      style={{
+        height: 29,
+        padding: 3,
+        cursor: 'pointer',
+        display: 'inline-block',
+        width: '40%',
+        color: '#fff',
+        backgroundColor: '#41878b',
+        fontWeight: 'bold',
+        borderRadius: 4,
+      }}
+      onClick={onClick}
+    >
+      {children}
+    </div>
+  );
+};
+
 class RsaPreview extends React.Component {
   static propTypes = {
-    pubKey: PropTypes.object.isRequired,
-    pemKey: PropTypes.string.isRequired,
-  };
-
-  state = {
-    showAdvancedInfo: false,
+    contactName: PropTypes.string.isRequired,
+    contactPubKey: PropTypes.instanceOf(Uint8Array).isRequired,
+    contactPemKey: PropTypes.string.isRequired,
+    localPubKey: PropTypes.instanceOf(Uint8Array).isRequired,
+    localPemKey: PropTypes.string.isRequired,
   };
 
   toggleAdvancedInfo = () => {
     this.setState({ showAdvancedInfo: !this.state.showAdvancedInfo });
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      showAdvancedInfo: false,
+      artView: Settings.preferRsaArtView(),
+      showOwnKey: false,
+    };
+  }
+
   genRsaPreview = ({ visible }) => {
     if (!visible) {
       return;
     }
 
-    const { pubKey, pemKey } = this.props;
     const charWidth = 68;
     const charHeight = 36;
+
+    const { artView, showOwnKey } = this.state;
+
+    const {
+      contactPubKey, contactPemKey, localPubKey, localPemKey,
+    } = this.props;
+
+    const randomartStyle = {
+      ...randomartContainerStyle,
+    };
+
+    const pemStyle = {
+      ...pemContainerStyle,
+    };
+
+    let pubKey, pemKey;
+    if (showOwnKey) {
+      pubKey = localPubKey;
+      pemKey = localPemKey;
+      randomartStyle.border = pemStyle.border = '4px solid #c77c33';
+    }
+    else {
+      pubKey = contactPubKey;
+      pemKey = contactPemKey;
+      randomartStyle.border = pemStyle.border = '4px solid #3cb137';
+    }
 
     const randomartString = randomart(
       pubKey,
@@ -95,26 +149,53 @@ class RsaPreview extends React.Component {
       },
     );
 
-    return (
-      <>
-        <pre style={randomartContainerStyle}>
+    if (artView) {
+      return (
+        <pre style={randomartStyle}>
           <code style={asciiStyle}>
             {randomartString}
           </code>
         </pre>
-
-        <pre style={pemContainerStyle}>
+      );
+    }
+    else {
+      return (
+        <pre style={pemStyle}>
           <code style={asciiStyle}>
             {pemKey}
           </code>
         </pre>
-      </>
-    );
+      );
+    }
+  };
+
+  genDescription = () => {
+    if (this.state.showOwnKey) {
+      return 'Your own RSA-4096 digital signature is as follows:';
+    }
+    else {
+      return `${this.props.contactName}'s RSA-4096 digital signature is as ` +
+        'follows:';
+    }
+  };
+
+  switchArtView = () => {
+    this.setState({
+      artView: !this.state.artView,
+    }, () => {
+      Settings.setPreferRsaArtView(this.state.artView).catch(console.error);
+    });
+  };
+
+  switchOwner = () => {
+    this.setState({
+      showOwnKey: !this.state.showOwnKey,
+    });
   };
 
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const { showAdvancedInfo } = this.state;
+    const { showAdvancedInfo, showOwnKey } = this.state;
     return (
       <Segment inverted={!darkMode}>
         <Accordion inverted={!darkMode}>
@@ -126,10 +207,22 @@ class RsaPreview extends React.Component {
             View Digital Signature
           </Accordion.Title>
           <Accordion.Content active={showAdvancedInfo} style={contentStyle}>
-            The prospective contact's RSA-4096 digital signature is as
-            follows:
+            {this.genDescription()}
             <br/>
+
             {this.genRsaPreview({ visible: showAdvancedInfo })}
+            <br/>
+
+            <MiniButton onClick={this.switchArtView}>
+              Change Style
+            </MiniButton>
+
+            &nbsp;&nbsp;
+
+            <MiniButton onClick={this.switchOwner}>
+              {showOwnKey ? 'View Contact\'s Key' : 'View Own Key'}
+            </MiniButton>
+
           </Accordion.Content>
         </Accordion>
       </Segment>
