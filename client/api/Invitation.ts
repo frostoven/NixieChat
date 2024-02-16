@@ -568,8 +568,17 @@ class Invitation {
       localGreetingName: this._localGreetingName,
       localPubKey: this._localPubKey,
       localDhPubKey: this._localDhKeyExchange?.getPublicKey() || null,
+
+      // If the UI detects a serious error, it can use this to destroy the
+      // invite;
+      reportFatalError: this.uiReportsError,
     };
   }
+
+  uiReportsError = (error: string) => {
+    this.error = `${error}`;
+    clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
+  };
 
   /* == Class methods =========================================== */
 
