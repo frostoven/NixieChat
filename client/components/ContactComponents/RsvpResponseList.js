@@ -183,10 +183,12 @@ class RsvpResponseList extends React.Component {
         error,
         time,
         rsvpAnswer,
+        isOutbound,
         initiatorName,
         initiatorSocketId,
         receiverName,
         receiverSocketId,
+        localPubKey,
         contactPublicName,
         contactGreetingName,
         contactGreetingMessage,
@@ -197,6 +199,9 @@ class RsvpResponseList extends React.Component {
         contactDhPubKey,
         sharedSecret,
       } = invitation;
+
+      const initiatorPubKey = isOutbound ? localPubKey : contactPubKey;
+      const receiverPubKey = isOutbound ? contactPubKey : localPubKey;
 
       let name;
       if (contactGreetingName && contactGreetingName !== contactPublicName) {
@@ -294,8 +299,10 @@ class RsvpResponseList extends React.Component {
                   sharedSecret={sharedSecret}
                   initiatorName={initiatorName}
                   initiatorId={initiatorSocketId}
+                  initiatorPubKey={initiatorPubKey}
                   receiverName={receiverName}
                   receiverId={receiverSocketId}
+                  receiverPubKey={receiverPubKey}
                   time={time}
                 />
                 <br/><br/>
@@ -361,8 +368,10 @@ class RsvpResponseList extends React.Component {
                   sharedSecret={sharedSecret}
                   initiatorName={initiatorName}
                   initiatorId={initiatorSocketId}
+                  initiatorPubKey={initiatorPubKey}
                   receiverName={receiverName}
                   receiverId={receiverSocketId}
+                  receiverPubKey={receiverPubKey}
                   time={time}
                 />
                 <br/><br/>
