@@ -49,6 +49,22 @@ class Settings {
     cache.oneOrMoreAccountsUnencrypted = !!value;
     await storage.writeSettings(cache);
   }
+
+  // If true, the user prefers seeing key randomart over PEM text.
+  static preferRsaArtView() {
+    const cache = storage.settingsCache || {};
+    if (typeof cache.preferRsaArtView === 'undefined') {
+      return true;
+    }
+    return cache.preferRsaArtView;
+  }
+
+  // If true, the user prefers seeing key randomart over PEM text.
+  static async setPreferRsaArtView(value) {
+    const cache = storage.settingsCache || {};
+    cache.preferRsaArtView = !!value;
+    await storage.writeSettings(cache);
+  }
 }
 
 window.$nixieDebugUtils.settings = Settings;
