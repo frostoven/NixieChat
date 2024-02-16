@@ -243,8 +243,8 @@ class AccountCreator extends React.Component {
           />
 
           <NxField
-            label="Personal Name (only contacts can see this)"
-            help={'This is what people see after you\'ve been added as a contact.'}
+            label="Personal Alias (only contacts can see this)"
+            help={'The default name used when adding new contacts.'}
             placeholder="Personal Name"
             onChange={(event) => {
               this.setState({ personalName: event.target.value });
@@ -252,7 +252,7 @@ class AccountCreator extends React.Component {
           />
 
           <NxField
-            label="Optional Public Name"
+            label="Optional Public Name (needed to add you as a contact)"
             help={
               <div>
                 If you want people to invite you to chats, you need to have a

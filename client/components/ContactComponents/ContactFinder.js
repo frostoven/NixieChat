@@ -208,13 +208,15 @@ class ContactFinder extends React.Component {
         <br/><br/>
         <Form>
           <NxField
-            label="Your name"
+            label="Name You Want Shown"
             help={(
               <div>
-                The name you want the contact to see in the invitation.
+                The name by which you wish to identify yourself. Your
+                prospective contact will see this name in the invitation.
                 <br/><br/>
-                This name will be displayed in their contacts list if they
-                choose to accept your invitation.
+                This is the name that will be displayed in their contacts list
+                if they choose to accept your invitation. You're allowed to
+                pick a name that differs from your account details.
               </div>
             )}
             placeholder="Shown in Invite"
@@ -230,8 +232,10 @@ class ContactFinder extends React.Component {
             placeholder={'Contact\'s Public Name'}
             help={(
               <div>
+                You need to obtain this name from your prospective contact.
+                <br/>
                 You can only find contacts if they have a public name. Their
-                public names are visible only while they are online.
+                public names are usable only while they are online.
               </div>
             )}
             value={contactPublicName}
