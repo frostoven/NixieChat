@@ -4,9 +4,15 @@ import {
   ReceiveInvitation,
 } from '../components/ContactComponents/ReceiveInvitation';
 
-function showAddContactDialog() {
+function showAddContactDialog(ownPublicName) {
+  let header = 'Add Contact';
+  if (ownPublicName) {
+    // TODO: Allow disabling this in the settings.
+    header += ' - ' + ownPublicName;
+  }
+
   const contactAdder = $floatingForm.alert({
-    header: 'Add contact',
+    header,
     body: <ContactFinder/>,
     actions: [],
 

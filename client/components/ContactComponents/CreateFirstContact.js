@@ -2,6 +2,11 @@ import React from 'react';
 import { LargeCircleIconButton } from '../Generic/LargeCircleIconButton';
 import { Grid, GridColumn } from 'semantic-ui-react';
 import { showAddContactDialog } from '../../modal/nixieDialogs';
+import {
+  EncryptedAccountStorage
+} from '../../storage/EncryptedAccountStorage';
+
+const accountStorage = new EncryptedAccountStorage();
 
 const containerStyle = {
   textAlign: 'center',
@@ -39,6 +44,7 @@ class CreateFirstContact extends React.Component {
   };
 
   render() {
+    const account = accountStorage.getActiveAccount().decryptedData;
     return (
       <div style={containerStyle}>
         <Grid stackable columns={3} style={gridStyle}>
@@ -47,7 +53,7 @@ class CreateFirstContact extends React.Component {
               icon="user plus"
               label="Add your first contact"
               labelStyle={labelStyle}
-              onClick={showAddContactDialog}
+              onClick={() => showAddContactDialog(account.publicName)}
             />
           </GridColumn>
 
