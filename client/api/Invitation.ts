@@ -17,6 +17,7 @@ import { logConfig } from '../config/logging';
 // Note: We use this only for TS typing. The DH browser library we use mirrors
 // the node:crypto API. Node calls don't actually get bundled into the client.
 import { DiffieHellmanGroup } from 'node:crypto';
+import { InvitationInfo } from './types/InvitationInfo';
 
 const verbose = logConfig.verboseHandshakeLogs;
 const oldestAllowedTime = 1700000000000;
@@ -127,7 +128,7 @@ class Invitation {
   _contactGreetingName: string | null = null;
   _localGreetingName: string | null = null;
   _localPublicName: string | null = null;
-  _rsvpAnswer: number | null = null;
+  _rsvpAnswer: InvitationResponse | null = null;
   _isOutbound: boolean | null = null;
   _contactPubKey = null;
   _contactPemKey = null;
@@ -516,7 +517,7 @@ class Invitation {
    * Returns a one-sided React-friendly representation of this object.
    * @return InvitationInfo
    */
-  getInfo() {
+  getInfo(): InvitationInfo {
     // Dev note: For most of these values you should avoid referencing
     // strict-section getters from this function because they will log warnings
     // if their values are null (which exists to hint at devs that they've
@@ -635,11 +636,11 @@ class Invitation {
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
   };
 
-  static getInstanceById(id: string) {
+  static getInstanceById(id: string): Invitation | null {
     return Invitation._instanceFromId[id] || null;
   }
 
-  static getInfoById(id: string) {
+  static getInfoById(id: string): InvitationInfo | null {
     const instance = Invitation._instanceFromId[id];
     if (instance) {
       return instance.getInfo();

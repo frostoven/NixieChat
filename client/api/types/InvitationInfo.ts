@@ -15,16 +15,15 @@ interface InvitationInfo {
   receiverSocketId: (null | string),
   initiatorSalt: (null | Uint8Array),
   receiverSalt: (null | Uint8Array),
-  localAccountId: string,
-  localAccountName: string,
+  localAccountId: (null | string),
+  localAccountName: (null | string),
   contactGreetingName: (string | null),
   contactPubKey: (CryptoKey | null),
   contactSocketId: (null | string),
   contactPublicName: (string | null),
   localPublicName: (string | null),
-  greeting: string,
-  localPubKey: (Buffer | null),
-  rsvpAnswer: (typeof InvitationResponse | null),
+  localPubKey: (Uint8Array | null),
+  rsvpAnswer: (InvitationResponse | null),
   dhPrepPercentage: (number),
   dhPrepStatusMessage: (string),
   localDhPubKey: (null | ArrayBuffer),
@@ -34,6 +33,7 @@ interface InvitationInfo {
   localGreeting: string,
   contactPemKey: (null | string),
   sharedSecret: (null | Uint8Array),
+  reportFatalError: (error: string) => void,
 }
 
 export {
