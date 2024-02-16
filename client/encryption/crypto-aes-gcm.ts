@@ -17,6 +17,8 @@
  * * https://developer.mozilla.org/en-US/docs/Web/API/AesGcmParams
  */
 
+const VERBOSE = false;
+
 /**
  * Encrypts plaintext using AES-GCM with supplied password, for decryption with aesGcmDecrypt().
  *                                                                      (c) Chris Veness MIT Licence
@@ -61,17 +63,9 @@ async function aesGcmEncrypt(password: string, plaintext: string) {
 
   const ciphertext = new Uint8Array(ctBuffer);
 
-  // return btoa(ivStr + ctStr);
-  console.log({
-    iv,
-    ivStr: Array.from(iv).map(b => String.fromCharCode(b)).join(''),
-    ciphertext,
-    key,
-  });
-
   // @ts-ignore: Length does indeed exist.
   const keyLength = key.algorithm.length;
-  console.log(
+  VERBOSE && console.log(
     `[AES-GCM] Encryption took ${performance.now() - start}ms for a key ` +
     `of length ${keyLength} and plaintext of length ${plaintext.length}.`,
   );
@@ -129,7 +123,7 @@ async function aesGcmDecrypt(
 
     // @ts-ignore: Length does indeed exist.
     const keyLength = key.algorithm.length;
-    console.log(
+    VERBOSE && console.log(
       `[AES-GCM] Decryption took ${performance.now() - start}ms for a key ` +
       `of length ${keyLength} and plaintext of length ${plainBuffer.byteLength}.`,
     );
