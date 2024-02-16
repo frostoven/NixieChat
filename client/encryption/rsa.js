@@ -250,7 +250,7 @@ function signDataRsa(privateKey, data) {
 }
 
 /**
- * @return {Promise<Uint8Array>}
+ * @return {Promise<Uint8Array|string>}
  */
 async function exportPublicKey(keys, format = 'raw') {
   if (format === 'raw') {
@@ -265,7 +265,7 @@ async function exportPublicKey(keys, format = 'raw') {
 }
 
 /**
- * @return {Promise<Uint8Array>}
+ @return {Promise<Uint8Array|string>}
  */
 async function exportPrivateKey(keys, format = 'raw') {
   if (format === 'raw') {
