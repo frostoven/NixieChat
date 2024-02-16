@@ -34,7 +34,7 @@ const accountStorage = new EncryptedAccountStorage();
 /**
  * Used for both inbound and outbound invitations.
  *
- * Imporant notes:
+ * Important notes:
  * * For non-UI stuff, never reference the underscored variables at all, even
  *   from within this class. Use their getters and setters instead as they've
  *   been set up to check for possible problems and are extremely strict about
@@ -131,7 +131,8 @@ class Invitation {
   _rsvpAnswer: InvitationResponse | null = null;
   _isOutbound: boolean | null = null;
   _contactPubKey = null;
-  _contactPemKey = null;
+  _contactPemKey: string | null = null;
+  _localPemKey: string | null = null;
   _contactDhPubKey = null;
   _localPubKey: Uint8Array | null = null;
   _localDhKeyExchange: DiffieHellmanGroup | null = null;
@@ -408,6 +409,23 @@ class Invitation {
   }
 
   /**
+   * The local's digital signature in PEM form. Useful for visualizations.
+   * @type {null|string}
+   */
+  get localPemKey() {
+    this._localPemKey === null && this.logNullRead('localPemKey');
+    return this._localPemKey;
+  }
+
+  set localPemKey(value) {
+    if (this._localPemKey !== null) {
+      this.logRoError('localPemKey');
+      return;
+    }
+    this._localPemKey = value;
+  }
+
+  /**
    * Local account digital signature.
    * @type {null|CryptoKey}
    */
@@ -567,6 +585,7 @@ class Invitation {
       localPublicName: this._localPublicName,
       localGreetingName: this._localGreetingName,
       localPubKey: this._localPubKey,
+      localPemKey: this._localPemKey,
       localDhPubKey: this._localDhKeyExchange?.getPublicKey() || null,
 
       // If the UI detects a serious error, it can use this to destroy the
@@ -697,9 +716,16 @@ class Invitation {
     const greeting = this.localGreeting.trim();
 
     this.isOutbound = true;
+    const localPubKey = localAccount.decryptedData.publicKey;
     this.localPubKey = await exportRsaPublicKey({
-      publicKey: localAccount.decryptedData.publicKey,
-    });
+      publicKey: localPubKey,
+    }) as Uint8Array;
+
+    // Useful for visualisations.
+    this.localPemKey = await exportRsaPublicKey(
+      { publicKey: localPubKey },
+      'pem',
+    ) as string;
 
     this.initiatorName = this.localPublicName;
     this.receiverName = this.contactPublicName;
@@ -722,7 +748,7 @@ class Invitation {
   async stage1_prepareInvitationResponse({
     greetingName,
     replyAddress = '',
-    pubKey,
+    pubKey: contactPubKey,
     time,
     greeting,
   }) {
@@ -751,12 +777,12 @@ class Invitation {
     // from the internet.
     if (
       typeof replyAddress !== 'string' ||
-      !(pubKey instanceof ArrayBuffer) ||
+      !(contactPubKey instanceof ArrayBuffer) ||
       typeof time !== 'number'
     ) {
       console.error(
         '[ContactCreator] Received malformed invite. Dump:',
-        { replyAddress, greeting, pubKey, time },
+        { replyAddress, greeting, contactPubKey, time },
       );
       return;
     }
@@ -781,26 +807,24 @@ class Invitation {
       return console.error(this.error);
     }
 
-    if (!pubKey) {
+    if (!contactPubKey) {
       this.error = 'Cannot receive invite; bad contact public key.';
       return console.error(this.error);
     }
 
     // Node sends this as an ArrayBuffer, so we wrap it in a uint8 view.
-    pubKey = new Uint8Array(pubKey);
+    contactPubKey = new Uint8Array(contactPubKey);
 
     // Useful for visualisations.
-    let pemKey = await importRsaPublicKey(pubKey, 'raw');
+    let pemKey = await importRsaPublicKey(contactPubKey, 'raw');
     pemKey = await exportRsaPublicKey({ publicKey: pemKey }, 'pem');
     this.contactPemKey = pemKey;
 
     this.contactGreetingName = greetingName;
     this.contactGreeting = greeting;
     this.invitationReceived = true;
-    this.contactPubKey = pubKey;
+    this.contactPubKey = contactPubKey;
     this.time = time;
-
-    const ownResponse = await showInvitationDialog(this.getInfo());
 
     // Find the account associated with the requested public name.
     const receivingAccount = accountStorage.findAccountByPublicName({
@@ -821,9 +845,16 @@ class Invitation {
 
     const localPubKey = await exportRsaPublicKey({
       publicKey: receivingAccount.decryptedData.publicKey,
-    });
+    }) as Uint8Array;
 
     this.localPubKey = localPubKey;
+
+    // // Useful for visualisations.
+    this.localPemKey = await exportRsaPublicKey({
+      publicKey: receivingAccount.decryptedData.publicKey
+    }, 'pem') as string;
+
+    const ownResponse = await showInvitationDialog(this.getInfo());
 
     const {
       answer, greetingMessage, greetingName: localGreetingName,
@@ -876,7 +907,7 @@ class Invitation {
     answer,
     greetingName,
     greetingMessage,
-    pubKey,
+    pubKey: contactPubKey,
     replyAddress,
   }) {
     if (this.error) {
@@ -897,7 +928,7 @@ class Invitation {
       );
     }
 
-    if (!pubKey) {
+    if (!contactPubKey) {
       this.error = 'Invalid contact public key specified.';
       return;
     }
@@ -922,15 +953,15 @@ class Invitation {
     }
 
     // The server sends us the public key as an ArrayBuffer, convert to a view.
-    pubKey = new Uint8Array(pubKey);
+    contactPubKey = new Uint8Array(contactPubKey);
 
     // Used for visualizations.
-    let pemKey = await importRsaPublicKey(pubKey, 'raw');
-    pemKey = await exportRsaPublicKey({ publicKey: pemKey }, 'pem');
+    let contactPemKey = await importRsaPublicKey(contactPubKey, 'raw');
+    contactPemKey = await exportRsaPublicKey({ publicKey: contactPemKey }, 'pem');
 
     this.rsvpAnswer = answer;
-    this.contactPubKey = pubKey;
-    this.contactPemKey = pemKey;
+    this.contactPubKey = contactPubKey;
+    this.contactPemKey = contactPemKey;
   }
 
   /**

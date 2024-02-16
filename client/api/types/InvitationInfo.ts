@@ -18,7 +18,7 @@ interface InvitationInfo {
   localAccountId: (null | string),
   localAccountName: (null | string),
   contactGreetingName: (string | null),
-  contactPubKey: (CryptoKey | null),
+  contactPubKey: (Uint8Array | null),
   contactSocketId: (null | string),
   contactPublicName: (string | null),
   localPublicName: (string | null),
@@ -32,6 +32,7 @@ interface InvitationInfo {
   contactGreetingMessage: (string),
   localGreeting: string,
   contactPemKey: (null | string),
+  localPemKey: (null | string),
   sharedSecret: (null | Uint8Array),
   reportFatalError: (error: string) => void,
 }
