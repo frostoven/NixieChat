@@ -589,12 +589,9 @@ class Invitation {
   }) {
     Invitation._instanceFromId[this._id] = this;
 
-    if (
-      !contactPublicName || !localGreetingName || !localAccountId || !localAccountName
-    ) {
+    if (!contactPublicName || !localAccountId || !localAccountName) {
       this.error = '[ContactCreator] Received malformed invitation ';
       !contactPublicName && (this.error += `(contact name: "${contactPublicName}") `);
-      !localGreetingName && (this.error += `(greeting: "${localGreetingName}") `);
       !localAccountId && (this.error += `(account ID: "${localAccountId}") `);
       !localAccountName && (this.error += `(Own name: "${localAccountName}") `);
       console.error(this.error);
@@ -611,17 +608,8 @@ class Invitation {
       this.localAccountName = localAccountName;
       this.contactPublicName = contactPublicName;
       this.localSocketId = localSocketId;
-
-      // Dev note: Your IDE might complain this line shouldn't be checked for
-      // string because it's always string. I disagree; we're receiving this
-      // from the internet.
-      typeof localGreetingName === 'string' && (
-        this.localGreetingName = localGreetingName
-      );
-
-      typeof localGreeting === 'string' && (
-        this.localGreeting = localGreeting
-      );
+      this.localGreetingName = localGreetingName || null;
+      this.localGreeting = localGreeting || '';
 
       const account = accountStorage.findAccountById({ id: localAccountId });
       if (account === null || account.decryptedData === null) {
@@ -748,6 +736,9 @@ class Invitation {
       );
     }
 
+    // Dev note: Your IDE might complain this line shouldn't be checked for
+    // string because it's always string. I disagree; we're receiving this
+    // from the internet.
     if (
       typeof replyAddress !== 'string' ||
       !(pubKey instanceof ArrayBuffer) ||
