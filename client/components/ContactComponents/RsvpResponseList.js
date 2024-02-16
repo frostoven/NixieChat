@@ -64,7 +64,6 @@ const greetingStyle = {
 
 class RsvpResponseList extends React.Component {
   static propTypes = {
-    /** @type InvitationInfo[] */
     invitationIds: PropTypes.array,
     // The message to show on the left of the responses screen.
     overrideLoaderMessage: PropTypes.string,
@@ -161,6 +160,30 @@ class RsvpResponseList extends React.Component {
     console.log('chat creation tbd');
   };
 
+  /** @param {InvitationInfo} info */
+  genSharedPin = (info) => {
+    const { isOutbound, localPubKey, contactPubKey } = info;
+    const initiatorPubKey = isOutbound ? localPubKey : contactPubKey;
+    const receiverPubKey = isOutbound ? contactPubKey : localPubKey;
+
+    return (
+      <SharedPin
+        sharedSecret={info.sharedSecret}
+        initiatorName={info.initiatorName}
+        initiatorId={info.initiatorSocketId}
+        initiatorPubKey={initiatorPubKey}
+        receiverName={info.receiverName}
+        receiverId={info.receiverSocketId}
+        receiverPubKey={receiverPubKey}
+        time={info.time}
+        onError={(error) => {
+          info.reportFatalError(error);
+          this.forceUpdate();
+        }}
+      />
+    );
+  };
+
   render() {
     /** @type InvitationInfo[] */
     const invitationIds = this.props.invitationIds;
@@ -175,7 +198,7 @@ class RsvpResponseList extends React.Component {
     const rightSide = [];
 
     for (let i = 0, len = invitationIds.length; i < len; i++) {
-      let invitation = Invitation.getInfoById(invitationIds[i]);
+      let invitationInfo = Invitation.getInfoById(invitationIds[i]);
       const isSelected = selected === i;
 
       const {
@@ -198,10 +221,7 @@ class RsvpResponseList extends React.Component {
         dhPrepStatusMessage,
         contactDhPubKey,
         sharedSecret,
-      } = invitation;
-
-      const initiatorPubKey = isOutbound ? localPubKey : contactPubKey;
-      const receiverPubKey = isOutbound ? contactPubKey : localPubKey;
+      } = invitationInfo;
 
       let name;
       if (contactGreetingName && contactGreetingName !== contactPublicName) {
@@ -241,7 +261,7 @@ class RsvpResponseList extends React.Component {
         <Button
           fluid
           disabled={!readyToConnect}
-          onClick={() => this.startVerification(invitation)}
+          onClick={() => this.startVerification(invitationInfo)}
         >
           {readyToConnect ? 'Connect' : dhPrepStatusMessage}
         </Button>
@@ -295,19 +315,10 @@ class RsvpResponseList extends React.Component {
                 'Add Contact.' Otherwise, this is not the correct person.
 
                 <br/><br/>
-                <SharedPin
-                  sharedSecret={sharedSecret}
-                  initiatorName={initiatorName}
-                  initiatorId={initiatorSocketId}
-                  initiatorPubKey={initiatorPubKey}
-                  receiverName={receiverName}
-                  receiverId={receiverSocketId}
-                  receiverPubKey={receiverPubKey}
-                  time={time}
-                />
+                {this.genSharedPin(invitationInfo)}
                 <br/><br/>
 
-                <Button fluid onClick={() => this.saveContact(invitation)}>
+                <Button fluid onClick={() => this.saveContact(invitationInfo)}>
                   Add Contact
                 </Button>
               </>}
@@ -364,19 +375,10 @@ class RsvpResponseList extends React.Component {
                 'Add Contact.' Otherwise, this is not the correct person.
 
                 <br/><br/>
-                <SharedPin
-                  sharedSecret={sharedSecret}
-                  initiatorName={initiatorName}
-                  initiatorId={initiatorSocketId}
-                  initiatorPubKey={initiatorPubKey}
-                  receiverName={receiverName}
-                  receiverId={receiverSocketId}
-                  receiverPubKey={receiverPubKey}
-                  time={time}
-                />
+                {this.genSharedPin(invitationInfo)}
                 <br/><br/>
 
-                <Button fluid onClick={() => this.saveContact(invitation)}>
+                <Button fluid onClick={() => this.saveContact(invitationInfo)}>
                   Add Contact
                 </Button>
               </>}

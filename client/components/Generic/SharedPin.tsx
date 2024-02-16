@@ -10,6 +10,9 @@ import {
 import { Segment } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 
+// The user has two options: view the full SHA-256 hash, or view a weaker
+// simplified pin. The following table is used to generate that weaker pin.
+//
 // We specifically choose 32 characters here to make modulo 256 return a clean
 // bias. Vowels were chosen for omission as it's rather easy to end up with
 // some fuck-nasty curse words by pure luck.
@@ -55,13 +58,14 @@ const pinGroup = [
 ];
 
 // Converts a number from 0 to 255 into an alphabet character or number.
-function char255toPinGroup(numberArray) {
+function char255toPinGroup(numberArray: Uint8Array) {
   const pinCharCount = pinGroup.length;
   if (pinCharCount !== 32) {
     const error = 'Bug detected: The character pin group is not 32 ' +
       'character. Refusing to proceed.';
     console.error(error);
-    $dialog.alert({
+    // @ts-ignore - JSDoc is not descriptive enough to appease TS.
+    window.$dialog.alert({
       prioritise: true,
       header: 'Error',
       body: error,
@@ -81,7 +85,7 @@ function char255toPinGroup(numberArray) {
   // This produces the spaces, dashes, and color, and the trailing character.
   const auxBytes = numberArray.slice(12);
 
-  const chars = [];
+  const chars: string[] = [];
   for (let i = 0, len = pinStart.length; i < len; i++) {
     let character = pinStart[i];
 
@@ -134,7 +138,7 @@ function char255toPinGroup(numberArray) {
   }
 
   // The trailing char is in the thousands at this point; bring it into range.
-  trailingChar = pinGroup[trailingChar % pinCharCount];
+  const trailingString: string = pinGroup[trailingChar % pinCharCount];
 
   // Move the dash onward if next to the space.
   if (Math.abs(spacePosition - dashPosition) <= 1) {
@@ -146,10 +150,10 @@ function char255toPinGroup(numberArray) {
   chars.splice(dashPosition, 0, '-');
 
   if (chars[chars.length - 1] === ' ') {
-    chars.push(trailingChar);
+    chars.push(trailingString);
   }
   else {
-    chars.push(' ', trailingChar);
+    chars.push(' ', trailingString);
   }
 
   return {
@@ -158,8 +162,7 @@ function char255toPinGroup(numberArray) {
   };
 }
 
-/** @type React.CSSProperties */
-const pinStyle = {
+const pinStyle: React.CSSProperties = {
   width: 162,
   borderRadius: 4,
   cursor: 'default',
@@ -169,8 +172,7 @@ const pinStyle = {
   border: '2px solid grey',
 };
 
-/** @type React.CSSProperties */
-const fullPinStyle = {
+const fullPinStyle: React.CSSProperties = {
   ...pinStyle,
   fontSize: '11pt',
   display: 'block',
@@ -178,6 +180,24 @@ const fullPinStyle = {
   marginTop: 8,
   backgroundColor: 'rgba(128, 128, 128, 0.25)',
 };
+
+interface Props {
+  // Password generated that was not sent over the network.
+  sharedSecret: Uint8Array,
+  // Used as a salt.
+  time: number,
+  // Used as a salt.
+  initiatorName: string,
+  // Used as a salt.
+  receiverName: string,
+  // Used as a salt.
+  initiatorId: string,
+  // Used as a salt.
+  receiverId: string,
+  initiatorPubKey: Uint8Array,
+  receiverPubKey: Uint8Array,
+  onError: Function,
+}
 
 /**
  * React component that generates a shared pin following a Diffie-Hellman
@@ -188,26 +208,24 @@ const fullPinStyle = {
  * color on both sides. This component takes in a shared secret, timestamp, and
  * names of the initiator and receiver as props.
  */
-class SharedPin extends React.Component {
+class SharedPin extends React.Component<Props> {
+  // Note: The reason we use both a Props interface and PropTypes is because
+  // PropTypes perform runtime checking while the Props interface is for
+  // compile-time checking only.
   static propTypes = {
-    // Password generated that was not sent over the network.
     sharedSecret: PropTypes.object.isRequired,
-    // Used as a salt.
     time: PropTypes.number.isRequired,
-    // Used as a salt.
     initiatorName: PropTypes.string.isRequired,
-    // Used as a salt.
     receiverName: PropTypes.string.isRequired,
-    // Used as a salt.
     initiatorId: PropTypes.string.isRequired,
-    // Used as a salt.
     receiverId: PropTypes.string.isRequired,
-    initiatorPubKey: PropTypes.object.isRequired,
-    receiverPubKey: PropTypes.object.isRequired,
+    initiatorPubKey: PropTypes.instanceOf(Uint8Array).isRequired,
+    receiverPubKey: PropTypes.instanceOf(Uint8Array).isRequired,
+    onError: PropTypes.func.isRequired,
   };
 
-  pinHash = null;
-  pinShortText = null;
+  pinHash: Uint8Array | null = null;
+  pinShortText: string | null = null;
   pinColor = 'grey';
   pinBgColor = 'grey';
 
@@ -233,13 +251,13 @@ class SharedPin extends React.Component {
       stringToArrayBuffer(receiverName),
       stringToArrayBuffer(receiverId),
     ]), false).then((result) => {
-      this.pinHash = result;
+      this.pinHash = result as Uint8Array;
 
       const { chars, color } = char255toPinGroup(this.pinHash);
 
       const [ r, g, b ] = color;
       const confirmationColor = `rgb(${r} ${g} ${b})`;
-      let inverseColor;
+      let inverseColor: string;
       if ((r + g + b) / 3 > 128) {
         inverseColor = '#000';
       }
@@ -254,7 +272,13 @@ class SharedPin extends React.Component {
       this.forceUpdate();
     }).catch((error) => {
       console.error(error);
-      $dialog.alert({
+
+      this.props.onError(
+        'Could not generate shared pin. It appears some data was invalid.',
+      );
+
+      // @ts-ignore - JSDoc is not descriptive enough to appease TS.
+      window.$dialog.alert({
         prioritise: true,
         header: 'Error Generating Pin',
         body: 'Could not generate shared pin. Please restart NixieChat and ' +
@@ -273,6 +297,7 @@ class SharedPin extends React.Component {
       text = uint8ArrayToHexString(this.pinHash);
       style.cursor = 'text';
       style.borderColor = this.pinBgColor;
+      // @ts-ignore - Error invalid. 'unset' is allowed in place of a number.
       style.width = 'unset';
 
       // Allow text to break at predefined points.
