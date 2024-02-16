@@ -53,6 +53,15 @@ const selectedNameStyle = {
   fontWeight: 'bold',
 };
 
+/** @type React.CSSProperties */
+const greetingStyle = {
+  padding: 8,
+  marginLeft: 8,
+  marginTop: 4,
+  border: 'thin dashed grey',
+  borderLeft: '4px solid grey',
+};
+
 class RsvpResponseList extends React.Component {
   static propTypes = {
     /** @type InvitationInfo[] */
@@ -112,7 +121,7 @@ class RsvpResponseList extends React.Component {
           <br/><br/>
           It's recommended you cancel and try again.
         </div>
-      )
+      ),
     });
   };
 
@@ -180,6 +189,7 @@ class RsvpResponseList extends React.Component {
         receiverSocketId,
         contactPublicName,
         contactGreetingName,
+        contactGreetingMessage,
         contactPubKey,
         contactPemKey,
         dhPrepPercentage,
@@ -250,6 +260,18 @@ class RsvpResponseList extends React.Component {
             <h3>Invitation to {contactPublicName}</h3>
             <div>
               Contact {name} has <b>accepted</b> your invitation.
+
+              {
+                contactGreetingMessage && (
+                  <div>
+                    <br/>
+                    They've included this greeting in their response:
+                    <p style={greetingStyle}>
+                      {contactGreetingMessage}
+                    </p>
+                  </div>
+                )
+              }
 
               <RsaPreview pubKey={contactPubKey} pemKey={contactPemKey}/>
 

@@ -4,7 +4,7 @@ import { Button, Form, Segment } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { InvitationResponse } from '../../../shared/InvitationResponse';
 import {
-  EncryptedAccountStorage
+  EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 import { NxField } from '../Generic/NxField';
 import { RsaPreview } from '../Generic/RsaPreview';
@@ -14,6 +14,16 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Invitation } from '../../api/Invitation';
 
 const accountsStorage = new EncryptedAccountStorage();
+
+/** @type React.CSSProperties */
+const greetingStyle = {
+  padding: 8,
+  marginLeft: 8,
+  marginRight: 16,
+  marginTop: 4,
+  border: 'thin dashed grey',
+  borderLeft: '4px solid grey',
+};
 
 class ReceiveInvitation extends React.Component {
   static propTypes = {
@@ -206,6 +216,7 @@ class ReceiveInvitation extends React.Component {
       time,
       localPublicName,
       contactGreetingName,
+      contactGreetingMessage,
       contactPubKey,
       contactPemKey,
     } = info;
@@ -229,6 +240,17 @@ class ReceiveInvitation extends React.Component {
         decline this request. Only accept contacts you trust; they can resend
         the invitation at any time (unless you block them).
         <br/><br/>
+
+        {
+          contactGreetingMessage && (
+            <div>
+              They've included this greeting:
+              <p style={greetingStyle}>
+                {contactGreetingMessage}
+              </p>
+            </div>
+          )
+        }
 
         <Segment inverted={!darkMode}>
           <Form>
