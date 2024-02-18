@@ -1,4 +1,4 @@
-const { ceil, floor, max, min } = Math;
+const { ceil, floor } = Math;
 
 // https://stackoverflow.com/questions/39725716/how-to-convert-javascript-array-to-binary-data-and-back-for-websocket
 function stringToArrayBuffer(str) {
@@ -31,10 +31,10 @@ function uint8ArrayToHexString(uint8Array) {
   ).join('');
 }
 
-function getRandomBits(count = 256, returnAsString = true) {
+function getRandomBits(count = 256, returnAsHexString = true) {
   const uint8Array = new Uint8Array(count / 8);
   const rng = crypto.getRandomValues(uint8Array);
-  if (returnAsString) {
+  if (returnAsHexString) {
     return uint8ArrayToHexString(rng);
   }
   else {
@@ -44,8 +44,8 @@ function getRandomBits(count = 256, returnAsString = true) {
 
 // Returns a 256 bit string, or the equivalent Uint8Array if `false` is passed
 // in.
-function get256RandomBits(returnAsString = true) {
-  return getRandomBits(256, returnAsString);
+function get256RandomBits(returnAsHexString = true) {
+  return getRandomBits(256, returnAsHexString);
 }
 
 // This function under the MIT license. Taken from:
@@ -61,7 +61,7 @@ function getSafeRandomIntInclusive(min, max) {
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
-async function sha256(stringOrBuffer, returnAsString = true) {
+async function sha256(stringOrBuffer, returnAsHexString = true) {
   let msgBuffer;
   if (typeof stringOrBuffer === 'string') {
     // encode as UTF-8
@@ -79,7 +79,7 @@ async function sha256(stringOrBuffer, returnAsString = true) {
   // hash the message
   const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
 
-  if (returnAsString) {
+  if (returnAsHexString) {
     // convert ArrayBuffer to hex string
     return uint8ArrayToHexString(new Uint8Array(hashBuffer));
   }
