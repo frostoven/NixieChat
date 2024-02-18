@@ -208,10 +208,11 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
       // Convert stored PEM keys to CryptoKey.
       account.decryptedData.publicKey = await importRsaPublicKey(
         account.decryptedData.publicKey, 'pem',
-      );
+      ) as CryptoKey;
       account.decryptedData.privateKey = await importRsaPrivateKey(
         account.decryptedData.privateKey, 'pem',
-      );
+      ) as CryptoKey;
+
 
       account.passwordStore.setPassword(password);
       this.loginCount++;
