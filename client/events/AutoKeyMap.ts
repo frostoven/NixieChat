@@ -114,6 +114,8 @@ class AutoKeyMap {
 
     const binding = this._keyMap[event.code];
     if (typeof binding === 'function') {
+      event.preventDefault();
+      event.stopPropagation();
       binding(event);
     }
   };
