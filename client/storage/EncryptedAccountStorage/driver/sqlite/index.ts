@@ -26,6 +26,10 @@ class SqliteStorage implements StoreInterface {
     console.error('[SQLiteStorage] under construction');
   }
 
+  public getAllContactsByOwner() {
+    console.error('[SQLiteStorage] under construction');
+  }
+
   retrieveAllContacts() {
     console.error('[SQLiteStorage] under construction');
   }

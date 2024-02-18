@@ -179,6 +179,11 @@ class IdbAccountStorage implements StoreInterface {
     console.error('[IndexedDb] under construction');
   }
 
+
+  public getAllContactsByOwner() {
+    console.error('under construction');
+  }
+
   retrieveAllContacts() {
     console.error('[IndexedDb] under construction');
   }

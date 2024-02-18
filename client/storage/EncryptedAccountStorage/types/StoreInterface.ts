@@ -7,6 +7,7 @@ interface StoreInterface {
   getAllEncryptedAccounts: () => Promise<any[]|null>,
   getAccountsStore: Function,
   addContact: Function,
+  getAllContactsByOwner: Function,
   retrieveAllContacts: Function,
 }
 
