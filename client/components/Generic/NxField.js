@@ -10,6 +10,7 @@ class NxField extends React.Component {
     help: PropTypes.any,
     rightSideComponent: PropTypes.any,
     placeholder: PropTypes.any,
+    disabled: PropTypes.bool,
     value: PropTypes.any,
     autoFocus: PropTypes.bool,
     usernameHint: PropTypes.string,
@@ -24,6 +25,7 @@ class NxField extends React.Component {
     help: null,
     rightSideComponent: null,
     placeholder: null,
+    disabled: false,
     autoFocus: false,
     usernameHint: '',
     isPassword: false,
@@ -42,7 +44,7 @@ class NxField extends React.Component {
 
     const {
       label, help, rightSideComponent, placeholder, value, autoFocus,
-      autoComplete, usernameHint, isPassword, onChange,
+      autoComplete, disabled, usernameHint, isPassword, onChange,
     } = this.props;
     return (
       <Form.Field>
@@ -60,6 +62,7 @@ class NxField extends React.Component {
               autoComplete="username"
               required
               value={usernameHint}
+              disabled={disabled}
               style={{ display: 'none' }}
               onChange={() => {
               }}
@@ -77,6 +80,7 @@ class NxField extends React.Component {
           autoFocus={autoFocus}
           placeholder={placeholder}
           value={value}
+          disabled={disabled}
           type={isPassword ? 'password' : 'text'}
           autoComplete={isPassword ? autoComplete : null}
           onChange={onChange}
