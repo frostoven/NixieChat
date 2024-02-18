@@ -100,18 +100,28 @@ class RemoteCrypto {
   // Sends an invitation to someone.
   // Used to be called findContact.
   static async sendInvitation(
-    localAccountId, contactPublicName, localGreeting, localGreetingName,
-    callback = nop,
+    localAccountId, localAccountName, contactPublicName, localGreeting,
+    localGreetingName, callback = nop,
   ) {
     // Sending out an invitation is a first (local) contact creation step, so
     // create a new instance to track it.
     const contactCreator = new Invitation({
       localAccountId,
+      localAccountName,
       localSocketId: serverEmitter.id,
       localGreetingName,
       localGreeting,
       contactPublicName,
     });
+
+    if (contactCreator.error) {
+      // TODO: Toast a friendly version of this, or post it in a user-visible system
+      //  chat.
+      return console.error(
+        'Received a contact invitation, but could not initiate the process.',
+        'Error:', contactCreator.error,
+      )
+    }
 
     // Keep track of pending invite names. If we receive an RSVP response from
     // someone we didn't send an invitation to then treat them as spam. This
@@ -163,6 +173,7 @@ class RemoteCrypto {
     // step, so create a new instance to track it.
     const contactCreator = new Invitation({
       localAccountId: account.decryptedData.accountId,
+      localAccountName: account.decryptedData.accountName,
       localSocketId: serverEmitter.id,
       contactPublicName: source,
     });

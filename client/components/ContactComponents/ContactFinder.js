@@ -10,7 +10,7 @@ import {
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
 import {
-  EncryptedAccountStorage
+  EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 import { sharedConfig } from '../../../shared/config';
 import { clientEmitter } from '../../emitters/comms';
@@ -42,7 +42,8 @@ class ContactFinder extends React.Component {
   constructor(props) {
     super(props);
     const acc = accountStorage.getActiveAccount().decryptedData;
-    this.state.localGreetingName = acc.publicName || randomAccountName();
+    this.state.localGreetingName =
+      acc.personalName || acc.publicName || randomAccountName();
     this.invitationItems = {};
   }
 
@@ -132,10 +133,10 @@ class ContactFinder extends React.Component {
       const greetingName = this.state.localGreetingName || '(No name specified)';
       const { contactPublicName, localGreeting } = this.state;
       const activeAccount = accountStorage.getActiveAccount();
-      const accountId = activeAccount.decryptedData.accountId;
+      const { accountId, accountName } = activeAccount.decryptedData;
 
       await RemoteCrypto.sendInvitation(
-        accountId, contactPublicName, localGreeting, greetingName,
+        accountId, accountName, contactPublicName, localGreeting, greetingName,
         (error, data) => {
           const state = {
             buttonDisabled: false,
