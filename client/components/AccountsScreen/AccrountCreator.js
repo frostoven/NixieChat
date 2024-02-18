@@ -314,6 +314,8 @@ class AccountCreator extends React.Component {
             <Icon name={'level down alternate'}/>
             Cancel
           </Button>
+
+          {/* TODO: Add right-aligned button: "Import From Another Device"*/}
         </Form>
 
         <br/>

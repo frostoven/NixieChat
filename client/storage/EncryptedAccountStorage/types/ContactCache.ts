@@ -39,6 +39,11 @@ interface ContactCache extends BasicContactSignature {
  * Data that's held in RAM after decryption.
  */
 interface DecryptedContactData {
+  // Used in the absence of a contact personal name, and for severe errors
+  // where the personal name is unknown.
+  initialName: string,
+  // This is a random SHA-256 hash.
+  internalContactId: string,
   contactPubKey: CryptoKey,
   chatDetachableId: string,
   privateChatIdSalt: Uint8Array,

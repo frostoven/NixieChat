@@ -21,38 +21,16 @@ interface AccountCreationParamsSignature {
   // This should always be a string, even if the user opts to not have a
   // password (in which case it should be passed in as '').
   password: string,
-  // Used to salt the keys used when storing contacts. The idea is to make it
-  // difficult to identify which contacts belong to which accounts without
-  // storing contacts and accounts in the same encrypted blob.
+  // Contacts are stored in a table different to accounts. This string is used
+  // to identify which contacts belong to which account. This value is
+  // encrypted, the purpose being to make it difficult to ascertain which
+  // contacts belong to which accounts without first unlocking accounts.
+  // Account information itself is also encrypted, so without the decrypted
+  // account, contact information is an unidentifiable mess.
+  contactDetachableId: string,
+  // Used to salt encrypted data used when storing contacts.
   privateContactIdSalt: string,
-  // Used to salt the keys used when storing chats. The idea is to make it
-  // difficult to identify which chats belong to which accounts without
-  // storing chats and accounts in the same encrypted blob.
   privateChatIdSalt: string,
-}
-
-/**
- * An encrypted blob describing everything about a contact.
- * For IndexedDb, this represents one entry in a JS object.
- * For SQLite, this represents a single row in a table.
- */
-interface ContactsBlob {
-  // A string created by hashing the account ID with privateContactIdSalt.
-  owningAccountIDHash: Uint8Array,
-  encryptedContactBlob: Uint8Array,
-  encryptedContactIv: Uint8Array,
-}
-
-/**
- * An encrypted blob describing everything about a particular message.
- * For IndexedDb, this represents one entry in a JS object.
- * For SQLite, this represents a single row in a table.
- */
-interface ChatBlob {
-  // A string created by hashing the account ID with privateChatIdSalt.
-  owningAccountIDHash: Uint8Array,
-  encryptedMessageBlob: Uint8Array,
-  encryptedMessageIv: Uint8Array,
 }
 
 /**
@@ -72,6 +50,4 @@ export {
   StoreInterface,
   AccountCreationParamsSignature,
   BasicAccountSignature,
-  ContactsBlob,
-  ChatBlob,
 };

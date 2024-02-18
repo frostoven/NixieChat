@@ -52,7 +52,7 @@ class IdbAccountStorage implements StoreInterface {
 
       // Can happen if the user declines DB use.
       request.onerror = (event) => {
-        console.log('[AccountsStorage] Could not init accounts store.', event);
+        console.error('[AccountsStorage] Could not init accounts store.', event);
         return resolve(null);
       };
 
@@ -60,7 +60,7 @@ class IdbAccountStorage implements StoreInterface {
       request.onsuccess = (event: Event) => {
         const target: IDBOpenDBRequest = event.target as IDBOpenDBRequest;
         if (!target) {
-          console.log('[AccountsStorage] Could not init accounts store.', event);
+          console.error('[AccountsStorage] Could not init accounts store.', event);
           return resolve(null);
         }
 
@@ -83,16 +83,51 @@ class IdbAccountStorage implements StoreInterface {
 
         db = target.result;
 
-        const objectStore = db.createObjectStore('accounts', {
-          // Key paths must be unique, so this ensures we don't have multiple
+        // --- Accounts store ----------------------------------- //
+
+        const accountStore = db.createObjectStore('accounts', {
+          // Key paths must be unique; this ensures we don't have multiple
           // accounts with the same name.
           keyPath: 'accountName',
         });
 
-        objectStore.transaction.oncomplete = (_) => {
+        // It is absolutely essential that the initialization vector is unique
+        // per CryptoKey, else we can easily decrypt AES strings without the
+        // password. We don't actually reuse keys, but it makes sense to
+        // prevent duplicates globally in case some oversight fucks us later.
+        accountStore.createIndex('encryptedAccountIv', 'encryptedAccountIv', {
+          unique: true,
+        });
+
+        accountStore.transaction.oncomplete = (_) => {
           // If we ever wanted to write some default data post-creation, we'd
           // do that here.
           console.log('Accounts object store created.');
+        };
+
+        // --- Contacts store ----------------------------------- //
+
+        // Contact stores don't have unique key paths other than a simple ID as
+        // they aren't meant to be uniquely identified.
+        const contactStore = db.createObjectStore('contacts', {
+          keyPath: 'id',
+          autoIncrement: true,
+        });
+
+        // Same comment applies as with the encryptedAccountIv above: Keep IVs
+        // unique for all contacts, even for unrelated accounts.
+        contactStore.createIndex('encryptedContactIv', 'encryptedContactIv', {
+          unique: true,
+        });
+
+        // All contacts belonging to the same account will have the same
+        // detachable ID. The ID is 256 bits of random data presented as hex.
+        contactStore.createIndex('contactDetachableId', 'contactDetachableId', {
+          unique: false,
+        });
+
+        contactStore.transaction.oncomplete = (_) => {
+          console.log('Contacts object store created.');
         };
       };
     });
@@ -113,12 +148,18 @@ class IdbAccountStorage implements StoreInterface {
   }) {
     return new Promise((resolve) => {
       if (!this.isDbReady()) {
-        return null;
+        console.error('Cannot create account: DB not ready.');
+        return resolve(false);
       }
 
-      let transaction;
+      if (!accountName || !encryptedAccountIv || !encryptedAccountIv) {
+        console.error('Cannot create account: Invalid parameters.');
+        return resolve(false);
+      }
+
+      let transaction: IDBTransaction;
       try {
-        // @ts-ignore - Better data integrity in Firefox.
+        // @ts-ignore - Better data integrity on Firefox.
         transaction = db!.transaction([ 'accounts' ], 'readwriteflush', strict);
       }
       catch (_) {
@@ -139,13 +180,13 @@ class IdbAccountStorage implements StoreInterface {
       };
 
       request.onerror = (error) => {
-        resolve(null);
-        console.log('error', error);
+        console.error('error', error);
+        resolve(false);
       };
     });
   }
 
-  getAllEncryptedAccounts(): Promise<object[]|null> {
+  getAllEncryptedAccounts(): Promise<object[] | null> {
     return new Promise(resolve => {
       if (!this.isDbReady()) {
         return resolve(null);
@@ -162,7 +203,7 @@ class IdbAccountStorage implements StoreInterface {
       };
 
       request.onerror = (error) => {
-        console.log('error', error);
+        console.error('error', error);
         resolve(null);
       };
     });
@@ -175,13 +216,83 @@ class IdbAccountStorage implements StoreInterface {
     return db;
   }
 
-  addContact() {
-    console.error('[IndexedDb] under construction');
+  // Important note: This function does not ensure that the contact key is
+  // valid. It assumes that the wrapper class (EncryptedAccountStorage) has
+  // done all the work. This is because, at the DB level, we can only ensure
+  // unencrypted are unique. All other values are encrypted (and two strings
+  // with the exact same values produce different ciphertexts, even) so the DB
+  // has very limited error-checking capabilities.
+  addContact({
+    contactDetachableId,
+    encryptedContactBlob,
+    encryptedContactIv,
+  }) {
+    return new Promise((resolve) => {
+      if (!this.isDbReady()) {
+        console.error('Cannot add contact: DB not ready.');
+        return resolve(false);
+      }
+
+      if (!contactDetachableId || !encryptedContactBlob || !encryptedContactIv) {
+        console.error('Cannot add contact: Invalid parameters.');
+        return resolve(false);
+      }
+
+      let transaction: IDBTransaction;
+      try {
+        // @ts-ignore - Better data integrity on Firefox.
+        transaction = db!.transaction([ 'contacts' ], 'readwriteflush', strict);
+      }
+      catch (_) {
+        transaction = db!.transaction([ 'contacts' ], 'readwrite', strict);
+      }
+
+      const request =
+        transaction
+          .objectStore('contacts')
+          .add({
+            contactDetachableId,
+            encryptedContactBlob,
+            encryptedContactIv,
+          });
+
+      request.onsuccess = () => {
+        resolve(true);
+      };
+
+      request.onerror = (error) => {
+        console.error('error', error);
+        resolve(false);
+      };
+    });
   }
 
+  getAllContactsByOwner({ contactDetachableId }): Promise<object[] | null> {
+    return new Promise(resolve => {
+      if (!this.isDbReady()) {
+        return resolve(null);
+      }
 
-  public getAllContactsByOwner() {
-    console.error('under construction');
+      const request = db!
+        .transaction([ 'contacts' ], 'readonly')
+        .objectStore('contacts')
+        .index('contactDetachableId')
+        // TODO: Test using getAll() (without contactDetachableId) to get
+        //  contacts that don't belong, and ensure the failure to decrypt is
+        //  handled gracefully. Users need an opportunity to deal with
+        //  corrupted contact data.
+        .getAll(contactDetachableId);
+
+      request.onsuccess = (event: Event) => {
+        const target: IDBRequest = event.target as IDBRequest;
+        resolve(target.result);
+      };
+
+      request.onerror = (error) => {
+        console.error('error', error);
+        resolve(null);
+      };
+    });
   }
 
   retrieveAllContacts() {

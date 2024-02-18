@@ -9,6 +9,11 @@ import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Invitation } from '../../api/Invitation';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
+import {
+  EncryptedAccountStorage
+} from '../../storage/EncryptedAccountStorage';
+
+const accountStorage = new EncryptedAccountStorage();
 
 /** @type React.CSSProperties */
 const columnStyle = {
@@ -35,11 +40,6 @@ const responseLoaderAnimation = {
 const loaderIconStyle = {
   paddingLeft: 24,
   paddingBottom: 18,
-};
-
-/** @type React.CSSProperties */
-const headerStyle = {
-  textDecoration: 'underline',
 };
 
 /** @type React.CSSProperties */
@@ -139,26 +139,24 @@ class RsvpResponseList extends React.Component {
     await RemoteCrypto.startVerification({ creatorId: info.id });
   };
 
-  /** @param {InvitationInfo} info */
-  updateDhStatus = (info) => {
+  updateDhStatus = () => {
     this.forceUpdate();
   };
 
   /** @param {InvitationInfo} info */
-  saveContact = (info) => {
-    console.log('save using:', info);
-    const {
-      localAccountId,
-      contactGreetingName,
-      contactPublicName,
-      contactPubKey,
-      contactPemKey,
-    } = info;
-
-    const name = contactGreetingName || contactPublicName;
-
-    // TODO: toast a message such as "Contact added!"
-    this.props.onContactAdded();
+  saveContact = async (info) => {
+    const added = await accountStorage.addContact(info);
+    if (!added) {
+      let error = 'An error occurred while saving the contact';
+      if (info.error) {
+        error += `: ${info.error}`;
+      }
+      window.$dialog.alert(error);
+    }
+    else {
+      // TODO: toast a message such as "Contact added!"
+      this.props.onContactAdded();
+    }
   };
 
   /** @param {InvitationInfo} info */
@@ -203,15 +201,8 @@ class RsvpResponseList extends React.Component {
       const isSelected = selected === i;
 
       const {
-        id,
         error,
-        time,
         rsvpAnswer,
-        isOutbound,
-        initiatorName,
-        initiatorSocketId,
-        receiverName,
-        receiverSocketId,
         localPubKey,
         localPemKey,
         contactPublicName,

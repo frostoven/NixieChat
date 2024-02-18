@@ -4,14 +4,18 @@ import {
   AccountCreationParamsSignature,
 } from './types/StoreInterface';
 import {
-  get256RandomBits,
-  getRandomBits,
   sha256,
+  getRandomBits,
+  get256RandomBits,
+  mergeUint8Arrays,
+  stringToArrayBuffer,
+  arrayBufferToString,
 } from '../../utils';
 import { aesGcmDecrypt, aesGcmEncrypt } from '../../encryption/crypto-aes-gcm';
 import {
   exportRsaPrivateKey,
-  exportRsaPublicKey, importRsaPrivateKey,
+  exportRsaPublicKey,
+  importRsaPrivateKey,
   importRsaPublicKey,
 } from '../../encryption/rsa';
 import { Settings } from '../cacheFrontends/Settings';
@@ -20,6 +24,7 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { clientEmitter, initServerConnection } from '../../emitters/comms';
 import { AccountCache } from './types/AccountCache';
 import { InvitationInfo } from '../../api/types/InvitationInfo';
+import { ContactCache, DecryptedContactData } from './types/ContactCache';
 
 let singletonInstance: EncryptedAccountStorage;
 
@@ -37,6 +42,10 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   private _activeAccount: string | null = null;
   // Stores all accounts, both decrypted and pending decryption.
   private _accountCaches: { [key: string]: AccountCache } = {};
+  // Stores all contacts, both decrypted and pending decryption.
+  private _contactCaches: {
+    [accountName: string]: { [internalContactId: string]: ContactCache }
+  } = {};
 
   constructor() {
     if (singletonInstance) {
@@ -80,19 +89,21 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
       privateKey: options.privateKey,
     };
 
-    const blob = {
+    const accountInfo = {
       ...options,
       accountId: get256RandomBits(true) as string,
       publicKey: await exportRsaPublicKey(keyPair, 'pem'),
       privateKey: await exportRsaPrivateKey(keyPair, 'pem'),
-      privateContactIdSalt: getRandomBits(768, true) as string,
-      privateChatIdSalt: getRandomBits(768, true) as string,
+      contactDetachableId: getRandomBits(256, true) as string,
+      privateContactIdSalt: arrayBufferToString(getRandomBits(768, false)),
+      privateChatIdSalt: arrayBufferToString(getRandomBits(768, false)),
+      modulusHash,
     };
 
     // Encrypt the account info.
     const accountBlob = await aesGcmEncrypt(
       options.password,
-      JSON.stringify(blob),
+      JSON.stringify(accountInfo),
     );
 
     await this.dbStore!.createAccount({
@@ -143,13 +154,18 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
           encryptedAccountBlob,
           encryptedAccountIv,
           decryptedData: null,
-          passwordStore: getPasswordStore(),
+          accountPasswordStore: getPasswordStore(),
+          contactPasswordStore: getPasswordStore(),
         };
         this._accountCaches[accountName] = accountCache;
       }
 
-      if (accountCache.passwordStore.isPasswordSet()) {
-        // We're already logged in. Skip.
+      if (accountCache.accountPasswordStore.isPasswordSet()) {
+        // We're already logged in. Just do the contacts. We do this one at a
+        // time (via await) because we don't yet have threaded support and
+        // probably shouldn't overwhelm the main thread with burst unlocks.
+        // TODO: Thread me, maybe via the comlink library.
+        await this.decryptAllAccountContacts(accountCache);
         this.loginCount++;
         continue;
       }
@@ -171,6 +187,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     }
   }
 
+  // TODO: rename to decryptAccount.
   async attemptAccountDecryption({
     accountName, password,
   }: {
@@ -213,14 +230,122 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
         account.decryptedData.privateKey, 'pem',
       ) as CryptoKey;
 
+      // Retrieve stringified array buffers.
+      account.decryptedData.modulusHash = stringToArrayBuffer(
+        account.decryptedData.modulusHash,
+      );
+      account.decryptedData.privateContactIdSalt = stringToArrayBuffer(
+        account.decryptedData.privateContactIdSalt,
+      );
+      account.decryptedData.privateChatIdSalt = stringToArrayBuffer(
+        account.decryptedData.privateChatIdSalt,
+      );
 
-      account.passwordStore.setPassword(password);
+      account.accountPasswordStore.setPassword(password);
+      account.contactPasswordStore.setPassword(await sha256(mergeUint8Arrays([
+        stringToArrayBuffer(password),
+        account.decryptedData.privateContactIdSalt,
+      ]), true) as string);
+
+      // Without our contacts we are nothing :'). Intentionally load contacts
+      // before initiating server connection, we don't want a blank account if
+      // contacts fail to load. We can possibly offer key recovery in the event
+      // of destroyed contact data.
+      await this.decryptAllAccountContacts(account);
+
       this.loginCount++;
       // This function is idempotent; it does nothing on duplicate calls.
       initServerConnection();
+
+      const publicName = account.decryptedData.publicName;
+      if (account.decryptedData.publicName) {
+        console.log(`➤ Unlocked account with public name ${publicName}`);
+      }
       return true;
     }
     return false;
+  }
+
+  async decryptAllAccountContacts(account: AccountCache): Promise<boolean> {
+    if (!account.decryptedData) {
+      console.error(
+        'Cannot decrypt contacts - specified account is not unlocked:',
+        account,
+      );
+      return false;
+    }
+
+    const contacts = await this.dbStore?.getAllContactsByOwner({
+      contactDetachableId: account.decryptedData.contactDetachableId,
+    });
+
+    for (let i = 0, len = contacts.length; i < len; i++) {
+      const contact: ContactCache = contacts[i];
+      const decryptedText = await account.contactPasswordStore.decryptAes256Gcm(
+        contact.encryptedContactBlob,
+        contact.encryptedContactIv,
+        false,
+      ) as string;
+
+      let decryptedData: DecryptedContactData;
+      try {
+        decryptedData = JSON.parse(decryptedText);
+      }
+      catch (error) {
+        console.error(
+          'Could not load a contact. Data appears to be corrupted. Error:',
+          error,
+        );
+        continue;
+      }
+
+      const {
+        initialName,
+        internalContactId,
+        contactPubKey,
+        privateChatIdSalt,
+        sharedSalt,
+        initialSharedSecret,
+      } = decryptedData;
+
+      // Check the data.
+      if (contact.contactDetachableId !== account.decryptedData.contactDetachableId) {
+        // TODO: Save back to the DB and alert the user.
+        console.warn(
+          `Contact ("${initialName}") has an invalid detachable ID. Fixing.`,
+        );
+        decryptedData.chatDetachableId = account.decryptedData.contactDetachableId;
+      }
+      if (!contactPubKey || !privateChatIdSalt || !sharedSalt || !initialSharedSecret) {
+        console.error(
+          `Contact "${initialName}" is missing one or more required fields.`,
+        );
+        continue;
+      }
+
+      // Convert stored PEM key to CryptoKey.
+      decryptedData.contactPubKey = await importRsaPublicKey(
+        decryptedData.contactPubKey, 'pem',
+      ) as CryptoKey;
+
+      // Retrieve stringified array buffers.
+      decryptedData.privateChatIdSalt = stringToArrayBuffer(
+        decryptedData.privateChatIdSalt,
+      );
+      decryptedData.initialSharedSecret = stringToArrayBuffer(
+        decryptedData.initialSharedSecret,
+      );
+      decryptedData.sharedSalt = stringToArrayBuffer(
+        decryptedData.sharedSalt,
+      );
+
+      contact.decryptedData = decryptedData;
+      this._contactCaches[account.accountName] = {
+        [internalContactId]: contact,
+      };
+    }
+
+    return true;
   }
 
   getAllAccounts() {
@@ -254,10 +379,77 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
         return account;
       }
     }
+    console.warn('could not find id', id);
     return null;
   }
 
-  addContact() {
+  /**
+   * Add a contact.
+   * @param info
+   * @return - Returns false if the contact could not be stored.
+   */
+  async addContact(info: InvitationInfo): Promise<boolean> {
+    if (info.error) {
+      // This point shouldn't be reachable, but we add it just in case the UI
+      // missed an error somewhere. Note: info.reportFatalError() forwards
+      // errors to the open UI.
+      info.reportFatalError('Refusing to store contact: invitation has errors.');
+      return false;
+    }
+
+    const {
+      isOutbound,
+      localAccountName,
+      localGreetingName,
+      contactGreetingName,
+      contactPubKey,
+      localPubKey,
+      initiatorSalt,
+      receiverSalt,
+      initiatorSocketId,
+      receiverSocketId,
+      sharedSecret,
+    } = info;
+
+    const account = this._accountCaches[localAccountName as string];
+    if (!account || !account.decryptedData) {
+      info.error = 'Account was relocked. Device memory cleared?';
+      return false;
+    }
+
+    const publicKey = await importRsaPublicKey(contactPubKey!, 'raw');
+
+    const contactInfo: any = {
+      initialName: contactGreetingName,
+      internalContactId: getRandomBits(256, true) as string,
+      contactPubKey: await exportRsaPublicKey({ publicKey }, 'pem'),
+      chatDetachableId: getRandomBits(256, true) as string,
+      privateChatIdSalt: arrayBufferToString(getRandomBits(768, false)),
+      initialSharedSecret: arrayBufferToString(sharedSecret!),
+    };
+
+    // This generated only once for each new contact; may as well go ham.
+    contactInfo.sharedSalt = await sha256(mergeUint8Arrays([
+      stringToArrayBuffer(isOutbound ? contactGreetingName : localGreetingName),
+      stringToArrayBuffer(isOutbound ? localGreetingName : contactGreetingName),
+      stringToArrayBuffer(initiatorSocketId),
+      stringToArrayBuffer(receiverSocketId),
+      isOutbound ? contactPubKey! : localPubKey!,
+      isOutbound ? localPubKey! : contactPubKey!,
+      initiatorSalt!,
+      receiverSalt!,
+    ]), true) as string;
+
+    // Encrypt the account info.
+    const contactBlob = await account.contactPasswordStore.encryptAes256Gcm(
+      JSON.stringify(contactInfo),
+    );
+
+    return await this.dbStore!.addContact({
+      contactDetachableId: account.decryptedData.contactDetachableId,
+      encryptedContactBlob: contactBlob?.ciphertext,
+      encryptedContactIv: contactBlob?.iv,
+    });
   }
 
   getAccountsStore() {
