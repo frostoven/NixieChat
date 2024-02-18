@@ -239,6 +239,15 @@ class SharedPin extends React.Component<Props> {
       initiatorPubKey, receiverPubKey,
     } = this.props;
 
+    if (!sharedSecret || sharedSecret.length < 256) {
+      // 256 is 2048-bit. We'll need to revise this when implementing elliptic
+      // curves.
+      return this.props.onError(
+        'Refusing to continue: Generated shared secret is incredibly weak, ' +
+        'or broken.',
+      );
+    }
+
     // This takes our shared secret, salts it with some public data, and then
     // performs a SHA-256 hash on the result.
     sha256(mergeUint8Arrays([
