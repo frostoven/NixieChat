@@ -61,6 +61,7 @@ class PasswordChooser extends React.Component<Props> {
   handleClear = () => {
     this.setState({
       password: '',
+      confirmPassword: '',
       error: '',
     });
   };
