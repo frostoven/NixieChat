@@ -65,7 +65,7 @@ class AccountCreator extends React.Component {
     accountError: '',
     buttonIcon: 'user circle',
     primaryButtonText: 'Create',
-    submitDisabled: false,
+    formDisabled: false,
     showPasswordPrompt: false,
   };
 
@@ -78,7 +78,7 @@ class AccountCreator extends React.Component {
   }
 
   requestPassword = () => {
-    if (this.state.submitDisabled) {
+    if (this.state.formDisabled) {
       return;
     }
 
@@ -100,6 +100,7 @@ class AccountCreator extends React.Component {
     }
 
     this.setState({
+      formDisabled: true,
       showPasswordPrompt: true,
     });
   };
@@ -109,7 +110,7 @@ class AccountCreator extends React.Component {
       showPasswordPrompt: false,
       buttonIcon: 'hourglass start',
       primaryButtonText: 'Generating key pair...',
-      submitDisabled: true,
+      formDisabled: true,
     }, () => {
       this.createKeyPair(password).catch(console.error);
     });
@@ -161,6 +162,15 @@ class AccountCreator extends React.Component {
     });
   };
 
+  randomizeName = () => {
+    if (this.state.formDisabled) {
+      return;
+    }
+    this.setState({
+      accountName: randomName(),
+    });
+  };
+
   render() {
     if (this.state.showPasswordPrompt) {
       return (
@@ -196,7 +206,7 @@ class AccountCreator extends React.Component {
 
     const { showCancelButton, onCancel } = this.props;
     const {
-      accountError, accountName, primaryButtonText, buttonIcon, submitDisabled,
+      accountError, accountName, primaryButtonText, buttonIcon, formDisabled,
     } = this.state;
 
     let headerText;
@@ -230,10 +240,13 @@ class AccountCreator extends React.Component {
             autoFocus
             placeholder={accountError || 'Account Name'}
             value={accountName}
+            disabled={formDisabled}
             rightSideComponent={
               <Button
+                key={'nameRandomizer'}
+                disabled={formDisabled}
                 style={rerollStyle} color="olive"
-                onClick={() => this.setState({ accountName: randomName() })}
+                onClick={this.randomizeName}
               >
                 <Icon name="refresh"/>
               </Button>
@@ -246,6 +259,7 @@ class AccountCreator extends React.Component {
           <NxField
             label="Personal Alias (only contacts can see this)"
             help={'The default name used when adding new contacts.'}
+            disabled={formDisabled}
             placeholder="Personal Name"
             onChange={(event) => {
               this.setState({ personalName: event.target.value });
@@ -264,6 +278,7 @@ class AccountCreator extends React.Component {
                 This field is automatically suffixed with a random number.
               </div>
             }
+            disabled={formDisabled}
             placeholder="Public Name"
             onChange={(event) => {
               this.setState({ publicName: event.target.value });
@@ -281,7 +296,7 @@ class AccountCreator extends React.Component {
             type="button"
             labelPosition="right"
             onClick={this.requestPassword}
-            disabled={submitDisabled}
+            disabled={formDisabled}
           >
             <Icon name={buttonIcon}/>
             {primaryButtonText}
@@ -293,7 +308,7 @@ class AccountCreator extends React.Component {
             type="button"
             labelPosition="right"
             onClick={onCancel}
-            disabled={submitDisabled}
+            disabled={formDisabled}
             style={{ display: showCancelButton ? 'inline-block' : 'none' }}
           >
             <Icon name={'level down alternate'}/>
