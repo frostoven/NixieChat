@@ -22,6 +22,7 @@ const accountStore = new EncryptedAccountStorage();
 
 const CHROMIUM_LINK = 'https://www.chromium.org/getting-involved/download-chromium/';
 const FIREFOX_LINK = 'https://www.mozilla.org/';
+
 // const SAFARI_7D = 'https://gist.github.com/pesterhazy/4de96193af89a6dd5ce682ce2adff49a#state-deleted-after-7-days-of-inactivity-safari';
 
 function randomName() {

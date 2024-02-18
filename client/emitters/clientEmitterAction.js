@@ -8,6 +8,8 @@ const clientEmitterAction = {
   // Disconnected from server.
   clientDisconnected: _autoCounter++,
   reloadStorage: _autoCounter++,
+  // Forces the root node to re-read some database entries, though it will skip
+  // logged in accounts. This action does not close open dialogs.
   reloadApp: _autoCounter++,
   // Action indicating that some ContactCreator instance has had significant
   // changes. Used by UIs to rerender themselves if they're concerned with

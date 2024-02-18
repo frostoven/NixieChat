@@ -36,7 +36,7 @@ function getPasswordStore(): FrozenPasswordStore {
     encryptAes256Gcm: async (plaintext: string) => {
       if (_savedPassword === null) {
         return console.error(
-          '[PasswordStore] Encryption failed: Password not set.'
+          '[PasswordStore] Encryption failed: Password not set.',
         );
       }
 
@@ -49,7 +49,7 @@ function getPasswordStore(): FrozenPasswordStore {
     ) => {
       if (_savedPassword === null) {
         return console.error(
-          '[PasswordStore] Decryption failed: Password not set.'
+          '[PasswordStore] Decryption failed: Password not set.',
         );
       }
 

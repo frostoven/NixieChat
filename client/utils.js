@@ -2,11 +2,17 @@ const { ceil, floor, max, min } = Math;
 
 // https://stackoverflow.com/questions/39725716/how-to-convert-javascript-array-to-binary-data-and-back-for-websocket
 function stringToArrayBuffer(str) {
+  if (!str) {
+    console.error('stringToArrayBuffer received falsy string.')
+  }
   return new Uint8Array(str.split('').map(c => c.charCodeAt(0)));
 }
 
 // https://stackoverflow.com/questions/39725716/how-to-convert-javascript-array-to-binary-data-and-back-for-websocket
 function arrayBufferToString(ab) {
+  if (!ab || !ab.length) {
+    console.error('arrayBufferToString received an empty of falsy buffer.')
+  }
   return new Uint8Array(ab).reduce((p, c) => p + String.fromCharCode(c), '');
 }
 
