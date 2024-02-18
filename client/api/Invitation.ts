@@ -596,6 +596,7 @@ class Invitation {
 
   uiReportsError = (error: string) => {
     this.error = `${error}`;
+    console.error(`[uiReportsError]`, this.error);
     clientEmitter.emit(clientEmitterAction.updateDhStatus, this.getInfo());
   };
 
@@ -818,7 +819,10 @@ class Invitation {
     // Useful for visualisations.
     let pemKey = await importRsaPublicKey(contactPubKey, 'raw');
     pemKey = await exportRsaPublicKey({ publicKey: pemKey }, 'pem');
-    this.contactPemKey = pemKey;
+    if (!pemKey) {
+      return this.error = 'Contact send an invalid public key.';
+    }
+    this.contactPemKey = pemKey as string;
 
     this.contactGreetingName = greetingName;
     this.contactGreeting = greeting;
@@ -959,9 +963,13 @@ class Invitation {
     let contactPemKey = await importRsaPublicKey(contactPubKey, 'raw');
     contactPemKey = await exportRsaPublicKey({ publicKey: contactPemKey }, 'pem');
 
+    if (!contactPemKey) {
+      return this.error = 'Contact send an invalid public key.';
+    }
+
     this.rsvpAnswer = answer;
     this.contactPubKey = contactPubKey;
-    this.contactPemKey = contactPemKey;
+    this.contactPemKey = contactPemKey as string;
   }
 
   /**
