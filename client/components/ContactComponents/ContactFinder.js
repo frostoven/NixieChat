@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
+import PropTypes from 'prop-types';
 import {
   Button,
   Form,
@@ -24,6 +25,10 @@ import { randomAccountName, randomErrorColor } from '../../../shared/textGen';
 const accountStorage = new EncryptedAccountStorage();
 
 class ContactFinder extends React.Component {
+  static propTypes = {
+    onContactAdded: PropTypes.func.isRequired,
+  };
+
   state = {
     localGreetingName: '',
     localGreeting: '',
@@ -179,6 +184,7 @@ class ContactFinder extends React.Component {
         <RsvpResponseList
           key={`RsvpResponseList-Finder`}
           invitationIds={Object.keys(this.invitationItems)}
+          onContactAdded={this.props.onContactAdded}
         />
       );
     }

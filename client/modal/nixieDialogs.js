@@ -13,7 +13,11 @@ function showAddContactDialog(ownPublicName) {
 
   const contactAdder = $floatingForm.alert({
     header,
-    body: <ContactFinder/>,
+    body: <ContactFinder
+      onContactAdded={() => {
+        $floatingForm.deactivateModalById(contactAdder.id);
+      }}
+    />,
     actions: [],
 
     onDimmerClick: () => {

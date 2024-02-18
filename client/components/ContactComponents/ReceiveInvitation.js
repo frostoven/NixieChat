@@ -200,6 +200,10 @@ class ReceiveInvitation extends React.Component {
     }
   };
 
+  closeModal = () => {
+    $floatingForm.deactivateModalById(this.floatingForm.id);
+  };
+
   render() {
     if (!this.state.invitationInfo) {
       return 'Invitation no longer valid.';
@@ -229,6 +233,7 @@ class ReceiveInvitation extends React.Component {
           key={`RsvpResponseList-${this.props.creatorId}`}
           overrideLoaderMessage={'Waiting for confirmation...'}
           invitationIds={[ info.id ]}
+          onContactAdded={this.closeModal}
         />
       );
     }

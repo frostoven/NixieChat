@@ -67,6 +67,7 @@ class RsvpResponseList extends React.Component {
     invitationIds: PropTypes.array,
     // The message to show on the left of the responses screen.
     overrideLoaderMessage: PropTypes.string,
+    onContactAdded: PropTypes.func.isRequired,
   };
 
   static defaultProps = {
@@ -156,8 +157,8 @@ class RsvpResponseList extends React.Component {
 
     const name = contactGreetingName || contactPublicName;
 
-    // TODO: implement a createChat function.
-    console.log('chat creation tbd');
+    // TODO: toast a message such as "Contact added!"
+    this.props.onContactAdded();
   };
 
   /** @param {InvitationInfo} info */
