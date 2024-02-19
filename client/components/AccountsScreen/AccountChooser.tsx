@@ -126,7 +126,7 @@ class AccountChooser extends React.Component<Props, State> {
       statusMessage: 'Attempting decryption...',
       requestPasswordFor: '',
     }, async () => {
-      const success = await this.accountStorage.attemptAccountDecryption({
+      const success = await this.accountStorage.decryptAccount({
         accountName,
         password,
       });

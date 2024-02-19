@@ -24,7 +24,12 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { clientEmitter, initServerConnection } from '../../emitters/comms';
 import { AccountCache } from './types/AccountCache';
 import { InvitationInfo } from '../../api/types/InvitationInfo';
-import { ContactCache, DecryptedContactData } from './types/ContactCache';
+import {
+  BasicContactSignature,
+  ContactCache,
+  DecryptedContactData,
+} from './types/ContactCache';
+import { ChatCache, DecryptedChatData } from './types/ChatCache';
 
 let singletonInstance: EncryptedAccountStorage;
 
@@ -42,9 +47,13 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   private _activeAccount: string | null = null;
   // Stores all accounts, both decrypted and pending decryption.
   private _accountCaches: { [key: string]: AccountCache } = {};
-  // Stores all contacts, both decrypted and pending decryption.
+  // Stores all contacts read at some point. They may still need decrypting.
   private _contactCaches: {
     [accountName: string]: { [internalContactId: string]: ContactCache }
+  } = {};
+  // Stores all chat read at some point. They may still need decrypting.
+  private _chatCaches: {
+    [internalContactId: string]: { [internalChatId: string]: ChatCache }
   } = {};
 
   constructor() {
@@ -175,7 +184,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
         // then we check for that here. When the user skips setting a password,
         // the application uses '0000' as a password instead of nothing.
         try {
-          await this.attemptAccountDecryption({
+          await this.decryptAccount({
             accountName,
             password: '0000',
           });
@@ -187,8 +196,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     }
   }
 
-  // TODO: rename to decryptAccount.
-  async attemptAccountDecryption({
+  async decryptAccount({
     accountName, password,
   }: {
     accountName: string, password: string,
@@ -266,6 +274,84 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     return false;
   }
 
+  async decryptContact(account: AccountCache, contact: ContactCache): Promise<boolean> {
+    if (!account.decryptedData) {
+      console.error(
+        'Cannot decrypt contacts - specified account is not unlocked:',
+        account,
+      );
+      return false;
+    }
+
+    const decryptedText = await account.contactPasswordStore.decryptAes256Gcm(
+      contact.encryptedContactBlob,
+      contact.encryptedContactIv,
+      false,
+    ) as string;
+
+    let decryptedData: DecryptedContactData;
+    try {
+      decryptedData = JSON.parse(decryptedText);
+    }
+    catch (error) {
+      console.error(
+        'Could not load a contact. Data appears to be corrupted. Error:',
+        error,
+      );
+      return false;
+    }
+
+    const {
+      initialName,
+      internalContactId,
+      contactPubKey,
+      privateChatIdSalt,
+      sharedSalt,
+      initialSharedSecret,
+    } = decryptedData;
+
+    // Check the data.
+    if (contact.contactDetachableId !== account.decryptedData.contactDetachableId) {
+      // TODO: Save back to the DB and alert the user.
+      // TODO: Save back to the DB and alert the user.
+      console.warn(
+        `Contact ("${initialName}") has an invalid detachable ID. Fixing.`,
+      );
+      decryptedData.chatDetachableId = account.decryptedData.contactDetachableId;
+    }
+    if (!contactPubKey || !privateChatIdSalt || !sharedSalt || !initialSharedSecret) {
+      console.error(
+        `Contact "${initialName}" is missing one or more required fields.`,
+      );
+      return false;
+    }
+
+    // Convert stored PEM key to CryptoKey.
+    decryptedData.contactPubKey = await importRsaPublicKey(
+      decryptedData.contactPubKey, 'pem',
+    ) as CryptoKey;
+
+    // Retrieve stringified array buffers.
+    decryptedData.privateChatIdSalt = stringToArrayBuffer(
+      decryptedData.privateChatIdSalt,
+    );
+    decryptedData.initialSharedSecret = stringToArrayBuffer(
+      decryptedData.initialSharedSecret,
+    );
+    decryptedData.sharedSalt = stringToArrayBuffer(
+      decryptedData.sharedSalt,
+    );
+
+    contact.decryptedData = decryptedData;
+    this._contactCaches[account.accountName] = {
+      [internalContactId]: contact,
+    };
+
+    await this.decryptAllChats(account, contact);
+
+    return true;
+  }
+
   async decryptAllAccountContacts(account: AccountCache): Promise<boolean> {
     if (!account.decryptedData) {
       console.error(
@@ -281,68 +367,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
 
     for (let i = 0, len = contacts.length; i < len; i++) {
       const contact: ContactCache = contacts[i];
-      const decryptedText = await account.contactPasswordStore.decryptAes256Gcm(
-        contact.encryptedContactBlob,
-        contact.encryptedContactIv,
-        false,
-      ) as string;
-
-      let decryptedData: DecryptedContactData;
-      try {
-        decryptedData = JSON.parse(decryptedText);
-      }
-      catch (error) {
-        console.error(
-          'Could not load a contact. Data appears to be corrupted. Error:',
-          error,
-        );
-        continue;
-      }
-
-      const {
-        initialName,
-        internalContactId,
-        contactPubKey,
-        privateChatIdSalt,
-        sharedSalt,
-        initialSharedSecret,
-      } = decryptedData;
-
-      // Check the data.
-      if (contact.contactDetachableId !== account.decryptedData.contactDetachableId) {
-        // TODO: Save back to the DB and alert the user.
-        console.warn(
-          `Contact ("${initialName}") has an invalid detachable ID. Fixing.`,
-        );
-        decryptedData.chatDetachableId = account.decryptedData.contactDetachableId;
-      }
-      if (!contactPubKey || !privateChatIdSalt || !sharedSalt || !initialSharedSecret) {
-        console.error(
-          `Contact "${initialName}" is missing one or more required fields.`,
-        );
-        continue;
-      }
-
-      // Convert stored PEM key to CryptoKey.
-      decryptedData.contactPubKey = await importRsaPublicKey(
-        decryptedData.contactPubKey, 'pem',
-      ) as CryptoKey;
-
-      // Retrieve stringified array buffers.
-      decryptedData.privateChatIdSalt = stringToArrayBuffer(
-        decryptedData.privateChatIdSalt,
-      );
-      decryptedData.initialSharedSecret = stringToArrayBuffer(
-        decryptedData.initialSharedSecret,
-      );
-      decryptedData.sharedSalt = stringToArrayBuffer(
-        decryptedData.sharedSalt,
-      );
-
-      contact.decryptedData = decryptedData;
-      this._contactCaches[account.accountName] = {
-        [internalContactId]: contact,
-      };
+      await this.decryptContact(account, contact);
     }
 
     return true;
@@ -445,17 +470,129 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
       JSON.stringify(contactInfo),
     );
 
-    return await this.dbStore!.addContact({
+    const contact: BasicContactSignature = {
       contactDetachableId: account.decryptedData.contactDetachableId,
-      encryptedContactBlob: contactBlob?.ciphertext,
-      encryptedContactIv: contactBlob?.iv,
+      encryptedContactBlob: contactBlob?.ciphertext!,
+      encryptedContactIv: contactBlob?.iv!,
+    };
+
+    await this.dbStore!.addContact(contact);
+
+    // To hide some complexity from new users, we automatically create the
+    // first chat between two users. For subsequent chats, users have more
+    // control over the creation process.
+    await this.createChat(account, contactInfo);
+
+    return true;
+  }
+
+  async createChat(
+    account: AccountCache, contact: DecryptedContactData, chatName: string | null = null,
+  ): Promise<boolean> {
+    const chatInfo: any = {
+      chatName: chatName,
+      internalChatId: getRandomBits(256, true) as string,
+      messageDetachableId: getRandomBits(256, true) as string,
+    };
+
+    // Encrypt the chat info.
+    const chatBlob = await account.contactPasswordStore.encryptAes256Gcm(
+      JSON.stringify(chatInfo),
+    );
+
+    return await this.dbStore!.createChat({
+      chatDetachableId: contact.chatDetachableId,
+      encryptedChatBlob: chatBlob?.ciphertext,
+      encryptedChatIv: chatBlob?.iv,
     });
   }
 
-  getAccountsStore() {
+  async decryptChat(account: AccountCache, contact: ContactCache, chat: ChatCache): Promise<boolean> {
+    if (!account.decryptedData) {
+      console.error(
+        'Cannot decrypt chats - specified account is not unlocked:',
+        account,
+      );
+      return false;
+    }
+
+    if (!contact.decryptedData) {
+      console.error(
+        'Cannot decrypt chats - owning contact is not unlocked:',
+        account,
+      );
+      return false;
+    }
+
+    const decryptedText = await account.contactPasswordStore.decryptAes256Gcm(
+      chat.encryptedChatBlob,
+      chat.encryptedChatIv,
+      false,
+    ) as string;
+
+    let decryptedData: DecryptedChatData;
+    try {
+      decryptedData = JSON.parse(decryptedText);
+    }
+    catch (error) {
+      console.error(
+        'Could not load a contact. Data appears to be corrupted. Error:',
+        error,
+      );
+      return false;
+    }
+
+    const {
+      chatName,
+      internalChatId,
+      messageDetachableId,
+    } = decryptedData;
+
+    // Check the data.
+    const contactInfo = contact.decryptedData;
+    if (chat.chatDetachableId !== contactInfo.chatDetachableId) {
+      // TODO: Save back to the DB and alert the user.
+      console.warn(
+        `Contact ("${contactInfo.initialName}") has an invalid detachable ` +
+        'ID. Fixing.',
+      );
+      chat.chatDetachableId = contactInfo.chatDetachableId;
+    }
+    if (!internalChatId || !messageDetachableId) {
+      console.error(
+        `Contact "${contactInfo.initialName}" is missing one or more ` +
+        'required fields.',
+      );
+      return false;
+    }
+
+    chat.decryptedData = decryptedData;
+    this._chatCaches[contactInfo.internalContactId] = {
+      [internalChatId]: chat,
+    };
+
+    return true;
   }
 
-  getAccountByPublicName() {
+  async decryptAllChats(account: AccountCache, contact: ContactCache): Promise<boolean> {
+    if (!account.decryptedData) {
+      console.error(
+        'Cannot decrypt contacts - specified account is not unlocked:',
+        account,
+      );
+      return false;
+    }
+
+    const chats = await this.dbStore?.getAllChatsByOwner({
+      contactDetachableId: account.decryptedData.contactDetachableId,
+    });
+
+    for (let i = 0, len = chats.length; i < len; i++) {
+      const chat: ChatCache = chats[i];
+      await this.decryptChat(account, contact, chat);
+    }
+
+    return true;
   }
 
   findAccountByPublicName({ publicName }) {
@@ -467,12 +604,6 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
       }
     }
     return null;
-  }
-
-  retrieveAllContacts() {
-  }
-
-  retrieveContactByName() {
   }
 }
 

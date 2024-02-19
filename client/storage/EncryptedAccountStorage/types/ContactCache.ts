@@ -26,7 +26,7 @@ interface BasicContactSignature {
  * - For SQLite, this represents a single row in a table.
  */
 interface ContactCache extends BasicContactSignature {
-  contactDetachableId: string,
+  chatDetachableId: string,
   decryptedData: DecryptedContactData | null,
   // The password used here is a SHA-256 hash of the user's account password
   // and their 768-bit secret salt. The idea here is that if an attacker got
@@ -42,7 +42,7 @@ interface DecryptedContactData {
   // Used in the absence of a contact personal name, and for severe errors
   // where the personal name is unknown.
   initialName: string,
-  // This is a random SHA-256 hash.
+  // Randomly generated string.
   internalContactId: string,
   contactPubKey: CryptoKey,
   chatDetachableId: string,
