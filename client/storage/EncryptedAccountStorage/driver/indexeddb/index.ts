@@ -129,6 +129,31 @@ class IdbAccountStorage implements StoreInterface {
         contactStore.transaction.oncomplete = (_) => {
           console.log('Contacts object store created.');
         };
+
+        // --- Chats store -------------------------------------- //
+
+        // Chat stores don't have unique key paths other than a simple ID as
+        // they aren't meant to be uniquely identified.
+        const chatStore = db.createObjectStore('chats', {
+          keyPath: 'id',
+          autoIncrement: true,
+        });
+
+        // Same comment applies as with the encryptedAccountIv above: Keep IVs
+        // unique for all chats, even for unrelated accounts.
+        chatStore.createIndex('encryptedChatIv', 'encryptedChatIv', {
+          unique: true,
+        });
+
+        // All chats belonging to the same account will have the same
+        // detachable ID. The ID is 256 bits of random data presented as hex.
+        chatStore.createIndex('chatDetachableId', 'chatDetachableId', {
+          unique: false,
+        });
+
+        chatStore.transaction.oncomplete = (_) => {
+          console.log('Chats object store created.');
+        };
       };
     });
   }
@@ -282,6 +307,75 @@ class IdbAccountStorage implements StoreInterface {
         //  handled gracefully. Users need an opportunity to deal with
         //  corrupted contact data.
         .getAll(contactDetachableId);
+
+      request.onsuccess = (event: Event) => {
+        const target: IDBRequest = event.target as IDBRequest;
+        resolve(target.result);
+      };
+
+      request.onerror = (error) => {
+        console.error('error', error);
+        resolve(null);
+      };
+    });
+  }
+
+  createChat({
+    chatDetachableId,
+    encryptedChatBlob,
+    encryptedChatIv,
+  }) {
+    return new Promise((resolve) => {
+      if (!this.isDbReady()) {
+        console.error('Cannot add chat: DB not ready.');
+        return resolve(false);
+      }
+
+      if (!chatDetachableId || !encryptedChatBlob || !encryptedChatIv) {
+        console.error('Cannot add chat: Invalid parameters.');
+        return resolve(false);
+      }
+
+      let transaction: IDBTransaction;
+      try {
+        // @ts-ignore - Better data integrity on Firefox.
+        transaction = db!.transaction([ 'chats' ], 'readwriteflush', strict);
+      }
+      catch (_) {
+        transaction = db!.transaction([ 'chats' ], 'readwrite', strict);
+      }
+
+      const request =
+        transaction
+          .objectStore('chats')
+          .add({
+            chatDetachableId,
+            encryptedChatBlob,
+            encryptedChatIv,
+          });
+
+      request.onsuccess = () => {
+        resolve(true);
+      };
+
+      request.onerror = (error) => {
+        console.error('error', error);
+        resolve(false);
+      };
+    });
+  }
+
+  getAllChatsByOwner({ chatDetachableId }): Promise<object[] | null> {
+    return new Promise(resolve => {
+      if (!this.isDbReady()) {
+        return resolve(null);
+      }
+
+      const request = db!
+        .transaction([ 'chats' ], 'readonly')
+        .objectStore('chats')
+        .index('chatDetachableId')
+        .getAll(chatDetachableId);
 
       request.onsuccess = (event: Event) => {
         const target: IDBRequest = event.target as IDBRequest;
