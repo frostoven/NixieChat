@@ -43,12 +43,12 @@ const columnRightStyle = {
 class ContactsAndChatGrid extends React.Component {
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const account = accountsStorage.getActiveAccount().decryptedData;
+    const contacts = accountsStorage.getActiveContacts();
 
     // If the user has no chats:
     // return <CreateFirstChat/>;
 
-    if (!account?.contacts?.length) {
+    if (!contacts.length) {
       return (
         <>
           <div style={newAccountOptionsStyle}>

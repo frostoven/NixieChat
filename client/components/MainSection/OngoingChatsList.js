@@ -1,11 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  EncryptedAccountStorage,
+} from '../../storage/EncryptedAccountStorage';
+
+const accountsStorage = new EncryptedAccountStorage();
 
 const chatsListStyle = {
   // borderBottom: 'thin solid grey',
   paddingLeft: 2,
   paddingTop: 12,
   paddingBottom: 12,
+  cursor: 'pointer',
 };
 
 const listStyle = {
@@ -30,7 +36,7 @@ const profileIconStyle = {
 };
 
 const contactInfoContainer = {
-  display: 'inline-block'
+  display: 'inline-block',
 };
 
 const taperedLineStyle = {
@@ -50,70 +56,33 @@ class OngoingChatsList extends React.Component {
     //
   };
 
+  handleChatClick = ({ name }) => {
+    console.log('Clicked:', name);
+  };
+
   genList = () => {
-    const contacts = [
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
+    const result = [];
+
+    const contactsList = accountsStorage.getActiveChats();
+    for (let i = 0, len = contactsList.length; i < len; i++) {
+      const contactInfo = contactsList[i];
+      result.push({
+        name: contactInfo.contactName,
+        lastMessage: '---',
         photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-      {
-        // Example structure.
-        name: 'Name TBA',
-        lastMessage: 'Last message shown here',
-        photo: '',
-      },
-    ];
+      });
+    }
 
     const contactsJsx = [];
 
-    for (let i = 0, len = contacts.length; i < len; i++) {
-      const { name, lastMessage } = contacts[i];
+    for (let i = 0, len = result.length; i < len; i++) {
+      const { name, lastMessage } = result[i];
       contactsJsx.push(
-        <div key={`contacts-list-${i}`} style={chatsListStyle}>
+        <div
+          key={`contacts-list-${i}`}
+          style={chatsListStyle}
+          onClick={() => this.handleChatClick(result[i])}
+        >
 
           {/* Contact profile photo */}
           <div style={profilePhotoContainer}>

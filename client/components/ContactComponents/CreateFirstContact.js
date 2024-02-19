@@ -39,10 +39,6 @@ const separatorMobileStyle = {
 };
 
 class CreateFirstContact extends React.Component {
-  createChat = () => {
-    //
-  };
-
   render() {
     const account = accountStorage.getActiveAccount().decryptedData;
     return (
