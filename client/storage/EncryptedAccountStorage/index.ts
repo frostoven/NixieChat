@@ -1,3 +1,4 @@
+import { forEach } from 'lodash';
 import getDbByPlatform from './driver';
 import {
   StoreInterface,
@@ -55,6 +56,12 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   private _chatCaches: {
     [internalContactId: string]: { [internalChatId: string]: ChatCache }
   } = {};
+  // UI-friendly version of _contactCaches.
+  private _contactUiCache: {
+    owningAccount: string,
+    internalContactId: string,
+    contactName: string,
+  }[] = [];
 
   constructor() {
     if (singletonInstance) {
@@ -379,6 +386,38 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
 
   getAllAccountsAsArray() {
     return Object.values(this._accountCaches);
+  }
+
+  getContactsAsArray(account: AccountCache) {
+    const id = account.decryptedData?.contactDetachableId;
+    return Object.values(this._contactCaches[id!]);
+  }
+
+  // Returns all contacts for the active account.
+  getActiveContacts() {
+    if (this._contactUiCache.length) {
+      return this._contactUiCache;
+    }
+
+    const owner = this.getActiveAccount()?.accountName;
+    const contactCaches = this._contactCaches[owner!];
+    if (!owner || !contactCaches) {
+      return [];
+    }
+
+    forEach(contactCaches, (contactCache: ContactCache, internalId: string) => {
+      if (!contactCache.decryptedData) {
+        console.warn('Skipping locked contact.');
+        return;
+      }
+      this._contactUiCache.push({
+        owningAccount: owner,
+        internalContactId: internalId,
+        contactName: contactCache.decryptedData.initialName,
+      });
+    });
+
+    return this._contactUiCache;
   }
 
   getAllAccountNames() {
