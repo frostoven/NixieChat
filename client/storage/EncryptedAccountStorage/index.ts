@@ -62,6 +62,13 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     internalContactId: string,
     contactName: string,
   }[] = [];
+  // UI-friendly version of _chatCaches.
+  private _chatUiCache: {
+    owningAccount: string,
+    internalContactId: string,
+    internalChatId: string,
+    contactName: string,
+  }[] = [];
 
   constructor() {
     if (singletonInstance) {
@@ -418,6 +425,29 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     });
 
     return this._contactUiCache;
+  }
+
+  // Returns all contacts for the active account.
+  getActiveChats() {
+    if (this._chatUiCache.length) {
+      return this._chatUiCache;
+    }
+
+    const activeContacts = this.getActiveContacts();
+    for (let ci = 0, len = activeContacts.length; ci < len; ci++) {
+      const contactInfo = activeContacts[ci];
+      const chatCaches = this._chatCaches[contactInfo.internalContactId];
+      forEach(chatCaches, (chatCache: ChatCache, internalId: string) => {
+        this._chatUiCache.push({
+          owningAccount: contactInfo.owningAccount,
+          internalContactId: contactInfo.internalContactId,
+          internalChatId: internalId,
+          contactName: contactInfo.contactName,
+        })
+      });
+    }
+
+    return this._chatUiCache;
   }
 
   getAllAccountNames() {
