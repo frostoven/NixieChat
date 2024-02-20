@@ -154,6 +154,31 @@ class IdbAccountStorage implements StoreInterface {
         chatStore.transaction.oncomplete = (_) => {
           console.log('Chats object store created.');
         };
+
+        // --- Message store ------------------------------------ //
+
+        // Chat stores don't have unique key paths other than a simple ID as
+        // they aren't meant to be uniquely identified.
+        const messageStore = db.createObjectStore('messages', {
+          keyPath: 'id',
+          autoIncrement: true,
+        });
+
+        // Same comment applies as with the encryptedAccountIv above: Keep IVs
+        // unique for all messages, even for unrelated accounts.
+        messageStore.createIndex('encryptedMessageIv', 'encryptedMessageIv', {
+          unique: true,
+        });
+
+        // All messages belonging to the same account will have the same
+        // detachable ID. The ID is 256 bits of random data presented as hex.
+        messageStore.createIndex('messageDetachableId', 'messageDetachableId', {
+          unique: false,
+        });
+
+        messageStore.transaction.oncomplete = (_) => {
+          console.log('Message object store created.');
+        };
       };
     });
   }
@@ -394,6 +419,44 @@ class IdbAccountStorage implements StoreInterface {
     encryptedMessageBlob,
     encryptedMessageIv,
   }) {
+    return new Promise((resolve) => {
+      if (!this.isDbReady()) {
+        console.error('Cannot add message: DB not ready.');
+        return resolve(false);
+      }
+
+      if (!messageDetachableId || !encryptedMessageBlob || !encryptedMessageIv) {
+        console.error('Cannot add message: Invalid parameters.');
+        return resolve(false);
+      }
+
+      let transaction: IDBTransaction;
+      try {
+        // @ts-ignore - Better data integrity on Firefox.
+        transaction = db!.transaction([ 'messages' ], 'readwriteflush', strict);
+      }
+      catch (_) {
+        transaction = db!.transaction([ 'messages' ], 'readwrite', strict);
+      }
+
+      const request =
+        transaction
+          .objectStore('messages')
+          .add({
+            messageDetachableId,
+            encryptedMessageBlob,
+            encryptedMessageIv,
+          });
+
+      request.onsuccess = () => {
+        resolve(true);
+      };
+
+      request.onerror = (error) => {
+        console.error('error', error);
+        resolve(false);
+      };
+    });
   }
 }
 
