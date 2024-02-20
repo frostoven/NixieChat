@@ -44,8 +44,8 @@ interface MessageBlob {
   // A string created by hashing the account ID with privateChatIdSalt.
   owningAccountIDHash: Uint8Array,
   owningAccountIDMessageIdHash: Uint8Array,
-  encryptedMessageBlob: Uint8Array,
-  encryptedMessageIv: Uint8Array,
+  ciphertext: Uint8Array,
+  iv: Uint8Array,
 }
 
 export {

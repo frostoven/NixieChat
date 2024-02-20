@@ -13,11 +13,11 @@ interface BasicChatSignature {
   // contact, chat information is an unidentifiable mess.
   chatDetachableId: string,
   // An encrypted version of DecryptedContactData.
-  encryptedChatBlob: Uint8Array,
+  ciphertext: Uint8Array,
   // Needed along with a password for decryption. It's very important that this
   // be unique among all entries, otherwise decrypting messages without a
   // password becomes trivial.
-  encryptedChatIv: Uint8Array,
+  iv: Uint8Array,
 }
 
 /**

@@ -73,8 +73,8 @@ class IdbAccountStorage implements StoreInterface {
       // * Preexisting device, but schemaVersion has changed.
       // Because upgrades are triggered on both, we use this as our generic
       // first-time setup.
-      request.onupgradeneeded = (event) => {
-        console.log('AccountsStorage upgrade triggered.');
+      request.onupgradeneeded = async (event) => {
+        console.log('Database upgrade triggered.');
         const target: IDBOpenDBRequest = event.target as IDBOpenDBRequest;
         if (!target) {
           console.error('[AccountsStorage] Setup or upgrade failed.', event);
@@ -85,102 +85,117 @@ class IdbAccountStorage implements StoreInterface {
 
         // --- Accounts store ----------------------------------- //
 
-        const accountStore = db.createObjectStore('accounts', {
-          // Key paths must be unique; this ensures we don't have multiple
-          // accounts with the same name.
-          keyPath: 'accountName',
+        this.createEncryptedObjectStore({
+          upgradeTarget: db,
+          storeName: 'accounts',
+          storeOptions: {
+            // Key paths must be unique; this ensures we don't have multiple
+            // accounts with the same name.
+            keyPath: 'accountName',
+          },
+          // Accounts are pure roots and thus not attachable to other roots.
+          detachableIdName: null,
         });
-
-        // It is absolutely essential that the initialization vector is unique
-        // per CryptoKey, else we can easily decrypt AES strings without the
-        // password. We don't actually reuse keys, but it makes sense to
-        // prevent duplicates globally in case some oversight fucks us later.
-        accountStore.createIndex('encryptedAccountIv', 'encryptedAccountIv', {
-          unique: true,
-        });
-
-        accountStore.transaction.oncomplete = (_) => {
-          // If we ever wanted to write some default data post-creation, we'd
-          // do that here.
-          console.log('Accounts object store created.');
-        };
 
         // --- Contacts store ----------------------------------- //
 
-        // Contact stores don't have unique key paths other than a simple ID as
-        // they aren't meant to be uniquely identified.
-        const contactStore = db.createObjectStore('contacts', {
-          keyPath: 'id',
-          autoIncrement: true,
+        this.createEncryptedObjectStore({
+          upgradeTarget: db,
+          storeName: 'contacts',
+          storeOptions: {
+            // Contact stores don't have unique key paths other than a simple
+            // ID as they aren't meant to be uniquely identified.
+            keyPath: 'id',
+            autoIncrement: true,
+          },
+          // Attaches to accounts.
+          detachableIdName: 'contactDetachableId',
         });
-
-        // Same comment applies as with the encryptedAccountIv above: Keep IVs
-        // unique for all contacts, even for unrelated accounts.
-        contactStore.createIndex('encryptedContactIv', 'encryptedContactIv', {
-          unique: true,
-        });
-
-        // All contacts belonging to the same account will have the same
-        // detachable ID. The ID is 256 bits of random data presented as hex.
-        contactStore.createIndex('contactDetachableId', 'contactDetachableId', {
-          unique: false,
-        });
-
-        contactStore.transaction.oncomplete = (_) => {
-          console.log('Contacts object store created.');
-        };
 
         // --- Chats store -------------------------------------- //
 
-        // Chat stores don't have unique key paths other than a simple ID as
-        // they aren't meant to be uniquely identified.
-        const chatStore = db.createObjectStore('chats', {
-          keyPath: 'id',
-          autoIncrement: true,
+        this.createEncryptedObjectStore({
+          upgradeTarget: db,
+          storeName: 'chats',
+          storeOptions: {
+            // Chat stores don't have unique key paths other than a simple ID as
+            // they aren't meant to be uniquely identified.
+            keyPath: 'id',
+            autoIncrement: true,
+          },
+          // Attaches to contacts.
+          detachableIdName: 'chatDetachableId',
         });
-
-        // Same comment applies as with the encryptedAccountIv above: Keep IVs
-        // unique for all chats, even for unrelated accounts.
-        chatStore.createIndex('encryptedChatIv', 'encryptedChatIv', {
-          unique: true,
-        });
-
-        // All chats belonging to the same account will have the same
-        // detachable ID. The ID is 256 bits of random data presented as hex.
-        chatStore.createIndex('chatDetachableId', 'chatDetachableId', {
-          unique: false,
-        });
-
-        chatStore.transaction.oncomplete = (_) => {
-          console.log('Chats object store created.');
-        };
 
         // --- Message store ------------------------------------ //
 
-        // Chat stores don't have unique key paths other than a simple ID as
-        // they aren't meant to be uniquely identified.
-        const messageStore = db.createObjectStore('messages', {
-          keyPath: 'id',
-          autoIncrement: true,
+        this.createEncryptedObjectStore({
+          upgradeTarget: db,
+          storeName: 'messages',
+          storeOptions: {
+            // Message stores don't have unique key paths other than a simple
+            // ID as they aren't meant to be uniquely identified.
+            keyPath: 'id',
+            autoIncrement: true,
+          },
+          // Attaches to chats.
+          detachableIdName: 'messageDetachableId',
         });
-
-        // Same comment applies as with the encryptedAccountIv above: Keep IVs
-        // unique for all messages, even for unrelated accounts.
-        messageStore.createIndex('encryptedMessageIv', 'encryptedMessageIv', {
-          unique: true,
-        });
-
-        // All messages belonging to the same account will have the same
-        // detachable ID. The ID is 256 bits of random data presented as hex.
-        messageStore.createIndex('messageDetachableId', 'messageDetachableId', {
-          unique: false,
-        });
-
-        messageStore.transaction.oncomplete = (_) => {
-          console.log('Message object store created.');
-        };
       };
     });
+  }
+
+  createEncryptedObjectStore({
+    upgradeTarget,
+    storeName,
+    storeOptions,
+    detachableIdName,
+  }: {
+    upgradeTarget: IDBDatabase,
+    storeName: string,
+    storeOptions: IDBObjectStoreParameters,
+    detachableIdName: string | null,
+  }) {
+    if (!upgradeTarget) {
+      console.error(
+        `Could not create store "${storeName}" - db connection not ready.`,
+      );
+      return false;
+    }
+
+    // Begin.
+    const objectStore = upgradeTarget.createObjectStore(
+      storeName, storeOptions,
+    );
+
+    // It is absolutely essential that the initialization vector is unique
+    // per CryptoKey, else we can easily decrypt AES strings without the
+    // password. We don't actually reuse keys, but it makes sense to
+    // prevent duplicates globally in case some oversight fucks us later.
+    objectStore.createIndex('iv', 'iv', {
+      unique: true,
+    });
+
+    if (detachableIdName !== null) {
+      // A detachable ID is like a foreign key, but not enforced by the
+      // database (because the root owner's copy is encrypted, so the
+      // database can't see the association).
+      //
+      // All dependents belonging to the same root will have the same
+      // detachable ID. For example, all contacts belonging to the same
+      // account have the same detachable ID. The ID is 256 bits of random
+      // data presented as hex.
+      objectStore.createIndex(detachableIdName, detachableIdName, {
+        unique: false,
+      });
+    }
+
+    objectStore.transaction.oncomplete = (_) => {
+      // If we ever wanted to write some default data post-creation, we'd
+      // do that here.
+      console.log('Object store creation complete.');
+      return true;
+    };
   }
 
   isDbReady() {
@@ -191,18 +206,14 @@ class IdbAccountStorage implements StoreInterface {
     return true;
   }
 
-  createAccount({
-    accountName,
-    encryptedAccountBlob,
-    encryptedAccountIv,
-  }) {
+  createAccount({ accountName, ciphertext, iv }) {
     return new Promise((resolve) => {
       if (!this.isDbReady()) {
         console.error('Cannot create account: DB not ready.');
         return resolve(false);
       }
 
-      if (!accountName || !encryptedAccountIv || !encryptedAccountIv) {
+      if (!accountName || !iv) {
         console.error('Cannot create account: Invalid parameters.');
         return resolve(false);
       }
@@ -221,8 +232,8 @@ class IdbAccountStorage implements StoreInterface {
           .objectStore('accounts')
           .add({
             accountName,
-            encryptedAccountBlob,
-            encryptedAccountIv,
+            ciphertext,
+            iv,
           });
 
       request.onsuccess = () => {
@@ -272,18 +283,14 @@ class IdbAccountStorage implements StoreInterface {
   // unencrypted are unique. All other values are encrypted (and two strings
   // with the exact same values produce different ciphertexts, even) so the DB
   // has very limited error-checking capabilities.
-  addContact({
-    contactDetachableId,
-    encryptedContactBlob,
-    encryptedContactIv,
-  }) {
+  addContact({ contactDetachableId, ciphertext, iv }) {
     return new Promise((resolve) => {
       if (!this.isDbReady()) {
         console.error('Cannot add contact: DB not ready.');
         return resolve(false);
       }
 
-      if (!contactDetachableId || !encryptedContactBlob || !encryptedContactIv) {
+      if (!contactDetachableId || !iv) {
         console.error('Cannot add contact: Invalid parameters.');
         return resolve(false);
       }
@@ -302,8 +309,8 @@ class IdbAccountStorage implements StoreInterface {
           .objectStore('contacts')
           .add({
             contactDetachableId,
-            encryptedContactBlob,
-            encryptedContactIv,
+            ciphertext,
+            iv,
           });
 
       request.onsuccess = () => {
@@ -345,18 +352,14 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
-  createChat({
-    chatDetachableId,
-    encryptedChatBlob,
-    encryptedChatIv,
-  }) {
+  createChat({ chatDetachableId, ciphertext, iv }) {
     return new Promise((resolve) => {
       if (!this.isDbReady()) {
         console.error('Cannot add chat: DB not ready.');
         return resolve(false);
       }
 
-      if (!chatDetachableId || !encryptedChatBlob || !encryptedChatIv) {
+      if (!chatDetachableId || !iv) {
         console.error('Cannot add chat: Invalid parameters.');
         return resolve(false);
       }
@@ -375,8 +378,8 @@ class IdbAccountStorage implements StoreInterface {
           .objectStore('chats')
           .add({
             chatDetachableId,
-            encryptedChatBlob,
-            encryptedChatIv,
+            ciphertext,
+            iv,
           });
 
       request.onsuccess = () => {
@@ -414,18 +417,14 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
-  createMessage({
-    messageDetachableId,
-    encryptedMessageBlob,
-    encryptedMessageIv,
-  }) {
+  createMessage({ messageDetachableId, ciphertext, iv }) {
     return new Promise((resolve) => {
       if (!this.isDbReady()) {
         console.error('Cannot add message: DB not ready.');
         return resolve(false);
       }
 
-      if (!messageDetachableId || !encryptedMessageBlob || !encryptedMessageIv) {
+      if (!messageDetachableId || !iv) {
         console.error('Cannot add message: Invalid parameters.');
         return resolve(false);
       }
@@ -444,8 +443,8 @@ class IdbAccountStorage implements StoreInterface {
           .objectStore('messages')
           .add({
             messageDetachableId,
-            encryptedMessageBlob,
-            encryptedMessageIv,
+            ciphertext,
+            iv,
           });
 
       request.onsuccess = () => {

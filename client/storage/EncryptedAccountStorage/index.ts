@@ -139,8 +139,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
 
     await this.dbStore!.createAccount({
       accountName: options.accountName,
-      encryptedAccountBlob: accountBlob.ciphertext,
-      encryptedAccountIv: accountBlob.iv,
+      ciphertext: accountBlob.ciphertext,
+      iv: accountBlob.iv,
     });
 
     // Make the root node re-read all accounts.
@@ -175,15 +175,15 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     // this._accountCaches = accounts;
     for (let i = 0, len = accounts.length; i < len; i++) {
       const {
-        accountName, encryptedAccountBlob, encryptedAccountIv,
+        accountName, ciphertext, iv,
       } = accounts[i];
 
       let accountCache = this._accountCaches[accountName];
       if (!accountCache) {
         accountCache = {
           accountName,
-          encryptedAccountBlob,
-          encryptedAccountIv,
+          ciphertext,
+          iv,
           decryptedData: null,
           accountPasswordStore: getPasswordStore(),
           contactPasswordStore: getPasswordStore(),
@@ -225,14 +225,14 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   }) {
     const account = this._accountCaches[accountName];
     const {
-      encryptedAccountBlob,
-      encryptedAccountIv,
+      ciphertext,
+      iv,
     } = account;
 
     let decryptedData: string | null = await aesGcmDecrypt(
       password,
-      encryptedAccountBlob,
-      encryptedAccountIv,
+      ciphertext,
+      iv,
       true,
     );
 
@@ -306,8 +306,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     }
 
     const decryptedText = await account.contactPasswordStore.decryptAes256Gcm(
-      contact.encryptedContactBlob,
-      contact.encryptedContactIv,
+      contact.ciphertext,
+      contact.iv,
       false,
     ) as string;
 
@@ -572,8 +572,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
 
     const contact: BasicContactSignature = {
       contactDetachableId: account.decryptedData.contactDetachableId,
-      encryptedContactBlob: contactBlob?.ciphertext!,
-      encryptedContactIv: contactBlob?.iv!,
+      ciphertext: contactBlob?.ciphertext!,
+      iv: contactBlob?.iv!,
     };
 
     await this.dbStore!.addContact(contact);
@@ -602,8 +602,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
 
     return await this.dbStore!.createChat({
       chatDetachableId: contact.chatDetachableId,
-      encryptedChatBlob: chatBlob?.ciphertext,
-      encryptedChatIv: chatBlob?.iv,
+      ciphertext: chatBlob?.ciphertext,
+      iv: chatBlob?.iv,
     });
   }
 
@@ -625,8 +625,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     }
 
     const decryptedText = await account.contactPasswordStore.decryptAes256Gcm(
-      chat.encryptedChatBlob,
-      chat.encryptedChatIv,
+      chat.ciphertext,
+      chat.iv,
       false,
     ) as string;
 

@@ -10,11 +10,11 @@ interface BasicAccountSignature {
   // identify encrypted accounts.
   accountName: string,
   // An encrypted version of DecryptedAccountData.
-  encryptedAccountBlob: Uint8Array,
+  ciphertext: Uint8Array,
   // Needed along with a password for decryption. It's very important that this
   // be unique among all entries, otherwise decrypting messages without a
   // password becomes trivial.
-  encryptedAccountIv: Uint8Array,
+  iv: Uint8Array,
 }
 
 /**
