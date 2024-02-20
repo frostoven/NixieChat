@@ -145,6 +145,7 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
+  // Used during the database upgrade process.
   createEncryptedObjectStore({
     upgradeTarget,
     storeName,
@@ -206,32 +207,38 @@ class IdbAccountStorage implements StoreInterface {
     return true;
   }
 
-  createAccount({ accountName, ciphertext, iv }) {
+  // Important note: This function does not ensure that the entry's identifier
+  // is valid. It assumes that the wrapper class (EncryptedAccountStorage) has
+  // done all the work. This is because, at the DB level, we can only ensure
+  // unencrypted are unique. All other values are encrypted (and two strings
+  // with the exact same values produce different ciphertexts, even) so the DB
+  // has very limited error-checking capabilities.
+  createEntry({ storeName, identifierKey, identifierValue, ciphertext, iv }) {
     return new Promise((resolve) => {
       if (!this.isDbReady()) {
-        console.error('Cannot create account: DB not ready.');
+        console.error(`Cannot create "${storeName}" entry: DB not ready.`);
         return resolve(false);
       }
 
-      if (!accountName || !iv) {
-        console.error('Cannot create account: Invalid parameters.');
+      if (!storeName || !identifierKey || !identifierValue || !iv) {
+        console.error(`Cannot create "${storeName}" entry: Invalid parameters.`);
         return resolve(false);
       }
 
       let transaction: IDBTransaction;
       try {
         // @ts-ignore - Better data integrity on Firefox.
-        transaction = db!.transaction([ 'accounts' ], 'readwriteflush', strict);
+        transaction = db!.transaction([ storeName ], 'readwriteflush', strict);
       }
       catch (_) {
-        transaction = db!.transaction([ 'accounts' ], 'readwrite', strict);
+        transaction = db!.transaction([ storeName ], 'readwrite', strict);
       }
 
       const request =
         transaction
-          .objectStore('accounts')
+          .objectStore(storeName)
           .add({
-            accountName,
+            [identifierKey]: identifierValue,
             ciphertext,
             iv,
           });
@@ -241,9 +248,49 @@ class IdbAccountStorage implements StoreInterface {
       };
 
       request.onerror = (error) => {
-        console.error('error', error);
+        console.error(`${storeName} error:`, error);
         resolve(false);
       };
+    });
+  }
+
+  async createAccount({ accountName, ciphertext, iv }) {
+    await this.createEntry({
+      storeName: 'accounts',
+      identifierKey: 'accountName',
+      identifierValue: accountName,
+      ciphertext,
+      iv,
+    });
+  }
+
+  async addContact({ contactDetachableId, ciphertext, iv }) {
+    await this.createEntry({
+      storeName: 'contacts',
+      identifierKey: 'contactDetachableId',
+      identifierValue: contactDetachableId,
+      ciphertext,
+      iv,
+    });
+  }
+
+  async createChat({ chatDetachableId, ciphertext, iv }) {
+    await this.createEntry({
+      storeName: 'chats',
+      identifierKey: 'chatDetachableId',
+      identifierValue: chatDetachableId,
+      ciphertext,
+      iv,
+    });
+  }
+
+  async createMessage({ messageDetachableId, ciphertext, iv }) {
+    await this.createEntry({
+      storeName: 'messages',
+      identifierKey: 'messageDetachableId',
+      identifierValue: messageDetachableId,
+      ciphertext,
+      iv,
     });
   }
 
@@ -277,53 +324,6 @@ class IdbAccountStorage implements StoreInterface {
     return db;
   }
 
-  // Important note: This function does not ensure that the contact key is
-  // valid. It assumes that the wrapper class (EncryptedAccountStorage) has
-  // done all the work. This is because, at the DB level, we can only ensure
-  // unencrypted are unique. All other values are encrypted (and two strings
-  // with the exact same values produce different ciphertexts, even) so the DB
-  // has very limited error-checking capabilities.
-  addContact({ contactDetachableId, ciphertext, iv }) {
-    return new Promise((resolve) => {
-      if (!this.isDbReady()) {
-        console.error('Cannot add contact: DB not ready.');
-        return resolve(false);
-      }
-
-      if (!contactDetachableId || !iv) {
-        console.error('Cannot add contact: Invalid parameters.');
-        return resolve(false);
-      }
-
-      let transaction: IDBTransaction;
-      try {
-        // @ts-ignore - Better data integrity on Firefox.
-        transaction = db!.transaction([ 'contacts' ], 'readwriteflush', strict);
-      }
-      catch (_) {
-        transaction = db!.transaction([ 'contacts' ], 'readwrite', strict);
-      }
-
-      const request =
-        transaction
-          .objectStore('contacts')
-          .add({
-            contactDetachableId,
-            ciphertext,
-            iv,
-          });
-
-      request.onsuccess = () => {
-        resolve(true);
-      };
-
-      request.onerror = (error) => {
-        console.error('error', error);
-        resolve(false);
-      };
-    });
-  }
-
   getAllContactsByOwner({ contactDetachableId }): Promise<object[] | null> {
     return new Promise(resolve => {
       if (!this.isDbReady()) {
@@ -352,47 +352,6 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
-  createChat({ chatDetachableId, ciphertext, iv }) {
-    return new Promise((resolve) => {
-      if (!this.isDbReady()) {
-        console.error('Cannot add chat: DB not ready.');
-        return resolve(false);
-      }
-
-      if (!chatDetachableId || !iv) {
-        console.error('Cannot add chat: Invalid parameters.');
-        return resolve(false);
-      }
-
-      let transaction: IDBTransaction;
-      try {
-        // @ts-ignore - Better data integrity on Firefox.
-        transaction = db!.transaction([ 'chats' ], 'readwriteflush', strict);
-      }
-      catch (_) {
-        transaction = db!.transaction([ 'chats' ], 'readwrite', strict);
-      }
-
-      const request =
-        transaction
-          .objectStore('chats')
-          .add({
-            chatDetachableId,
-            ciphertext,
-            iv,
-          });
-
-      request.onsuccess = () => {
-        resolve(true);
-      };
-
-      request.onerror = (error) => {
-        console.error('error', error);
-        resolve(false);
-      };
-    });
-  }
-
   getAllChatsByOwner({ chatDetachableId }): Promise<object[] | null> {
     return new Promise(resolve => {
       if (!this.isDbReady()) {
@@ -413,47 +372,6 @@ class IdbAccountStorage implements StoreInterface {
       request.onerror = (error) => {
         console.error('error', error);
         resolve(null);
-      };
-    });
-  }
-
-  createMessage({ messageDetachableId, ciphertext, iv }) {
-    return new Promise((resolve) => {
-      if (!this.isDbReady()) {
-        console.error('Cannot add message: DB not ready.');
-        return resolve(false);
-      }
-
-      if (!messageDetachableId || !iv) {
-        console.error('Cannot add message: Invalid parameters.');
-        return resolve(false);
-      }
-
-      let transaction: IDBTransaction;
-      try {
-        // @ts-ignore - Better data integrity on Firefox.
-        transaction = db!.transaction([ 'messages' ], 'readwriteflush', strict);
-      }
-      catch (_) {
-        transaction = db!.transaction([ 'messages' ], 'readwrite', strict);
-      }
-
-      const request =
-        transaction
-          .objectStore('messages')
-          .add({
-            messageDetachableId,
-            ciphertext,
-            iv,
-          });
-
-      request.onsuccess = () => {
-        resolve(true);
-      };
-
-      request.onerror = (error) => {
-        console.error('error', error);
-        resolve(false);
       };
     });
   }
