@@ -43,6 +43,16 @@ class IdbAccountStorage implements StoreInterface {
     }
   }
 
+  // === DB Init ================================================ //
+
+  isDbReady() {
+    if (!db) {
+      console.error('[AccountsStorage] Database not ready.');
+      return false;
+    }
+    return true;
+  }
+
   /**
    * Prepares the accounts store. If it does not yet exist, it's created.
    */
@@ -145,7 +155,9 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
-  // Used during the database upgrade process.
+  /**
+   * Used during the database upgrade process.
+   */
   createEncryptedObjectStore({
     upgradeTarget,
     storeName,
@@ -199,13 +211,7 @@ class IdbAccountStorage implements StoreInterface {
     };
   }
 
-  isDbReady() {
-    if (!db) {
-      console.error('[AccountsStorage] Database not ready.');
-      return false;
-    }
-    return true;
-  }
+  // === Write operations ======================================= //
 
   // Important note: This function does not ensure that the entry's identifier
   // is valid. It assumes that the wrapper class (EncryptedAccountStorage) has
@@ -254,6 +260,63 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
+  // === Read operations ======================================== //
+
+  // Please don't use this for messages. You'll blow up your RAM. Returns all
+  // entries in the specified object.
+  async getAllStoreEntries({ storeName }): Promise<object[] | null> {
+    return new Promise(resolve => {
+      if (!this.isDbReady()) {
+        return resolve(null);
+      }
+
+      const request = db!
+        .transaction([ storeName ], 'readonly')
+        .objectStore(storeName)
+        .getAll();
+
+      request.onsuccess = (event: Event) => {
+        const target: IDBRequest = event.target as IDBRequest;
+        resolve(target.result);
+      };
+
+      request.onerror = (error) => {
+        console.error('error', error);
+        resolve(null);
+      };
+    });
+  }
+
+  // Please don't use this for messages. You'll blow up your RAM. Returns all
+  // entries associated with the specified detached ID.
+  async getEntriesByDetachedId({
+    storeName, identifierKey, identifierValue,
+  }): Promise<object[] | null> {
+    return new Promise(resolve => {
+      if (!this.isDbReady()) {
+        return resolve(null);
+      }
+
+      const request = db!
+        .transaction([ storeName ], 'readonly')
+        .objectStore(storeName)
+        .index(identifierKey)
+        .getAll(identifierValue);
+
+      request.onsuccess = (event: Event) => {
+        const target: IDBRequest = event.target as IDBRequest;
+        resolve(target.result);
+      };
+
+      request.onerror = (error) => {
+        console.error('getEntriesByDetachedId error:', error);
+        resolve(null);
+      };
+    });
+  }
+
+  // === Convenience methods ==================================== //
+
   async createAccount({ accountName, ciphertext, iv }) {
     await this.createEntry({
       storeName: 'accounts',
@@ -294,85 +357,27 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
-  getAllEncryptedAccounts(): Promise<object[] | null> {
-    return new Promise(resolve => {
-      if (!this.isDbReady()) {
-        return resolve(null);
-      }
-
-      const request = db!
-        .transaction([ 'accounts' ], 'readonly')
-        .objectStore('accounts')
-        .getAll();
-
-      request.onsuccess = (event: Event) => {
-        const target: IDBRequest = event.target as IDBRequest;
-        resolve(target.result);
-      };
-
-      request.onerror = (error) => {
-        console.error('error', error);
-        resolve(null);
-      };
+  async getAllEncryptedAccounts(): Promise<object[] | null> {
+    return await this.getAllStoreEntries({
+      storeName: 'accounts',
     });
   }
 
-  getAccountsStore() {
-    if (!this.isDbReady()) {
-      return null;
-    }
-    return db;
-  }
-
-  getAllContactsByOwner({ contactDetachableId }): Promise<object[] | null> {
-    return new Promise(resolve => {
-      if (!this.isDbReady()) {
-        return resolve(null);
-      }
-
-      const request = db!
-        .transaction([ 'contacts' ], 'readonly')
-        .objectStore('contacts')
-        .index('contactDetachableId')
-        // TODO: Test using getAll() (without contactDetachableId) to get
-        //  contacts that don't belong, and ensure the failure to decrypt is
-        //  handled gracefully. Users need an opportunity to deal with
-        //  corrupted contact data.
-        .getAll(contactDetachableId);
-
-      request.onsuccess = (event: Event) => {
-        const target: IDBRequest = event.target as IDBRequest;
-        resolve(target.result);
-      };
-
-      request.onerror = (error) => {
-        console.error('error', error);
-        resolve(null);
-      };
+  async getAllContactsByOwner({ contactDetachableId }): Promise<object[] | null> {
+    return this.getEntriesByDetachedId({
+      storeName: 'contacts',
+      identifierKey: 'contactDetachableId',
+      identifierValue: contactDetachableId,
     });
   }
 
+  // Note that chats don't contain messages at the database level. They merely
+  // act as a grouping mechanism.
   getAllChatsByOwner({ chatDetachableId }): Promise<object[] | null> {
-    return new Promise(resolve => {
-      if (!this.isDbReady()) {
-        return resolve(null);
-      }
-
-      const request = db!
-        .transaction([ 'chats' ], 'readonly')
-        .objectStore('chats')
-        .index('chatDetachableId')
-        .getAll(chatDetachableId);
-
-      request.onsuccess = (event: Event) => {
-        const target: IDBRequest = event.target as IDBRequest;
-        resolve(target.result);
-      };
-
-      request.onerror = (error) => {
-        console.error('error', error);
-        resolve(null);
-      };
+    return this.getEntriesByDetachedId({
+      storeName: 'chats',
+      identifierKey: 'chatDetachableId',
+      identifierValue: chatDetachableId,
     });
   }
 }

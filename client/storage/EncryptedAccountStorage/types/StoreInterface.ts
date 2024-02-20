@@ -5,7 +5,6 @@ interface StoreInterface {
   prepareAccountsStore: Function,
   createAccount: (options: BasicAccountSignature) => Promise<any>,
   getAllEncryptedAccounts: () => Promise<any[]|null>,
-  getAccountsStore: Function,
   addContact: Function,
   createChat: Function,
   getAllContactsByOwner: Function,
