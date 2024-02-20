@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Settings } from '../../storage/cacheFrontends/Settings';
-import { Accordion, Button, Icon, Segment } from 'semantic-ui-react';
+import { Accordion, Icon, Segment } from 'semantic-ui-react';
 import randomart from 'randomart';
 
 const asciiArtSymbols = {

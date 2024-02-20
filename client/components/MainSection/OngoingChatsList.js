@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
+import { Settings } from '../../storage/cacheFrontends/Settings';
 
 const accountsStorage = new EncryptedAccountStorage();
 
@@ -62,21 +63,25 @@ class OngoingChatsList extends React.Component {
 
   genList = () => {
     const result = [];
-
+    const darkMode = Settings.isDarkModeEnabled();
     const contactsList = accountsStorage.getActiveChats();
     for (let i = 0, len = contactsList.length; i < len; i++) {
       const contactInfo = contactsList[i];
       result.push({
         name: contactInfo.contactName,
-        lastMessage: '---',
-        photo: '',
+        lastMessage: '^ᴗ^', // •ᴗ•   („• ֊ •„)   ^ᴗ^   ◕‿◕   (⌐■_■)  // https://kaomoji.ru/en/   https://emojidb.org/cute-kaomoji-faces-emojis
+        photo: accountsStorage.generateRandomartAvatar(
+          accountsStorage.getActiveAccount().accountName,
+          contactInfo.internalContactId,
+          darkMode,
+        ) || null,
       });
     }
 
     const contactsJsx = [];
 
     for (let i = 0, len = result.length; i < len; i++) {
-      const { name, lastMessage } = result[i];
+      const { name, lastMessage, photo } = result[i];
       contactsJsx.push(
         <div
           key={`contacts-list-${i}`}
@@ -86,15 +91,18 @@ class OngoingChatsList extends React.Component {
 
           {/* Contact profile photo */}
           <div style={profilePhotoContainer}>
-            <div style={profileIconStyle}>
-              &nbsp;
-            </div>
+            <img alt="DP" src={photo} style={profileIconStyle}/>
+
+            {/* Dev note: Use the following instead for a square preview. */}
+            {/*<div style={profileIconStyle}>*/}
+            {/*  <img src={photo}/>*/}
+            {/*</div>*/}
           </div>
 
           {/* Contact name and recent message */}
           <div style={contactInfoContainer}>
             <div>
-              <div><b>{name}</b></div>
+            <div><b>{name}</b></div>
               <div>{lastMessage}</div>
             </div>
           </div>
