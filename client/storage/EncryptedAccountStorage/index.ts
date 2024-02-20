@@ -31,11 +31,13 @@ import {
   DecryptedContactData,
 } from './types/ContactCache';
 import { ChatCache, DecryptedChatData } from './types/ChatCache';
+import { generateAvatar } from '../../components/Generic/GenerateAvatar';
 
 let singletonInstance: EncryptedAccountStorage;
 
 /**
  * Used for storing and retrieving Account details.
+ * TODO: Rename to CryptCache?
  */
 class EncryptedAccountStorage /*implements StoreInterface*/ {
   dbStore: StoreInterface | null = null;
@@ -58,17 +60,23 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   } = {};
   // UI-friendly version of _contactCaches.
   private _contactUiCache: {
-    owningAccount: string,
+    accountName: string,
     internalContactId: string,
     contactName: string,
   }[] = [];
   // UI-friendly version of _chatCaches.
   private _chatUiCache: {
-    owningAccount: string,
+    accountName: string,
     internalContactId: string,
     internalChatId: string,
     contactName: string,
   }[] = [];
+  private _randomartContactCache: {
+    [accountName: string]: {
+      // Bitmap images.
+      [contactId: string]: string,
+    }
+  } = {};
 
   constructor() {
     if (singletonInstance) {
@@ -423,7 +431,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
         return;
       }
       this._contactUiCache.push({
-        owningAccount: owner,
+        accountName: owner,
         internalContactId: internalId,
         contactName: contactCache.decryptedData.initialName,
       });
@@ -444,15 +452,33 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
       const chatCaches = this._chatCaches[contactInfo.internalContactId];
       forEach(chatCaches, (chatCache: ChatCache, internalId: string) => {
         this._chatUiCache.push({
-          owningAccount: contactInfo.owningAccount,
+          accountName: contactInfo.accountName,
           internalContactId: contactInfo.internalContactId,
           internalChatId: internalId,
           contactName: contactInfo.contactName,
-        })
+        });
       });
     }
 
     return this._chatUiCache;
+  }
+
+  // Generates a bitmap randomart profile picture for the specified contact.
+  // TODO: Maybe rename to getContactAvatar, and only gen an image if their
+  //  account hasn't sent us a profile pic.
+  generateRandomartAvatar(accountName: string, contactId: string, darkMode = false) {
+    const contactArtId = contactId + (darkMode ? '-dark' : '-light');
+    if (!this._randomartContactCache[accountName]) {
+      this._randomartContactCache[accountName] = {};
+    }
+    if (this._randomartContactCache[accountName][contactArtId]) {
+      return this._randomartContactCache[accountName][contactArtId];
+    }
+
+    const contactCache = this._contactCaches[accountName][contactId];
+    const publicKey = contactCache.decryptedData?.contactPubKeyUint8Array;
+    return this._randomartContactCache[accountName][contactArtId] =
+      generateAvatar(48, 48, publicKey!, darkMode);
   }
 
   getAllAccountNames() {
