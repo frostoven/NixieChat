@@ -345,6 +345,11 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
       decryptedData.contactPubKey, 'pem',
     ) as CryptoKey;
 
+    // It's useful to have a Uint8Array version of the public key. Generate it.
+    decryptedData.contactPubKeyUint8Array = await exportRsaPublicKey({
+      publicKey: decryptedData.contactPubKey,
+    }) as Uint8Array;
+
     // Retrieve stringified array buffers.
     decryptedData.privateChatIdSalt = stringToArrayBuffer(
       decryptedData.privateChatIdSalt,

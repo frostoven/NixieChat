@@ -45,6 +45,7 @@ interface DecryptedContactData {
   // Randomly generated string.
   internalContactId: string,
   contactPubKey: CryptoKey,
+  contactPubKeyUint8Array: Uint8Array,
   chatDetachableId: string,
   privateChatIdSalt: Uint8Array,
   initialSharedSecret: Uint8Array,
