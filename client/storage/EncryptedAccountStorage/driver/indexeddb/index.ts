@@ -389,8 +389,11 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
-  retrieveAllContacts() {
-    console.error('[IndexedDb] under construction');
+  createMessage({
+    messageDetachableId,
+    encryptedMessageBlob,
+    encryptedMessageIv,
+  }) {
   }
 }
 
