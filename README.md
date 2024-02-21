@@ -7,10 +7,10 @@ NixieChat servers act only as connection forwarders, and cannot read your
 messages. This project will serve as a base for web, mobile, and desktop
 applications.
 
-## Do not use this yet
+## !! Do not use this yet !!
 
-This app is still under development. It isn't fully formed yet, and still has
-a weeks until its usable. It will break a lot during that time.
+This app is still under development. It isn't fully formed yet, and still needs
+a few weeks until it will be usable. It will break a lot during that time.
 
 ## Cryptography Notice
 
@@ -29,7 +29,7 @@ Adding contacts:
 
 ![preview](preview_dark.jpg)
 
-Profile pics generate from RSA keys:
+Profile pics are generated from RSA keys:
 
 ![preview](preview_profile.png)
 
