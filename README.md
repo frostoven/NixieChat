@@ -1,16 +1,17 @@
 # Frostoven NixieChat
 
 NixieChat is a chat stack that uses end-to-end encryption for communication. It
-uses Diffie-Hellman to add contacts, and AES-256 (in GCM) mode to encrypt
+uses Diffie-Hellman to add contacts, and AES-256 (in GCM mode) to encrypt
 messages, accounts, and contact information. It signs messages with RSA.
 NixieChat servers act only as connection forwarders, and cannot read your
-messages. This project will serve as a base for web, mobile, and desktop
-applications.
+messages. This project will serve as a base for the web, mobile, and desktop
+version.
 
 ## !! Do not use this yet !!
 
-This app is still under development. It isn't fully formed yet, and still needs
-a few weeks until it will be usable. It will break a lot during that time.
+This app is still in early development. It isn't fully formed yet, and still
+needs a few weeks until it will be usable. It will break a lot during that
+time.
 
 ## Cryptography Notice
 
