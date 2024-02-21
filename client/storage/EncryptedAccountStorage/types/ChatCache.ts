@@ -26,7 +26,6 @@ interface BasicChatSignature {
  * - For SQLite, this represents a single row in a table.
  */
 interface ChatCache extends BasicChatSignature {
-  messageDetachableId: string,
   decryptedData: DecryptedChatData | null,
 
   // // The password used here is a SHA-256 hash of the user's contact password

@@ -69,6 +69,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     accountName: string,
     internalContactId: string,
     internalChatId: string,
+    messageDetachableId: string,
     contactName: string,
   }[] = [];
   private _randomartContactCache: {
@@ -455,6 +456,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
           accountName: contactInfo.accountName,
           internalContactId: contactInfo.internalContactId,
           internalChatId: internalId,
+          messageDetachableId: chatCache.decryptedData?.messageDetachableId!,
           contactName: contactInfo.contactName,
         });
       });
