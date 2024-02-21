@@ -57,9 +57,9 @@ class OngoingChatsList extends React.Component {
     //
   };
 
-  handleChatClick = ({ name }) => {
-    console.log('Clicked:', name);
-  };
+  // handleChatClick = ({ name }) => {
+  //   console.log('Clicked:', name);
+  // };
 
   genList = () => {
     const result = [];
@@ -69,24 +69,30 @@ class OngoingChatsList extends React.Component {
       const contactInfo = contactsList[i];
       result.push({
         name: contactInfo.contactName,
-        lastMessage: '^ᴗ^', // •ᴗ•   („• ֊ •„)   ^ᴗ^   ◕‿◕   (⌐■_■)  // https://kaomoji.ru/en/   https://emojidb.org/cute-kaomoji-faces-emojis
+        lastMessage: '^ᴗ^',
         photo: accountsStorage.generateRandomartAvatar(
           accountsStorage.getActiveAccount().accountName,
           contactInfo.internalContactId,
           darkMode,
         ) || null,
+        onClick: async () => {
+          const messages = await accountsStorage.getMessages({
+            messageDetachableId: contactInfo.messageDetachableId,
+          });
+          console.log('=>', messages)
+        },
       });
     }
 
     const contactsJsx = [];
 
     for (let i = 0, len = result.length; i < len; i++) {
-      const { name, lastMessage, photo } = result[i];
+      const { name, lastMessage, photo, onClick } = result[i];
       contactsJsx.push(
         <div
           key={`contacts-list-${i}`}
           style={chatsListStyle}
-          onClick={() => this.handleChatClick(result[i])}
+          onClick={onClick}
         >
 
           {/* Contact profile photo */}
@@ -102,7 +108,7 @@ class OngoingChatsList extends React.Component {
           {/* Contact name and recent message */}
           <div style={contactInfoContainer}>
             <div>
-            <div><b>{name}</b></div>
+              <div><b>{name}</b></div>
               <div>{lastMessage}</div>
             </div>
           </div>

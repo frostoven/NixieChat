@@ -10,6 +10,7 @@ interface StoreInterface {
   getAllContactsByOwner: Function,
   getAllChatsByOwner: Function,
   createMessage: Function,
+  getMessagesDescending: Function,
 }
 
 interface AccountCreationParamsSignature {

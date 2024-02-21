@@ -99,8 +99,8 @@ class IdbAccountStorage implements StoreInterface {
           upgradeTarget: db,
           storeName: 'accounts',
           storeOptions: {
-            // Key paths must be unique; this ensures we don't have multiple
-            // accounts with the same name.
+            // Key paths are unique. We use one here to ensure we don't have
+            // multiple accounts with the same name.
             keyPath: 'accountName',
           },
           // Accounts are pure roots and thus not attachable to other roots.
@@ -114,7 +114,7 @@ class IdbAccountStorage implements StoreInterface {
           storeName: 'contacts',
           storeOptions: {
             // Contact stores don't have unique key paths other than a simple
-            // ID as they aren't meant to be uniquely identified.
+            // ID as they aren't meant to be uniquely identified at high level.
             keyPath: 'id',
             autoIncrement: true,
           },
@@ -128,8 +128,8 @@ class IdbAccountStorage implements StoreInterface {
           upgradeTarget: db,
           storeName: 'chats',
           storeOptions: {
-            // Chat stores don't have unique key paths other than a simple ID as
-            // they aren't meant to be uniquely identified.
+            // Chat stores don't have unique key paths other than a simple ID
+            // as they aren't meant to be uniquely identified at high level.
             keyPath: 'id',
             autoIncrement: true,
           },
@@ -144,7 +144,7 @@ class IdbAccountStorage implements StoreInterface {
           storeName: 'messages',
           storeOptions: {
             // Message stores don't have unique key paths other than a simple
-            // ID as they aren't meant to be uniquely identified.
+            // ID as they aren't meant to be uniquely identified at high level.
             keyPath: 'id',
             autoIncrement: true,
           },
@@ -262,8 +262,11 @@ class IdbAccountStorage implements StoreInterface {
 
   // === Read operations ======================================== //
 
-  // Please don't use this for messages. You'll blow up your RAM. Returns all
-  // entries in the specified object.
+  /**
+   * Please don't use this for messages, or you'll blow up your RAM and create
+   * a black hole feasting its way through the universe.
+   * Returns all entries in the specified object.
+   */
   async getAllStoreEntries({ storeName }): Promise<object[] | null> {
     return new Promise(resolve => {
       if (!this.isDbReady()) {
@@ -287,10 +290,16 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
-  // Please don't use this for messages. You'll blow up your RAM. Returns all
-  // entries associated with the specified detached ID.
+  /**
+   * Please don't use this for messages without specifying a count. You'll blow
+   * up your RAM. Returns all entries associated with the specified detached
+   * ID (identifierKey).
+   */
   async getEntriesByDetachedId({
-    storeName, identifierKey, identifierValue,
+    storeName, identifierKey, identifierValue, count,
+  }: {
+    storeName: string, identifierKey: string, identifierValue: string,
+    count?: number | undefined,
   }): Promise<object[] | null> {
     return new Promise(resolve => {
       if (!this.isDbReady()) {
@@ -301,7 +310,7 @@ class IdbAccountStorage implements StoreInterface {
         .transaction([ storeName ], 'readonly')
         .objectStore(storeName)
         .index(identifierKey)
-        .getAll(identifierValue);
+        .getAll(identifierValue, count || undefined);
 
       request.onsuccess = (event: Event) => {
         const target: IDBRequest = event.target as IDBRequest;
@@ -313,6 +322,50 @@ class IdbAccountStorage implements StoreInterface {
         resolve(null);
       };
     });
+  }
+
+  /**
+   * Returns a cursor that traverses an object store by auto-incremented key
+   * order.
+   *
+   * Please don't defer execution after receiving your cursor from
+   * onObtainCursor, use it immediately. Browser reap transactions when the
+   * event loop moves on.
+   */
+  getOrderedCursor({
+    storeName,
+    identifierValue,
+    direction,
+    onObtainCursor,
+  }: {
+    storeName: string,
+    identifierValue: string,
+    direction: 'next' | 'prev'
+    onObtainCursor: (cursor: IDBCursorWithValue | null) => void,
+  }): void {
+
+    // return new Promise(resolve => {
+    if (!this.isDbReady()) {
+      return onObtainCursor(null);
+    }
+
+    const range = IDBKeyRange.only(identifierValue);
+
+    const cursorRequest = db!
+      .transaction(storeName, 'readonly')
+      .objectStore(storeName)
+      .index('messageDetachableId')
+      .openCursor(range, direction);
+
+    cursorRequest.onsuccess = (event) => {
+      const cursor: IDBCursorWithValue | null = (
+        event.target as IDBRequest<IDBCursorWithValue | null>
+      ).result;
+
+      // resolve(cursor);
+      onObtainCursor(cursor);
+    };
+    // });
   }
 
   // === Convenience methods ==================================== //
@@ -364,7 +417,7 @@ class IdbAccountStorage implements StoreInterface {
   }
 
   async getAllContactsByOwner({ contactDetachableId }): Promise<object[] | null> {
-    return this.getEntriesByDetachedId({
+    return await this.getEntriesByDetachedId({
       storeName: 'contacts',
       identifierKey: 'contactDetachableId',
       identifierValue: contactDetachableId,
@@ -373,11 +426,39 @@ class IdbAccountStorage implements StoreInterface {
 
   // Note that chats don't contain messages at the database level. They merely
   // act as a grouping mechanism.
-  getAllChatsByOwner({ chatDetachableId }): Promise<object[] | null> {
-    return this.getEntriesByDetachedId({
+  async getAllChatsByOwner({ chatDetachableId }): Promise<object[] | null> {
+    return await this.getEntriesByDetachedId({
       storeName: 'chats',
       identifierKey: 'chatDetachableId',
       identifierValue: chatDetachableId,
+    });
+  }
+
+  getMessagesDescending({
+    messageDetachableId,
+    count = 1,
+    offset = 0,
+  }) {
+    return new Promise((resolve) => {
+      const result: any = [];
+      this.getOrderedCursor({
+        storeName: 'messages',
+        identifierValue: messageDetachableId,
+        direction: 'prev',
+        onObtainCursor: (cursor) => {
+          if (offset) {
+            cursor?.advance(offset);
+          }
+          for (let i = 0; i < count; i++) {
+            if (cursor?.value === null) {
+              return resolve(result);
+            }
+            result.push(cursor?.value);
+            cursor?.continue();
+          }
+          resolve(result);
+        },
+      });
     });
   }
 }

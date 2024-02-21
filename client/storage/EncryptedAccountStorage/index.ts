@@ -707,6 +707,10 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     }
     return null;
   }
+
+  getMessages({ messageDetachableId }) {
+    return this.dbStore?.getMessagesDescending({ messageDetachableId });
+  }
 }
 
 export {
