@@ -151,6 +151,21 @@ class IdbAccountStorage implements StoreInterface {
           // Attaches to chats.
           detachableIdName: 'messageDetachableId',
         });
+
+        // --- Message drafts ------------------------------------ //
+
+        this.createEncryptedObjectStore({
+          upgradeTarget: db,
+          storeName: 'messageDrafts',
+          storeOptions: {
+            // Message stores don't have unique key paths other than a simple
+            // ID as they aren't meant to be uniquely identified at high level.
+            keyPath: 'id',
+            autoIncrement: true,
+          },
+          // Attaches to chats.
+          detachableIdName: 'messageDetachableId',
+        });
       };
     });
   }
@@ -295,7 +310,7 @@ class IdbAccountStorage implements StoreInterface {
    * up your RAM. Returns all entries associated with the specified detached
    * ID (identifierKey).
    */
-  async getEntriesByDetachedId({
+  getEntriesByDetachedId({
     storeName, identifierKey, identifierValue, count,
   }: {
     storeName: string, identifierKey: string, identifierValue: string,
@@ -334,17 +349,17 @@ class IdbAccountStorage implements StoreInterface {
    */
   getOrderedCursor({
     storeName,
+    identifierKey,
     identifierValue,
     direction,
     onObtainCursor,
   }: {
     storeName: string,
+    identifierKey: string,
     identifierValue: string,
     direction: 'next' | 'prev'
     onObtainCursor: (cursor: IDBCursorWithValue | null) => void,
   }): void {
-
-    // return new Promise(resolve => {
     if (!this.isDbReady()) {
       return onObtainCursor(null);
     }
@@ -354,7 +369,7 @@ class IdbAccountStorage implements StoreInterface {
     const cursorRequest = db!
       .transaction(storeName, 'readonly')
       .objectStore(storeName)
-      .index('messageDetachableId')
+      .index(identifierKey)
       .openCursor(range, direction);
 
     cursorRequest.onsuccess = (event) => {
@@ -362,10 +377,10 @@ class IdbAccountStorage implements StoreInterface {
         event.target as IDBRequest<IDBCursorWithValue | null>
       ).result;
 
-      // resolve(cursor);
+      // TODO: This this - if I'm understanding the docs correctly, IndexedDB
+      //  runs onsuccess for *every* cursor progression, not just once.
       onObtainCursor(cursor);
     };
-    // });
   }
 
   // === Convenience methods ==================================== //
@@ -443,6 +458,7 @@ class IdbAccountStorage implements StoreInterface {
       const result: any = [];
       this.getOrderedCursor({
         storeName: 'messages',
+        identifierKey: 'messageDetachableId',
         identifierValue: messageDetachableId,
         direction: 'prev',
         onObtainCursor: (cursor) => {
