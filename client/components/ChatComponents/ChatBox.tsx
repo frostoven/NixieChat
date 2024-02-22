@@ -1,6 +1,7 @@
 import React from 'react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { ChatBoxButton } from './ChatBoxButton';
+import { AutoKeyMap } from '../../events/AutoKeyMap';
 
 // TODO: Move text box themes to a central point.
 const darkTheme: React.CSSProperties = {
@@ -49,7 +50,8 @@ const textBoxStyle: React.CSSProperties = {
   maxHeight: 199,
   border: 'none',
   outline: 'none',
-  fontSize: '10pt',
+  fontSize: '11pt',
+  lineHeight: '12pt',
   resize: 'none',
   padding: 0,
   verticalAlign: 'bottom',
@@ -78,6 +80,7 @@ class ChatBox extends React.Component<Props> {
   static draft = {};
 
   private readonly textBoxRef: React.RefObject<any>;
+  private autoKeyMap = new AutoKeyMap();
 
   constructor(props: Props | Readonly<Props>) {
     super(props);
@@ -85,10 +88,16 @@ class ChatBox extends React.Component<Props> {
   }
 
   componentDidMount() {
-    // Restore drafts if this chat had any stored.
+    // Set up keybindings.
+    this.autoKeyMap.bindKeys({
+      Enter: this.sendMessage,
+      NumpadEnter: this.sendMessage,
+    });
+
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;
     const messageDetachableId = this.props.messageDetachableId;
     if (textArea && ChatBox.draft[messageDetachableId]) {
+      // Restore drafts if this chat had any stored.
       textArea.value = ChatBox.draft[messageDetachableId];
       this.recalculateSize();
     }
@@ -100,7 +109,27 @@ class ChatBox extends React.Component<Props> {
     if (textArea) {
       ChatBox.draft[this.props.messageDetachableId] = textArea.value;
     }
+
+    // Unbind hotkeys.
+    this.autoKeyMap.destroy();
   }
+
+  sendMessage = () => {
+    const textArea: HTMLTextAreaElement = this.textBoxRef.current;
+    if (!textArea) {
+      return;
+    }
+
+    if (AutoKeyMap.isShiftDown) {
+      // Add a line break instead.
+      textArea.value += '\r\n';
+      this.recalculateSize();
+    }
+    else {
+      console.log('> Send:', textArea.value);
+      textArea.value = '';
+    }
+  };
 
   recalculateSize = () => {
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;
