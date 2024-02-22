@@ -17,25 +17,33 @@ const chatBgStyleInverted = {
   backgroundImage: 'revert',
 };
 
-const chatFgStyle = {
+const chatFgStyle: React.CSSProperties = {
   height: '100%',
   backgroundImage: 'url(/assets/backgrounds/defaultPattern.svg)',
   backgroundSize: 392,
   opacity: 0.2,
 };
 
-const chatContainerStyle = {
+const chatContainerStyle: React.CSSProperties = {
   position: 'absolute',
   top: 0, bottom: 0, left: 0, right: 0,
   paddingBottom: 12,
 };
 
-const chatAreaStyle = {
+const chatAreaStyle: React.CSSProperties = {
   position: 'relative',
   height: '100%',
 };
 
-class ActiveChat extends React.Component {
+interface Props {
+  accountName: string,
+  messageDetachableId: string,
+  onCloseChat: Function,
+}
+
+class ActiveChat extends React.Component<Props> {
+  // The PropTypes package does compile-time checks, which is why use this as
+  // well as a Props interface.
   static propTypes = {
     accountName: PropTypes.string.isRequired,
     messageDetachableId: PropTypes.string.isRequired,
