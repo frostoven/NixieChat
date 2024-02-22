@@ -275,6 +275,60 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
+  deleteAllByDetachedId({
+    storeName, identifierKey, identifierValue,
+  }) {
+    return new Promise((resolve) => {
+      if (!this.isDbReady()) {
+        console.error(`Cannot create "${storeName}" entry: DB not ready.`);
+        return resolve(false);
+      }
+
+      if (!storeName || !identifierKey || !identifierValue) {
+        console.error(`Cannot create "${storeName}" entry: Invalid parameters.`);
+        return resolve(false);
+      }
+
+      const range = IDBKeyRange.only('personName');
+
+      // Unlike with inserts, we don't wait for flushes during deletions. We
+      // assume that users don't need a guaranteed deletes for *individual*
+      // operations. When we implement mass account deletion, the process will
+      // differ in that crypto keys will be garbled (and wait for flush) before
+      // deleting, meaning total deletion time doesn't affect security.
+      //
+      // The decision to not always flush may change in future.
+      let transaction: IDBTransaction = db!.transaction([ storeName ], 'readwrite');
+      const objectStore = transaction.objectStore(storeName);
+      const request = objectStore.openCursor();
+
+      request.onsuccess = (event) => {
+        const cursor: IDBCursorWithValue | null = (
+          event.target as IDBRequest<IDBCursorWithValue | null>
+        ).result;
+
+        if (cursor) {
+          // Delete entry if it matches our requirements.
+          if (cursor.value[identifierKey] === identifierValue) {
+            objectStore.delete(cursor.primaryKey);
+          }
+
+          // Move to the next entry.
+          cursor.continue();
+        }
+      };
+
+      request.onerror = (error) => {
+        console.error(`${storeName} error:`, error);
+        resolve(false);
+      };
+
+      transaction.oncomplete = () => {
+        resolve(true);
+      };
+    });
+  }
+
   // === Read operations ======================================== //
 
   /**
@@ -282,7 +336,7 @@ class IdbAccountStorage implements StoreInterface {
    * a black hole feasting its way through the universe.
    * Returns all entries in the specified object.
    */
-  async getAllStoreEntries({ storeName }): Promise<object[] | null> {
+  getAllStoreEntries({ storeName }): Promise<object[] | null> {
     return new Promise(resolve => {
       if (!this.isDbReady()) {
         return resolve(null);
