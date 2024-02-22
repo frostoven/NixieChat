@@ -42,21 +42,21 @@ const columnRightStyle = {
 
 class ContactsAndChatGrid extends React.Component {
   state = {
+    accountName: '',
     messageDetachableId: '',
   };
 
   onCloseChat = () => {
     this.setState({
       messageDetachableId: '',
-    })
+    });
   };
 
   render() {
     const darkMode = Settings.isDarkModeEnabled();
     const contacts = accountsStorage.getActiveContacts();
 
-    // If the user has no chats:
-    // return <CreateFirstChat/>;
+    const { accountName, messageDetachableId } = this.state;
 
     if (!contacts.length) {
       return (
@@ -69,7 +69,8 @@ class ContactsAndChatGrid extends React.Component {
           <Grid stretched style={columnLeftStyle} inverted={!darkMode}>
             <Grid.Column style={columnRightStyle}>
               <ActiveChat
-                messageDetachableId={this.state.messageDetachableId}
+                accountName={accountName}
+                messageDetachableId={messageDetachableId}
                 onCloseChat={this.onCloseChat}
               />
             </Grid.Column>
@@ -87,9 +88,10 @@ class ContactsAndChatGrid extends React.Component {
             style={columnLeftStyle}
           >
             <OngoingChatsList
-              onOpenChat={({ messageDetachableId }) => {
+              onOpenChat={({ accountName, messageDetachableId }) => {
                 this.setState({
-                  messageDetachableId: messageDetachableId,
+                  accountName,
+                  messageDetachableId,
                 });
               }}
             />
@@ -99,6 +101,7 @@ class ContactsAndChatGrid extends React.Component {
             style={columnRightStyle}
           >
             <ActiveChat
+              accountName={accountName}
               messageDetachableId={this.state.messageDetachableId}
               onCloseChat={this.onCloseChat}
             />

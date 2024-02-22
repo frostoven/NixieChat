@@ -2,6 +2,11 @@ import React from 'react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { ChatBoxButton } from './ChatBoxButton';
 import { AutoKeyMap } from '../../events/AutoKeyMap';
+import {
+  EncryptedAccountStorage,
+} from '../../storage/EncryptedAccountStorage';
+
+const accountStorage = new EncryptedAccountStorage();
 
 // TODO: Move text box themes to a central point.
 const darkTheme: React.CSSProperties = {
@@ -70,6 +75,7 @@ const textBoxStyleLight: React.CSSProperties = {
 };
 
 interface Props {
+  accountName: string,
   messageDetachableId: string,
   onCloseChat: Function,
 }
@@ -78,8 +84,6 @@ interface Props {
 // incredibly slow, visibly so on cheaper devices. Instead, we let the browser
 // manage text state, and then we read its values via ref when needed.
 class ChatBox extends React.Component<Props> {
-  static draft = {};
-
   private readonly textBoxRef: React.RefObject<any>;
   private autoKeyMap = new AutoKeyMap();
 
@@ -97,11 +101,8 @@ class ChatBox extends React.Component<Props> {
     });
 
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;
-    const messageDetachableId = this.props.messageDetachableId;
-    if (textArea && ChatBox.draft[messageDetachableId]) {
-      // Restore drafts if this chat had any stored.
-      textArea.value = ChatBox.draft[messageDetachableId];
-      this.recalculateSize();
+    if (textArea) {
+      this.loadDraft(textArea)
     }
   }
 
@@ -109,12 +110,45 @@ class ChatBox extends React.Component<Props> {
     // Store draft of the current text so the user does not lose it.
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;
     if (textArea) {
-      ChatBox.draft[this.props.messageDetachableId] = textArea.value;
+      this.saveDraft(textArea);
     }
 
     // Unbind hotkeys.
     this.autoKeyMap.destroy();
   }
+
+  // Saves the current unsent message for later use.
+  saveDraft = (textArea: HTMLTextAreaElement) => {
+    const { accountName, messageDetachableId } = this.props;
+    const message = textArea.value;
+    if (message) {
+      accountStorage.saveDraft({
+        accountName,
+        messageDetachableId,
+        message,
+      }).catch(console.error);
+    }
+    else {
+      accountStorage.deleteDraft({
+        accountName,
+        messageDetachableId,
+      }).catch(console.error);
+    }
+  };
+
+  // Restores the last unsent message.
+  loadDraft = (textArea: HTMLTextAreaElement) => {
+    const { accountName, messageDetachableId } = this.props;
+    accountStorage.loadDraft({
+      accountName,
+      messageDetachableId,
+    }).then((message) => {
+      if (message) {
+        textArea.value = message;
+        this.recalculateSize();
+      }
+    }).catch(console.error);
+  };
 
   sendMessage = () => {
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;

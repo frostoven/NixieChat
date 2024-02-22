@@ -57,18 +57,20 @@ class OngoingChatsList extends React.Component {
     const result = [];
     const darkMode = Settings.isDarkModeEnabled();
     const chatList = accountsStorage.getActiveChats();
+    const accountName = accountsStorage.getActiveAccount().accountName;
     for (let i = 0, len = chatList.length; i < len; i++) {
       const chatInfo = chatList[i];
       result.push({
         name: chatInfo.contactName,
         lastMessage: '^ᴗ^',
         photo: accountsStorage.generateRandomartAvatar(
-          accountsStorage.getActiveAccount().accountName,
+          accountName,
           chatInfo.internalContactId,
           darkMode,
         ) || null,
         onClick: () => {
           this.props.onOpenChat({
+            accountName,
             messageDetachableId: chatInfo.messageDetachableId,
           });
         },

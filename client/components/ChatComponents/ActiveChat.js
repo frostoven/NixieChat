@@ -37,12 +37,13 @@ const chatAreaStyle = {
 
 class ActiveChat extends React.Component {
   static propTypes = {
+    accountName: PropTypes.string.isRequired,
     messageDetachableId: PropTypes.string.isRequired,
     onCloseChat: PropTypes.func.isRequired,
   };
 
   genChat = () => {
-    const { messageDetachableId, onCloseChat } = this.props;
+    const { accountName, messageDetachableId, onCloseChat } = this.props;
     if (!messageDetachableId) {
       return null;
     }
@@ -55,6 +56,7 @@ class ActiveChat extends React.Component {
     return (
       <>
         <ChatBox
+          accountName={accountName}
           messageDetachableId={messageDetachableId}
           onCloseChat={onCloseChat}
         />
