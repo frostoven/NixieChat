@@ -708,8 +708,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     return null;
   }
 
-  getMessages({ messageDetachableId }) {
-    return this.dbStore?.getMessagesDescending({ messageDetachableId });
+  getMessages({ messageDetachableId, count }) {
+    return this.dbStore?.getMessagesDescending({ messageDetachableId, count });
   }
 }
 

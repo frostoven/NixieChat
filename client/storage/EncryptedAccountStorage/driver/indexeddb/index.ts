@@ -450,7 +450,7 @@ class IdbAccountStorage implements StoreInterface {
             cursor?.advance(offset);
           }
           for (let i = 0; i < count; i++) {
-            if (cursor?.value === null) {
+            if (!cursor?.value) {
               return resolve(result);
             }
             result.push(cursor?.value);
