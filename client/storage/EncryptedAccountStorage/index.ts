@@ -711,6 +711,39 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
   getMessages({ messageDetachableId, count }) {
     return this.dbStore?.getMessagesDescending({ messageDetachableId, count });
   }
+
+  async saveDraft({ accountName, messageDetachableId, message }) {
+    const passwordStore = this._accountCaches[accountName].contactPasswordStore;
+    const encrypted = await passwordStore.encryptAes256Gcm(message);
+    return await this.dbStore?.saveDraft({
+      messageDetachableId,
+      ciphertext: encrypted?.ciphertext,
+      iv: encrypted?.iv,
+    });
+  }
+
+  async loadDraft({ accountName, messageDetachableId }) {
+    const entry = await this.dbStore?.loadDraft({
+      messageDetachableId,
+    });
+
+    if (!entry) {
+      return '';
+    }
+
+    const passwordStore = this._accountCaches[accountName].contactPasswordStore;
+    return await passwordStore.decryptAes256Gcm(
+      entry.ciphertext,
+      entry.iv,
+    );
+  }
+
+  async deleteDraft({ accountName, messageDetachableId }) {
+    const passwordStore = this._accountCaches[accountName].contactPasswordStore;
+    return await this.dbStore?.deleteDraft({
+      messageDetachableId,
+    });
+  }
 }
 
 export {

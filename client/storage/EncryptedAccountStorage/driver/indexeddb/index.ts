@@ -533,12 +533,41 @@ class IdbAccountStorage implements StoreInterface {
   }
 
   async saveDraft({ messageDetachableId, ciphertext, iv }) {
+    // Delete old draft first, if it exists.
+    await this.deleteDraft({ messageDetachableId });
+
+    // Save new draft.
+    await this.createEntry({
+      storeName: 'messageDrafts',
+      identifierKey: 'messageDetachableId',
+      identifierValue: messageDetachableId,
+      ciphertext,
+      iv,
+    });
   }
 
   async loadDraft({ messageDetachableId }) {
+    const result = await this.getEntriesByDetachedId({
+      storeName: 'messageDrafts',
+      identifierKey: 'messageDetachableId',
+      identifierValue: messageDetachableId,
+      count: 1,
+    });
+
+    if (result) {
+      return result[0];
+    }
+    else {
+      return null;
+    }
   }
 
   async deleteDraft({ messageDetachableId }) {
+    await this.deleteAllByDetachedId({
+      storeName: 'messageDrafts',
+      identifierKey: 'messageDetachableId',
+      identifierValue: messageDetachableId,
+    });
   }
 }
 
