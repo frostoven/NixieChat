@@ -107,8 +107,11 @@ class ChatBox extends React.Component<Props> {
       textArea.onblur = () => this.saveDraft(textArea);
       // @ts-ignore - Whoever wrote that type entry is a moron.
       // https://developer.mozilla.org/en-US/docs/Web/API/setInterval#return_value
-      this.draftTimer = setInterval(() => this.saveDraft(textArea), 20000);
+      this.draftTimer = setInterval(() => this.saveDraft(textArea), 60000);
     }
+
+    // Save drafts when the tab / application exits.
+    window.addEventListener('beforeunload', this.saveOnExit);
   }
 
   componentWillUnmount() {
@@ -121,10 +124,22 @@ class ChatBox extends React.Component<Props> {
     // Unbind hotkeys.
     this.autoKeyMap.destroy();
 
+    // Clear the 20-second timer if it exists.
     if (this.draftTimer) {
       clearInterval(this.draftTimer);
     }
+
+    // Stop listening for application exist when the component unmounts.
+    window.removeEventListener('beforeunload', this.saveOnExit);
   }
+
+  saveOnExit = () => {
+    // Store draft of the current text so the user does not lose it.
+    const textArea: HTMLTextAreaElement = this.textBoxRef.current;
+    if (textArea) {
+      this.saveDraft(textArea);
+    }
+  };
 
   // Saves the current unsent message for later use.
   saveDraft = (textArea: HTMLTextAreaElement) => {

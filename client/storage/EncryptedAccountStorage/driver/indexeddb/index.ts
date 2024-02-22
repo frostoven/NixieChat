@@ -158,13 +158,13 @@ class IdbAccountStorage implements StoreInterface {
           upgradeTarget: db,
           storeName: 'messageDrafts',
           storeOptions: {
-            // Message stores don't have unique key paths other than a simple
-            // ID as they aren't meant to be uniquely identified at high level.
-            keyPath: 'id',
+            // Unlike with other object stores, detached IDs are unique with
+            // drafts as can logically only have one per chat.
+            keyPath: 'messageDetachableId',
             autoIncrement: true,
           },
-          // Attaches to chats.
-          detachableIdName: 'messageDetachableId',
+          // It forms part of our key path, so this should be null.
+          detachableIdName: null,
         });
       };
     });
@@ -608,11 +608,8 @@ class IdbAccountStorage implements StoreInterface {
   }
 
   async saveDraft({ messageDetachableId, ciphertext, iv }) {
-    // Delete old draft first, if it exists.
-    await this.deleteDraft({ messageDetachableId });
-
     // Save new draft.
-    await this.createEntry({
+    await this.insertOrUpdateField({
       storeName: 'messageDrafts',
       identifierKey: 'messageDetachableId',
       identifierValue: messageDetachableId,
@@ -622,19 +619,10 @@ class IdbAccountStorage implements StoreInterface {
   }
 
   async loadDraft({ messageDetachableId }) {
-    const result = await this.getEntriesByDetachedId({
+    return await this.getEntryByPrimaryKey({
       storeName: 'messageDrafts',
-      identifierKey: 'messageDetachableId',
-      identifierValue: messageDetachableId,
-      count: 1,
+      id: messageDetachableId,
     });
-
-    if (result) {
-      return result[0];
-    }
-    else {
-      return null;
-    }
   }
 
   async deleteDraft({ messageDetachableId }) {
