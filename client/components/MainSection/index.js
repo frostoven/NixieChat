@@ -6,7 +6,7 @@ import {
   Menu,
   Sidebar,
 } from 'semantic-ui-react';
-import { ContactsAndChatGrid } from './ContactsAndChatGrid';
+import { ContactsAndChatGrid } from '../ChatComponents/ContactsAndChatGrid';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import {
   EncryptedAccountStorage,
