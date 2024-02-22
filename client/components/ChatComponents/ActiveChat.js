@@ -38,10 +38,11 @@ const chatAreaStyle = {
 class ActiveChat extends React.Component {
   static propTypes = {
     messageDetachableId: PropTypes.string.isRequired,
+    onCloseChat: PropTypes.func.isRequired,
   };
 
   genChat = () => {
-    const { messageDetachableId } = this.props;
+    const { messageDetachableId, onCloseChat } = this.props;
     if (!messageDetachableId) {
       return null;
     }
@@ -53,7 +54,10 @@ class ActiveChat extends React.Component {
 
     return (
       <>
-        <ChatBox messageDetachableId={messageDetachableId}/>
+        <ChatBox
+          messageDetachableId={messageDetachableId}
+          onCloseChat={onCloseChat}
+        />
       </>
     );
   };

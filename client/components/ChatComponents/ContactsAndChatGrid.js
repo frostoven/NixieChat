@@ -45,6 +45,12 @@ class ContactsAndChatGrid extends React.Component {
     messageDetachableId: '',
   };
 
+  onCloseChat = () => {
+    this.setState({
+      messageDetachableId: '',
+    })
+  };
+
   render() {
     const darkMode = Settings.isDarkModeEnabled();
     const contacts = accountsStorage.getActiveContacts();
@@ -62,7 +68,10 @@ class ContactsAndChatGrid extends React.Component {
 
           <Grid stretched style={columnLeftStyle} inverted={!darkMode}>
             <Grid.Column style={columnRightStyle}>
-              <ActiveChat messageDetachableId={this.state.messageDetachableId}/>
+              <ActiveChat
+                messageDetachableId={this.state.messageDetachableId}
+                onCloseChat={this.onCloseChat}
+              />
             </Grid.Column>
           </Grid>
         </>
@@ -89,7 +98,10 @@ class ContactsAndChatGrid extends React.Component {
             computer={10} tablet={10} className="computer only"
             style={columnRightStyle}
           >
-            <ActiveChat messageDetachableId={this.state.messageDetachableId}/>
+            <ActiveChat
+              messageDetachableId={this.state.messageDetachableId}
+              onCloseChat={this.onCloseChat}
+            />
           </Grid.Column>
         </Grid>
       </>

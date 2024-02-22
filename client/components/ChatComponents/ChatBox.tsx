@@ -71,6 +71,7 @@ const textBoxStyleLight: React.CSSProperties = {
 
 interface Props {
   messageDetachableId: string,
+  onCloseChat: Function,
 }
 
 // Important note: Do not use React state to manage large text entry - it's
@@ -92,6 +93,7 @@ class ChatBox extends React.Component<Props> {
     this.autoKeyMap.bindKeys({
       Enter: this.sendMessage,
       NumpadEnter: this.sendMessage,
+      Escape: this.props.onCloseChat,
     });
 
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;
@@ -123,12 +125,13 @@ class ChatBox extends React.Component<Props> {
     if (AutoKeyMap.isShiftDown) {
       // Add a line break instead.
       textArea.value += '\r\n';
-      this.recalculateSize();
     }
     else {
       console.log('> Send:', textArea.value);
       textArea.value = '';
     }
+
+    this.recalculateSize();
   };
 
   recalculateSize = () => {
