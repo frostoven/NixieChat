@@ -461,6 +461,15 @@ class IdbAccountStorage implements StoreInterface {
       });
     });
   }
+
+  async saveDraft({ messageDetachableId, ciphertext, iv }) {
+  }
+
+  async loadDraft({ messageDetachableId }) {
+  }
+
+  async deleteDraft({ messageDetachableId }) {
+  }
 }
 
 export default IdbAccountStorage;

@@ -41,6 +41,18 @@ class SqliteStorage implements StoreInterface {
   getMessagesDescending() {
     console.error('[SQLiteStorage] under construction');
   }
+
+  saveDraft() {
+    console.error('[SQLiteStorage] under construction');
+  }
+
+  loadDraft() {
+    console.error('[SQLiteStorage] under construction');
+  }
+
+  deleteDraft() {
+    console.error('[SQLiteStorage] under construction');
+  }
 }
 
 export default SqliteStorage;

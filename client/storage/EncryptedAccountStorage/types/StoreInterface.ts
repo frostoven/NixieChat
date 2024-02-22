@@ -11,6 +11,9 @@ interface StoreInterface {
   getAllChatsByOwner: Function,
   createMessage: Function,
   getMessagesDescending: Function,
+  saveDraft: Function,
+  loadDraft: Function,
+  deleteDraft: Function,
 }
 
 interface AccountCreationParamsSignature {
