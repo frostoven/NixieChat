@@ -4,7 +4,7 @@ import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import {
-  EncryptedAccountStorage
+  EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 import { CreateFirstContact } from '../ContactComponents/CreateFirstContact';
 
@@ -41,6 +41,10 @@ const columnRightStyle = {
 };
 
 class ContactsAndChatGrid extends React.Component {
+  state = {
+    messageDetachableId: '',
+  };
+
   render() {
     const darkMode = Settings.isDarkModeEnabled();
     const contacts = accountsStorage.getActiveContacts();
@@ -58,7 +62,7 @@ class ContactsAndChatGrid extends React.Component {
 
           <Grid stretched style={columnLeftStyle} inverted={!darkMode}>
             <Grid.Column style={columnRightStyle}>
-              <ActiveChat/>
+              <ActiveChat messageDetachableId={this.state.messageDetachableId}/>
             </Grid.Column>
           </Grid>
         </>
@@ -73,13 +77,19 @@ class ContactsAndChatGrid extends React.Component {
             computer={6} tablet={6} mobile={16}
             style={columnLeftStyle}
           >
-            <OngoingChatsList/>
+            <OngoingChatsList
+              onOpenChat={({ messageDetachableId }) => {
+                this.setState({
+                  messageDetachableId: messageDetachableId,
+                });
+              }}
+            />
           </Grid.Column>
           <Grid.Column
             computer={10} tablet={10} className="computer only"
             style={columnRightStyle}
           >
-            <ActiveChat/>
+            <ActiveChat messageDetachableId={this.state.messageDetachableId}/>
           </Grid.Column>
         </Grid>
       </>

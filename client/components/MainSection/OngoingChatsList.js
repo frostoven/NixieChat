@@ -50,36 +50,27 @@ const taperedLineStyle = {
 
 class OngoingChatsList extends React.Component {
   static propTypes = {
-    //
+    onOpenChat: PropTypes.func.isRequired,
   };
-
-  static defaultProps = {
-    //
-  };
-
-  // handleChatClick = ({ name }) => {
-  //   console.log('Clicked:', name);
-  // };
 
   genList = () => {
     const result = [];
     const darkMode = Settings.isDarkModeEnabled();
-    const contactsList = accountsStorage.getActiveChats();
-    for (let i = 0, len = contactsList.length; i < len; i++) {
-      const contactInfo = contactsList[i];
+    const chatList = accountsStorage.getActiveChats();
+    for (let i = 0, len = chatList.length; i < len; i++) {
+      const chatInfo = chatList[i];
       result.push({
-        name: contactInfo.contactName,
+        name: chatInfo.contactName,
         lastMessage: '^ᴗ^',
         photo: accountsStorage.generateRandomartAvatar(
           accountsStorage.getActiveAccount().accountName,
-          contactInfo.internalContactId,
+          chatInfo.internalContactId,
           darkMode,
         ) || null,
-        onClick: async () => {
-          const messages = await accountsStorage.getMessages({
-            messageDetachableId: contactInfo.messageDetachableId,
+        onClick: () => {
+          this.props.onOpenChat({
+            messageDetachableId: chatInfo.messageDetachableId,
           });
-          console.log('=>', messages)
         },
       });
     }
