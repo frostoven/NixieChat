@@ -35,9 +35,10 @@ function getPasswordStore(): FrozenPasswordStore {
     // Encrypts a string using the last known password for this store.
     encryptAes256Gcm: async (plaintext: string) => {
       if (_savedPassword === null) {
-        return console.error(
+        console.error(
           '[PasswordStore] Encryption failed: Password not set.',
         );
+        return null;
       }
 
       return await aesGcmEncrypt(_savedPassword, plaintext);
@@ -45,16 +46,17 @@ function getPasswordStore(): FrozenPasswordStore {
 
     // Decrypts a string using the last known password for this store.
     decryptAes256Gcm: async (
-      cyphertext: Uint8Array, iv: Uint8Array, silenceDecryptError: boolean,
+      ciphertext: Uint8Array, iv: Uint8Array, silenceDecryptError: boolean = false,
     ) => {
       if (_savedPassword === null) {
-        return console.error(
+        console.error(
           '[PasswordStore] Decryption failed: Password not set.',
         );
+        return null;
       }
 
       return await aesGcmDecrypt(
-        _savedPassword, cyphertext, iv, silenceDecryptError,
+        _savedPassword, ciphertext, iv, silenceDecryptError,
       );
     },
   });

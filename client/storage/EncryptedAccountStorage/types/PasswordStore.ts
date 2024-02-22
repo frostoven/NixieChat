@@ -3,14 +3,14 @@ interface PasswordStore {
 
   setPassword: (password: string) => void,
 
-  encryptAes256Gcm: (plaintext: string) => Promise<void | {
+  encryptAes256Gcm: (plaintext: string) => Promise<{
     iv: Uint8Array;
     ciphertext: Uint8Array;
-  }>
+  } | null>
 
   decryptAes256Gcm: (
-    cyphertext: Uint8Array, iv: Uint8Array, silenceDecryptError: boolean,
-  ) => Promise<string | void | null>,
+    ciphertext: Uint8Array, iv: Uint8Array, silenceDecryptError?: boolean,
+  ) => Promise<string | null>,
 }
 
 type FrozenPasswordStore = Readonly<PasswordStore>;
