@@ -67,15 +67,39 @@ const textBoxStyleLight: React.CSSProperties = {
   color: '#000',
 };
 
+interface Props {
+  messageDetachableId: string,
+}
+
 // Important note: Do not use React state to manage large text entry - it's
 // incredibly slow, visibly so on cheaper devices. Instead, we let the browser
 // manage text state, and then we read its values via ref when needed.
-class ChatBox extends React.Component {
+class ChatBox extends React.Component<Props> {
+  static draft = {};
+
   private readonly textBoxRef: React.RefObject<any>;
 
-  constructor(props: {} | Readonly<{}>) {
+  constructor(props: Props | Readonly<Props>) {
     super(props);
     this.textBoxRef = React.createRef();
+  }
+
+  componentDidMount() {
+    // Restore drafts if this chat had any stored.
+    const textArea: HTMLTextAreaElement = this.textBoxRef.current;
+    const messageDetachableId = this.props.messageDetachableId;
+    if (textArea && ChatBox.draft[messageDetachableId]) {
+      textArea.value = ChatBox.draft[messageDetachableId];
+      this.recalculateSize();
+    }
+  }
+
+  componentWillUnmount() {
+    // Store draft of the current text so the user does not lose it.
+    const textArea: HTMLTextAreaElement = this.textBoxRef.current;
+    if (textArea) {
+      ChatBox.draft[this.props.messageDetachableId] = textArea.value;
+    }
   }
 
   recalculateSize = () => {

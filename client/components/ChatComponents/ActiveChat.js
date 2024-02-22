@@ -53,7 +53,7 @@ class ActiveChat extends React.Component {
 
     return (
       <>
-        <ChatBox/>
+        <ChatBox messageDetachableId={messageDetachableId}/>
       </>
     );
   };
