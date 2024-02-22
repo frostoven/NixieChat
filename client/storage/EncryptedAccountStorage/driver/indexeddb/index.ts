@@ -411,6 +411,29 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
+  getEntryByPrimaryKey({ storeName, id }): Promise<object[] | null> {
+    return new Promise(resolve => {
+      if (!this.isDbReady()) {
+        return resolve(null);
+      }
+
+      const request = db!
+        .transaction([ storeName ], 'readonly')
+        .objectStore(storeName)
+        .get(id);
+
+      request.onsuccess = (event: Event) => {
+        const target: IDBRequest = event.target as IDBRequest;
+        resolve(target.result);
+      };
+
+      request.onerror = (error) => {
+        console.error('error', error);
+        resolve(null);
+      };
+    });
+  }
+
   /**
    * Please don't use this for messages without specifying a count. You'll blow
    * up your RAM. Returns all entries associated with the specified detached
