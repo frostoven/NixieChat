@@ -43,10 +43,16 @@ const buttonStyle: React.CSSProperties = {
 const textBoxStyle: React.CSSProperties = {
   textAlign: 'left',
   width: '100%',
-  height: 44,
+  // This is the starting value only. This is auto-calculated as the user
+  // enters text.
+  height: 'auto',
+  maxHeight: 199,
   border: 'none',
   outline: 'none',
   fontSize: '10pt',
+  resize: 'none',
+  padding: 0,
+  verticalAlign: 'bottom',
 };
 
 const textBoxStyleDark: React.CSSProperties = {
@@ -61,7 +67,27 @@ const textBoxStyleLight: React.CSSProperties = {
   color: '#000',
 };
 
+// Important note: Do not use React state to manage large text entry - it's
+// incredibly slow, visibly so on cheaper devices. Instead, we let the browser
+// manage text state, and then we read its values via ref when needed.
 class ChatBox extends React.Component {
+  private readonly textBoxRef: React.RefObject<any>;
+
+  constructor(props: {} | Readonly<{}>) {
+    super(props);
+    this.textBoxRef = React.createRef();
+  }
+
+  recalculateSize = () => {
+    const textArea: HTMLTextAreaElement = this.textBoxRef.current;
+    if (textArea) {
+      // We first set auto and then actual height. Auto forces an element
+      // shrink while the px height forces growth.
+      textArea.style.height = 'auto';
+      textArea.style.height = textArea.scrollHeight + 'px';
+    }
+  };
+
   render() {
     const darkMode = Settings.isDarkModeEnabled();
     const themeStyle = darkMode ? containerStyleDark : containerStyleLight;
@@ -75,7 +101,11 @@ class ChatBox extends React.Component {
             />
           </div>
           <div className="chat-box-column" style={buttonStyle}>
-            <input autoFocus style={textBoxTheme}/>
+            <textarea
+              ref={this.textBoxRef}
+              autoFocus style={textBoxTheme}
+              onChange={this.recalculateSize}
+            />
           </div>
           <div className="chat-box-column" style={buttonStyle}>
             <ChatBoxButton
