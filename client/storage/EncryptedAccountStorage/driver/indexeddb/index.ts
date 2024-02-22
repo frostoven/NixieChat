@@ -329,6 +329,58 @@ class IdbAccountStorage implements StoreInterface {
     });
   }
 
+  /**
+   * If a unique value already exists, updates it. Otherwise, write a new
+   * entry.
+   *
+   * This method is useful for single-instance entries like message drafts, but
+   * please exercise caution with more complex datatypes. IVs for example are
+   * unique, so you may end up overwriting unrelated data. Prefer updating by
+   * row ID where possible.
+   */
+  insertOrUpdateField({
+    storeName, identifierKey, identifierValue, ciphertext, iv,
+  }) {
+    return new Promise((resolve) => {
+      if (!this.isDbReady()) {
+        console.error(`Cannot create "${storeName}" entry: DB not ready.`);
+        return resolve(false);
+      }
+
+      if (!storeName || !identifierKey || !identifierValue || !iv) {
+        console.error(`Cannot create "${storeName}" entry: Invalid parameters.`);
+        return resolve(false);
+      }
+
+      let transaction: IDBTransaction;
+      try {
+        // @ts-ignore - Better data integrity on Firefox.
+        transaction = db!.transaction([ storeName ], 'readwriteflush', strict);
+      }
+      catch (_) {
+        transaction = db!.transaction([ storeName ], 'readwrite', strict);
+      }
+
+      const request =
+        transaction
+          .objectStore(storeName)
+          .put({
+            [identifierKey]: identifierValue,
+            ciphertext,
+            iv,
+          });
+
+      request.onsuccess = () => {
+        resolve(true);
+      };
+
+      request.onerror = (error) => {
+        console.error(`${storeName} error:`, error);
+        resolve(false);
+      };
+    });
+  }
+
   // === Read operations ======================================== //
 
   /**
