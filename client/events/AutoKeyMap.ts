@@ -44,6 +44,8 @@ let totalInstances = 0;
 class AutoKeyMap {
   // Attempt at tracking Caps Lock.
   static capsLockOn = false;
+  // Shift is currently being held down.
+  static isShiftDown = false;
 
   // Used to keep track of what has focus.
   private static _windowStackOrder: string[] = [];
@@ -102,6 +104,8 @@ class AutoKeyMap {
     if (event.getModifierState!) {
       AutoKeyMap.capsLockOn = event.getModifierState('CapsLock');
     }
+
+    AutoKeyMap.isShiftDown = event.shiftKey;
 
     if (!this._keyMap || this._destroyed) {
       return;
