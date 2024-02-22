@@ -86,6 +86,7 @@ interface Props {
 class ChatBox extends React.Component<Props> {
   private readonly textBoxRef: React.RefObject<any>;
   private autoKeyMap = new AutoKeyMap();
+  private draftTimer: number = 0;
 
   constructor(props: Props | Readonly<Props>) {
     super(props);
@@ -102,7 +103,11 @@ class ChatBox extends React.Component<Props> {
 
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;
     if (textArea) {
-      this.loadDraft(textArea)
+      this.loadDraft(textArea);
+      textArea.onblur = () => this.saveDraft(textArea);
+      // @ts-ignore - Whoever wrote that type entry is a moron.
+      // https://developer.mozilla.org/en-US/docs/Web/API/setInterval#return_value
+      this.draftTimer = setInterval(() => this.saveDraft(textArea), 20000);
     }
   }
 
@@ -115,6 +120,10 @@ class ChatBox extends React.Component<Props> {
 
     // Unbind hotkeys.
     this.autoKeyMap.destroy();
+
+    if (this.draftTimer) {
+      clearInterval(this.draftTimer);
+    }
   }
 
   // Saves the current unsent message for later use.
