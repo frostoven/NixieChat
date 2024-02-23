@@ -77,6 +77,7 @@ const textBoxStyleLight: React.CSSProperties = {
 interface Props {
   accountName: string,
   messageDetachableId: string,
+  onSendMessage: Function,
   onCloseChat: Function,
 }
 
@@ -185,7 +186,7 @@ class ChatBox extends React.Component<Props> {
       textArea.value += '\r\n';
     }
     else {
-      console.log('> Send:', textArea.value);
+      this.props.onSendMessage(textArea.value);
       textArea.value = '';
     }
 
@@ -219,6 +220,7 @@ class ChatBox extends React.Component<Props> {
               ref={this.textBoxRef}
               autoFocus style={textBoxTheme}
               onChange={this.recalculateSize}
+              placeholder=" Message area..."
             />
           </div>
           <div className="chat-box-column" style={buttonStyle}>

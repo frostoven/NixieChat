@@ -150,6 +150,15 @@ class IdbAccountStorage implements StoreInterface {
           },
           // Attaches to chats.
           detachableIdName: 'messageDetachableId',
+          // To make device sync easier, we keep track of every message index
+          // in plaintext. Each contact has their own number line (incremented
+          // as n+th person to enter chat + total in chat; i.e. person1 counts
+          // in odds, person2 counts in evens).
+          additionalSetup: (objectStore) => {
+            objectStore.createIndex('order', 'order', {
+              unique: false,
+            });
+          },
         });
 
         // --- Message drafts ------------------------------------ //
@@ -178,11 +187,13 @@ class IdbAccountStorage implements StoreInterface {
     storeName,
     storeOptions,
     detachableIdName,
+    additionalSetup,
   }: {
     upgradeTarget: IDBDatabase,
     storeName: string,
     storeOptions: IDBObjectStoreParameters,
     detachableIdName: string | null,
+    additionalSetup?: (objectStore: IDBObjectStore) => void,
   }) {
     if (!upgradeTarget) {
       console.error(
@@ -216,6 +227,10 @@ class IdbAccountStorage implements StoreInterface {
       objectStore.createIndex(detachableIdName, detachableIdName, {
         unique: false,
       });
+    }
+
+    if (typeof additionalSetup === 'function') {
+      additionalSetup(objectStore);
     }
 
     objectStore.transaction.oncomplete = (_) => {
