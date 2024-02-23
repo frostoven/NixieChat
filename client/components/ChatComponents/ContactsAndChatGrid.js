@@ -138,6 +138,7 @@ class ContactsAndChatGrid extends React.Component {
             />
           </Grid.Column>
           <Grid.Column
+            className="mobile-margin-fix"
             {...rightColProps}
             style={columnRightStyle}
           >

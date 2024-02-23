@@ -121,3 +121,14 @@
 .ui.scrolling.modal {
   transform: translateY(-3%);
 }
+
+/* Fix issue where collapsed mobile views send columns off-screen. */
+@media only screen and (min-width: 320px) and (max-width: 767px) {
+  .column {
+    margin-right: 15px;
+  }
+  .mobile-margin-fix {
+    margin-left: 15px;
+    margin-right: 0;
+  }
+}
