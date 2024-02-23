@@ -16,18 +16,24 @@ const bubbleStyle: React.CSSProperties = {
   padding: '7px 11px',
   margin: 8,
   fontSize: '10pt',
-  width: '100%',
+  width: 'fit-content',
   maxWidth: 420,
+  // Makes non-br line breaks render as br.
+  whiteSpace: 'pre-line',
 };
 
 const outboundFloatStyle: React.CSSProperties = {
   marginLeft: 'auto',
-  textAlign: 'right',
 };
 
 const inboundFloatStyle: React.CSSProperties = {
   marginRight: 'auto',
-  textAlign: 'left',
+};
+
+const devMessageCountStyle: React.CSSProperties = {
+  position: 'absolute',
+  marginLeft: -20,
+  fontWeight: 'bold',
 };
 
 // Stores all styles in a hierarchy.
@@ -72,9 +78,8 @@ interface Props {
 
 class ChatBubble extends React.Component<Props> {
   shouldComponentUpdate(): boolean {
-    // TODO: Change this to check for message edits. These random rerenders are
-    //  to test performance only.
-    return Math.random() < 0.1;
+    // TODO: Change this to check for message edits.
+    return false;
   }
 
   render() {
@@ -85,11 +90,11 @@ class ChatBubble extends React.Component<Props> {
     const style = styleDirectionIsOutbound.get(message.isLocal);
     const bubbleStyle = darkMode ? style.darkMode : style.lightMode;
 
-    const messageBody = `${Math.random()}`;
     return (
       <div className="fadeInFast" style={containerStyle}>
         <div style={bubbleStyle}>
-          [{this.props.bubbleId}] {messageBody}
+          {message.body}
+          {/*<div style={devMessageCountStyle}>{this.props.bubbleId}</div>*/}
         </div>
       </div>
     );

@@ -59,6 +59,7 @@ const textBoxStyle: React.CSSProperties = {
   lineHeight: '12pt',
   resize: 'none',
   padding: 0,
+  marginLeft: 11,
   verticalAlign: 'bottom',
 };
 
@@ -186,6 +187,10 @@ class ChatBox extends React.Component<Props> {
       textArea.value += '\r\n';
     }
     else {
+      let result = textArea.value.trim();
+      if (!result) {
+        return;
+      }
       this.props.onSendMessage(textArea.value);
       textArea.value = '';
     }
@@ -212,6 +217,11 @@ class ChatBox extends React.Component<Props> {
         <div className="chat-box" style={innerStyle}>
           <div className="chat-box-column" style={buttonStyle}>
             <ChatBoxButton
+              icon="smile outline"
+            />
+          </div>
+          <div className="chat-box-column" style={buttonStyle}>
+            <ChatBoxButton
               icon="attach"
             />
           </div>
@@ -221,11 +231,6 @@ class ChatBox extends React.Component<Props> {
               autoFocus style={textBoxTheme}
               onChange={this.recalculateSize}
               placeholder=" Message area..."
-            />
-          </div>
-          <div className="chat-box-column" style={buttonStyle}>
-            <ChatBoxButton
-              icon="smile outline"
             />
           </div>
           <div className="chat-box-column" style={buttonStyle}>
