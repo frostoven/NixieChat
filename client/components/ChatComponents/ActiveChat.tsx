@@ -66,6 +66,8 @@ class ActiveChat extends React.Component<Props> {
     onCloseChat: PropTypes.func.isRequired,
   };
 
+  scrollRef: React.RefObject<any> = React.createRef();
+
   // This contains the latest conversation. This is filled as messages
   // arrive. However, when a DB is read for old messages, they're ordered by
   // time instead. This ensures the user doesn't miss delayed messages
@@ -97,7 +99,13 @@ class ActiveChat extends React.Component<Props> {
 
     this.stackMessage(message);
 
-    this.forceUpdate();
+    this.forceUpdate(() => {
+      const ref = this.scrollRef.current;
+      if (ref) {
+        // Scroll to bottom after sending a message.
+        ref.scrollTop = ref.scrollHeight;
+      }
+    });
   };
 
   // Add a message to the list of renderable components, but does not trigger
@@ -151,7 +159,7 @@ class ActiveChat extends React.Component<Props> {
         </div>
         <div style={chatContainerStyle}>
           <div style={chatAreaStyle}>
-            <div style={scrollableStyle}>
+            <div ref={this.scrollRef} style={scrollableStyle}>
               {this.messageBatches.map((batch) => {
                 // This structure ensures that each bubble can selectively
                 // choose when to render via shouldComponentUpdate.
