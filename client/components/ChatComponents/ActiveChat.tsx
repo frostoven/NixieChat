@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { any } from 'prop-types';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import {
   EncryptedAccountStorage,
@@ -56,6 +56,7 @@ interface Props {
 }
 
 let bubbleCount = 0;
+let lastScrollAnimDelta = 0.01;
 
 class ActiveChat extends React.Component<Props> {
   // The PropTypes package does compile-time checks, which is why use this as
@@ -100,11 +101,36 @@ class ActiveChat extends React.Component<Props> {
     this.stackMessage(message);
 
     this.forceUpdate(() => {
-      const ref = this.scrollRef.current;
+      const ref: HTMLElement = this.scrollRef.current;
       if (ref) {
         // Scroll to bottom after sending a message.
-        ref.scrollTop = ref.scrollHeight;
+        // console.log(`-> scrollTop=${ref.scrollTop}, scrollHeight=${ref.scrollHeight}, offsetHeight=${ref.offsetHeight}`);
+        // console.log(`-> target=${ref.scrollTop + ref.offsetHeight}`);
+        // ref.scrollTop = ref.scrollHeight;
+
+        // Animate to bottom.
+        // const target = ref.scrollTop + ref.offsetHeight;
+        this.animateScrollToBottom(ref, lastScrollAnimDelta);
       }
+    });
+  };
+
+  animateScrollToBottom = (ref: HTMLElement, delta) => {
+    const scrollAmount = Math.ceil((
+      ref.scrollHeight - (ref.scrollTop + ref.offsetHeight)
+    ) * delta);
+
+    console.log({ scrollAmount, lastScrollAnimDelta });
+    if (!scrollAmount) {
+      return;
+    }
+
+    ref.scrollTop += scrollAmount;
+
+    const start = Date.now();
+    requestAnimationFrame(() => {
+      lastScrollAnimDelta = ((Date.now() - start) * 0.03) || 0.01;
+      this.animateScrollToBottom(ref, lastScrollAnimDelta);
     });
   };
 

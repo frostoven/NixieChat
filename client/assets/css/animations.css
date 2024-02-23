@@ -1,8 +1,5 @@
 .fadeInDown {
   animation-duration: 0.5s;
-}
-
-.fadeInDown {
   animation-name: fadeInDown;
 }
 
@@ -10,6 +7,22 @@
   0% {
     opacity: 0;
     transform: translateY(-15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+.fadeInFast {
+  animation-duration: 0.1s;
+  animation-name: fadeInFast;
+}
+
+@keyframes fadeInFast {
+  0% {
+    opacity: 0.75;
+    transform: translateY(-5px);
   }
   100% {
     opacity: 1;

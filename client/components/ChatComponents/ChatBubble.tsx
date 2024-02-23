@@ -12,8 +12,8 @@ const containerStyle: React.CSSProperties = {
 };
 
 const bubbleStyle: React.CSSProperties = {
-  borderRadius: 8,
-  padding: 8,
+  borderRadius: 14,
+  padding: '7px 11px',
   margin: 8,
   fontSize: '10pt',
   width: '100%',
@@ -21,13 +21,13 @@ const bubbleStyle: React.CSSProperties = {
 };
 
 const outboundFloatStyle: React.CSSProperties = {
-  // float: 'right',
   marginLeft: 'auto',
+  textAlign: 'right',
 };
 
 const inboundFloatStyle: React.CSSProperties = {
-  // float: 'left',
   marginRight: 'auto',
+  textAlign: 'left',
 };
 
 // Stores all styles in a hierarchy.
@@ -87,7 +87,7 @@ class ChatBubble extends React.Component<Props> {
 
     const messageBody = `${Math.random()}`;
     return (
-      <div style={containerStyle}>
+      <div className="fadeInFast" style={containerStyle}>
         <div style={bubbleStyle}>
           [{this.props.bubbleId}] {messageBody}
         </div>
