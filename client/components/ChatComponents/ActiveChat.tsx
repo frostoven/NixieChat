@@ -35,6 +35,16 @@ const chatAreaStyle: React.CSSProperties = {
   height: '100%',
 };
 
+const scrollableStyle: React.CSSProperties = {
+  position: 'absolute',
+  overflowX: 'hidden',
+  overflowY: 'auto',
+  top: 0,
+  left: 0,
+  bottom: 45,
+  right: 15,
+};
+
 interface Props {
   accountName: string,
   messageDetachableId: string,
@@ -82,7 +92,9 @@ class ActiveChat extends React.Component<Props> {
         </div>
         <div style={chatContainerStyle}>
           <div style={chatAreaStyle}>
-            {this.props.messageDetachableId}
+            <div style={scrollableStyle}>
+              {this.props.messageDetachableId}
+            </div>
             {this.genChat()}
           </div>
         </div>
