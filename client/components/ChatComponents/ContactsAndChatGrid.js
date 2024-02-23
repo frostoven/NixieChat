@@ -40,6 +40,37 @@ const columnRightStyle = {
   paddingLeft: 0,
 };
 
+// Used to switch between exclusively showing the chat or the contact chat list
+// on small screens. Note that Semantic UI requires that all visible columns
+// always add up to 16 for each display type.
+const columnConfig = {
+  chatIsOpen: {
+    leftColProps: {
+      computer: 6,
+      tablet: 6,
+      only: 'tablet computer',
+    },
+    rightColProps: {
+      computer: 10,
+      tablet: 10,
+      mobile: 16,
+    },
+  },
+  chatIsClosed: {
+    leftColProps: {
+      computer: 6,
+      tablet: 6,
+      mobile: 16,
+    },
+    rightColProps: {
+      computer: 10,
+      tablet: 10,
+      // This should technically be zero, but Semantic only allows 1-16.
+      mobile: 1,
+    },
+  },
+};
+
 class ContactsAndChatGrid extends React.Component {
   state = {
     accountName: '',
@@ -79,12 +110,22 @@ class ContactsAndChatGrid extends React.Component {
       );
     }
 
+    let leftColProps, rightColProps;
+    if (messageDetachableId) {
+      leftColProps = columnConfig.chatIsOpen.leftColProps;
+      rightColProps = columnConfig.chatIsOpen.rightColProps;
+    }
+    else {
+      leftColProps = columnConfig.chatIsClosed.leftColProps;
+      rightColProps = columnConfig.chatIsClosed.rightColProps;
+    }
+
     return (
       <>
         {/* Contacts and chat are contained in this grid. */}
-        <Grid stretched style={columnLeftStyle} inverted={!darkMode}>
+        <Grid stretched style={columnStyle} inverted={!darkMode}>
           <Grid.Column
-            computer={6} tablet={6} mobile={16}
+            {...leftColProps}
             style={columnLeftStyle}
           >
             <OngoingChatsList
@@ -97,12 +138,12 @@ class ContactsAndChatGrid extends React.Component {
             />
           </Grid.Column>
           <Grid.Column
-            computer={10} tablet={10} className="computer only"
+            {...rightColProps}
             style={columnRightStyle}
           >
             <ActiveChat
               accountName={accountName}
-              messageDetachableId={this.state.messageDetachableId}
+              messageDetachableId={messageDetachableId}
               onCloseChat={this.onCloseChat}
             />
           </Grid.Column>
