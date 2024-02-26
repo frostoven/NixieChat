@@ -8,6 +8,11 @@ let reconnectionCount = 0;
 const clientEmitter = new EventEmitter();
 let serverEmitter: Socket | null = null;
 
+const protocol = {
+  'http:': 'ws:',
+  'https:': 'wss:',
+};
+
 function initServerConnection() {
   if (serverEmitter) {
     // Init has already been done; quit out.
@@ -15,7 +20,7 @@ function initServerConnection() {
     return;
   }
 
-  serverEmitter = io(`ws://${location.host}`);
+  serverEmitter = io(`${protocol[location.protocol]}//${location.host}`);
 
   async function refreshStorage() {
     const storage = new NixieStorage();
