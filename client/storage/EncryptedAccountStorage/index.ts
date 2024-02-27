@@ -31,7 +31,7 @@ import {
   DecryptedContactData,
 } from './types/ContactCache';
 import { ChatCache, DecryptedChatData } from './types/ChatCache';
-import { generateAvatar } from '../../components/Generic/GenerateAvatar';
+import randomart from '@frostoven/randomart';
 
 let singletonInstance: EncryptedAccountStorage;
 
@@ -479,8 +479,20 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
 
     const contactCache = this._contactCaches[accountName][contactId];
     const publicKey = contactCache.decryptedData?.contactPubKeyUint8Array;
-    return this._randomartContactCache[accountName][contactArtId] =
-      generateAvatar(48, 48, publicKey!, darkMode);
+
+    const buffer = randomart(publicKey, {
+      bounds: {
+        width: 48,
+        height: 48,
+      },
+      asBitmap: true,
+      darkMode,
+    });
+
+    const dataImage = `data:image/bmp;base64,${window.btoa(
+      arrayBufferToString(buffer),
+    )}`;
+    return this._randomartContactCache[accountName][contactArtId] = dataImage;
   }
 
   getAllAccountNames() {

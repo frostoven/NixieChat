@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Accordion, Icon, Segment } from 'semantic-ui-react';
-import randomart from 'randomart';
+import randomart from '@frostoven/randomart';
 
 const asciiArtSymbols = {
   '-2': '╡', // end
