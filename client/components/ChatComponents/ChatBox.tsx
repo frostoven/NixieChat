@@ -5,6 +5,7 @@ import { AutoKeyMap } from '../../events/AutoKeyMap';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
+import { EmoticonWindow } from './EmoticonWindow';
 
 const accountStorage = new EncryptedAccountStorage();
 
@@ -90,6 +91,10 @@ class ChatBox extends React.Component<Props> {
   private autoKeyMap = new AutoKeyMap();
   private draftTimer: number = 0;
 
+  state = {
+    showEmoticonWindow: false,
+  };
+
   constructor(props: Props | Readonly<Props>) {
     super(props);
     this.textBoxRef = React.createRef();
@@ -100,7 +105,7 @@ class ChatBox extends React.Component<Props> {
     this.autoKeyMap.bindKeys({
       Enter: this.sendMessage,
       NumpadEnter: this.sendMessage,
-      Escape: this.props.onCloseChat,
+      Escape: this.onBack,
     });
 
     const textArea: HTMLTextAreaElement = this.textBoxRef.current;
@@ -134,6 +139,21 @@ class ChatBox extends React.Component<Props> {
     // Stop listening for application exist when the component unmounts.
     window.removeEventListener('beforeunload', this.saveOnExit);
   }
+
+  onBack = () => {
+    if (this.state.showEmoticonWindow) {
+      this.setState({
+        showEmoticonWindow: false,
+      }, () => {
+        if (this.textBoxRef.current) {
+          this.textBoxRef.current.focus();
+        }
+      })
+    }
+    else {
+      this.props.onCloseChat();
+    }
+  };
 
   saveOnExit = () => {
     // Store draft of the current text so the user does not lose it.
@@ -208,21 +228,28 @@ class ChatBox extends React.Component<Props> {
     }
   };
 
+  toggleEmoticonWindow = () => {
+    this.setState({
+      showEmoticonWindow: !this.state.showEmoticonWindow,
+    });
+  };
+
   render() {
     const darkMode = Settings.isDarkModeEnabled();
     const themeStyle = darkMode ? containerStyleDark : containerStyleLight;
     const textBoxTheme = darkMode ? textBoxStyleDark : textBoxStyleLight;
+    const { showEmoticonWindow } = this.state;
     return (
       <div style={themeStyle}>
+        {showEmoticonWindow ? <EmoticonWindow/> : null}
         <div className="chat-box" style={innerStyle}>
-          <div className="chat-box-column" style={buttonStyle}>
+          <div
+            className="chat-box-column"
+            style={buttonStyle}
+            onClick={this.toggleEmoticonWindow}
+          >
             <ChatBoxButton
               icon="smile outline"
-            />
-          </div>
-          <div className="chat-box-column" style={buttonStyle}>
-            <ChatBoxButton
-              icon="attach"
             />
           </div>
           <div className="chat-box-column" style={buttonStyle}>
@@ -231,6 +258,11 @@ class ChatBox extends React.Component<Props> {
               autoFocus style={textBoxTheme}
               onChange={this.recalculateSize}
               placeholder=" Message area..."
+            />
+          </div>
+          <div className="chat-box-column" style={buttonStyle}>
+            <ChatBoxButton
+              icon="attach"
             />
           </div>
           <div className="chat-box-column" style={buttonStyle}>

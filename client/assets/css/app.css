@@ -132,3 +132,20 @@
     margin-right: 0;
   }
 }
+
+/* Customise tabular menus. They're way to thick. */
+.ui.attached.tabular.menu {
+  min-height: 30px;
+  height: 38px;
+}
+
+.ui.tabular.menu .active.item {
+  border-radius: 0 !important;
+  border: none;
+  border-bottom: 4px solid #a5f1b1;
+}
+
+.ui.inverted.bottom.attached.segment.active.tab {
+  border-radius: 0;
+  border: none;
+}
