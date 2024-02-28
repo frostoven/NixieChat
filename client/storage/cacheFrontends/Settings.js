@@ -65,6 +65,23 @@ class Settings {
     cache.preferRsaArtView = !!value;
     await storage.writeSettings(cache);
   }
+
+  // Used to track the last tab the user had open in the emoticon window.
+  static lastEmoticonTab() {
+    const cache = storage.settingsCache || {};
+    if (typeof cache.lastEmoticonTab !== 'number') {
+      // This is not a mistake - prefer the emoticon tab over the settings tab.
+      return 1;
+    }
+    return cache.lastEmoticonTab;
+  }
+
+  // Used to track the last tab the user had open in the emoticon window.
+  static async setLastEmoticonTab(value) {
+    const cache = storage.settingsCache || {};
+    cache.lastEmoticonTab = value;
+    await storage.writeSettings(cache);
+  }
 }
 
 window.$nixieDebugUtils.settings = Settings;
