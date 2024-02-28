@@ -28,15 +28,21 @@ const imgStyle: React.CSSProperties = {
 
 interface Props {
   fileName: string,
+  style?: React.CSSProperties,
 }
 
 class ChatBoxButton extends React.Component<Props> {
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const style = darkMode ? darkModeStyle : lightModeStyle;
+    let style = darkMode ? darkModeStyle : lightModeStyle;
+
+    if (this.props.style) {
+      style = { ...style, ...this.props.style };
+    }
+
     return (
       <div style={style}>
-        <img alt='' src={`${this.props.fileName}`} style={imgStyle}/>
+        <img alt="" src={`${this.props.fileName}`} style={imgStyle}/>
       </div>
     );
   }

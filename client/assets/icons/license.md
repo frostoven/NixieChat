@@ -14,4 +14,5 @@ The following was obtained from OpenMoji and modified to better suit NixiChat's
 art style:
 
 * clip.webp
+* cog.webp
 * smile.webp

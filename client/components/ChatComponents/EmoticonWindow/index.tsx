@@ -1,6 +1,7 @@
 import React from 'react';
 import { Settings } from '../../../storage/cacheFrontends/Settings';
-import { Tab, TabPane } from 'semantic-ui-react';
+import { Tab, TabPane, TabProps } from 'semantic-ui-react';
+import { EmoticonTab } from './EmoticonTab';
 
 const containerStyle: React.CSSProperties = {
   position: 'absolute',
@@ -14,12 +15,27 @@ const tabStyle: React.CSSProperties = {
 };
 
 class EmoticonWindow extends React.Component {
+  state = {
+    activeTab: Settings.lastEmoticonTab(),
+  };
+
+  handleTabChange = (_: any, data: TabProps) => {
+    const activeTab = data.activeIndex;
+    Settings.setLastEmoticonTab(activeTab).catch(console.error);
+    this.setState({
+      activeTab,
+    });
+  };
+
   render() {
     const darkMode = Settings.isDarkModeEnabled();
+    const { activeTab } = this.state;
     return (
       <div style={containerStyle}>
         <Tab
+          activeIndex={activeTab}
           menu={{ inverted: !darkMode, attached: true, tabular: true }}
+          onTabChange={this.handleTabChange}
           panes={[
             {
               menuItem: 'Settings', render: () => {
@@ -30,9 +46,11 @@ class EmoticonWindow extends React.Component {
             },
             {
               menuItem: 'Emoticons', render: () => {
-                return (<TabPane inverted={!darkMode} style={tabStyle}>
-                  Tab 2 Content
-                </TabPane>);
+                return (
+                  <TabPane inverted={!darkMode} style={tabStyle}>
+                    <EmoticonTab/>
+                  </TabPane>
+                );
               },
             },
             {
