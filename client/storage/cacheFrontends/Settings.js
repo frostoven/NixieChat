@@ -77,9 +77,25 @@ class Settings {
   }
 
   // Used to track the last tab the user had open in the emoticon window.
-  static async setLastEmoticonTab(value) {
+  static async setActiveEmoticonTab(value) {
     const cache = storage.settingsCache || {};
     cache.lastEmoticonTab = value;
+    await storage.writeSettings(cache);
+  }
+
+  // Used to track the last tab the user had open in the emoticon window.
+  static lastActiveEmoticonStyle() {
+    const cache = storage.settingsCache || {};
+    if (typeof cache.lastEmoticonStyle !== 'number') {
+      return 0;
+    }
+    return cache.lastEmoticonStyle;
+  }
+
+  // Used to track the last tab the user had open in the emoticon window.
+  static async setActiveEmoticonStyle(value) {
+    const cache = storage.settingsCache || {};
+    cache.lastEmoticonStyle = value;
     await storage.writeSettings(cache);
   }
 }
