@@ -61,4 +61,9 @@ router.get(
 	assetsController.getImage,
 );
 
+router.get(
+	'/assets/emo/:dirName/:fileName',
+	assetsController.getEmoticon,
+);
+
 module.exports = router;

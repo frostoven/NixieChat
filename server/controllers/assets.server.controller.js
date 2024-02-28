@@ -81,3 +81,11 @@ exports.getImage = (req, res) => {
     req.params.fileName,
   ));
 };
+
+exports.getEmoticon = (req, res) => {
+  res.sendFile(path.join(
+    __dirname +
+    `../../../client/assets/emo/${req.params.dirName}/` +
+    req.params.fileName,
+  ));
+};
