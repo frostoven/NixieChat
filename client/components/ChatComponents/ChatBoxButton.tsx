@@ -1,8 +1,8 @@
 import React from 'react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
-import { Icon, SemanticICONS } from 'semantic-ui-react';
 
 const baseStyle: React.CSSProperties = {
+  display: 'inline-block',
   cursor: 'pointer',
   margin: 11,
   marginBottom: 7,
@@ -29,20 +29,31 @@ const imgStyle: React.CSSProperties = {
 interface Props {
   fileName: string,
   style?: React.CSSProperties,
+  width?: number,
+  onClick?: () => void,
 }
 
 class ChatBoxButton extends React.Component<Props> {
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    let style = darkMode ? darkModeStyle : lightModeStyle;
+    const { style, width, onClick } = this.props;
+    let containerStyle = darkMode ? darkModeStyle : lightModeStyle;
 
-    if (this.props.style) {
-      style = { ...style, ...this.props.style };
+    if (style) {
+      containerStyle = { ...containerStyle, ...style };
+    }
+
+    let buttonStyle;
+    if (width) {
+      buttonStyle = { ...imgStyle, width };
+    }
+    else {
+      buttonStyle = imgStyle;
     }
 
     return (
-      <div style={style}>
-        <img alt="" src={`${this.props.fileName}`} style={imgStyle}/>
+      <div style={containerStyle} onClick={onClick ? onClick : undefined}>
+        <img alt="" src={`${this.props.fileName}`} style={buttonStyle}/>
       </div>
     );
   }
