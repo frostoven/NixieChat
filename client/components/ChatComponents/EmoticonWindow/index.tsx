@@ -3,15 +3,11 @@ import { Settings } from '../../../storage/cacheFrontends/Settings';
 import { Tab, TabPane, TabProps } from 'semantic-ui-react';
 import { EmoticonTab } from './EmoticonTab';
 
-const containerStyle: React.CSSProperties = {
-  position: 'absolute',
-  bottom: 45,
-  left: 0,
-  right: 0,
-};
-
 const tabStyle: React.CSSProperties = {
-  height: '30vh',
+  height: '25vh',
+  minHeight: 160,
+  padding: 0,
+  paddingTop: 8,
 };
 
 class EmoticonWindow extends React.Component {
@@ -21,7 +17,7 @@ class EmoticonWindow extends React.Component {
 
   handleTabChange = (_: any, data: TabProps) => {
     const activeTab = data.activeIndex;
-    Settings.setLastEmoticonTab(activeTab).catch(console.error);
+    Settings.setActiveEmoticonTab(activeTab).catch(console.error);
     this.setState({
       activeTab,
     });
@@ -31,7 +27,7 @@ class EmoticonWindow extends React.Component {
     const darkMode = Settings.isDarkModeEnabled();
     const { activeTab } = this.state;
     return (
-      <div style={containerStyle}>
+      <div>
         <Tab
           activeIndex={activeTab}
           menu={{ inverted: !darkMode, attached: true, tabular: true }}
@@ -39,15 +35,21 @@ class EmoticonWindow extends React.Component {
           panes={[
             {
               menuItem: 'Settings', render: () => {
-                return (<TabPane inverted={!darkMode} style={tabStyle}>
-                  Tab 1 Content
-                </TabPane>);
+                return (
+                  <TabPane inverted={!darkMode} style={tabStyle}>
+                    Settings TBD
+                  </TabPane>
+                );
               },
             },
             {
               menuItem: 'Emoticons', render: () => {
                 return (
-                  <TabPane inverted={!darkMode} style={tabStyle}>
+                  <TabPane
+                    className="54"
+                    inverted={!darkMode}
+                    style={tabStyle}
+                  >
                     <EmoticonTab/>
                   </TabPane>
                 );
@@ -55,16 +57,20 @@ class EmoticonWindow extends React.Component {
             },
             {
               menuItem: 'Stickers', render: () => {
-                return (<TabPane inverted={!darkMode} style={tabStyle}>
-                  Tab 3 Content
-                </TabPane>);
+                return (
+                  <TabPane inverted={!darkMode} style={tabStyle}>
+                    Stickers TBD
+                  </TabPane>
+                );
               },
             },
             {
               menuItem: 'GIFs', render: () => {
-                return (<TabPane inverted={!darkMode} style={tabStyle}>
-                  Tab 3 Content
-                </TabPane>);
+                return (
+                  <TabPane inverted={!darkMode} style={tabStyle}>
+                    GIFs TBD
+                  </TabPane>
+                );
               },
             },
           ]}
