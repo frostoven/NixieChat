@@ -1,0 +1,7 @@
+const tgramLookup = {
+  //
+};
+
+export {
+  tgramLookup,
+};
