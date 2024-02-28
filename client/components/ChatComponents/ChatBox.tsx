@@ -7,6 +7,8 @@ import {
 } from '../../storage/EncryptedAccountStorage';
 import { EmoticonWindow } from './EmoticonWindow';
 
+const ICON_PATH = 'assets/icons';
+
 const accountStorage = new EncryptedAccountStorage();
 
 // TODO: Move text box themes to a central point.
@@ -148,7 +150,7 @@ class ChatBox extends React.Component<Props> {
         if (this.textBoxRef.current) {
           this.textBoxRef.current.focus();
         }
-      })
+      });
     }
     else {
       this.props.onCloseChat();
@@ -249,7 +251,7 @@ class ChatBox extends React.Component<Props> {
             onClick={this.toggleEmoticonWindow}
           >
             <ChatBoxButton
-              icon="smile outline"
+              fileName={`${ICON_PATH}/smile.webp`}
             />
           </div>
           <div className="chat-box-column" style={buttonStyle}>
@@ -262,12 +264,12 @@ class ChatBox extends React.Component<Props> {
           </div>
           <div className="chat-box-column" style={buttonStyle}>
             <ChatBoxButton
-              icon="attach"
+              fileName={`${ICON_PATH}/clip.webp`}
             />
           </div>
           <div className="chat-box-column" style={buttonStyle}>
             <ChatBoxButton
-              icon="microphone"
+              fileName={`${ICON_PATH}/send.webp`}
             />
           </div>
         </div>

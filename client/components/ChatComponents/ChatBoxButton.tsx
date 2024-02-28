@@ -5,7 +5,9 @@ import { Icon, SemanticICONS } from 'semantic-ui-react';
 const baseStyle: React.CSSProperties = {
   cursor: 'pointer',
   margin: 11,
+  marginBottom: 7,
   fontWeight: 'revert',
+  width: 22,
 };
 
 const darkModeStyle: React.CSSProperties = {
@@ -20,8 +22,12 @@ const lightModeStyle: React.CSSProperties = {
   backgroundColor: '#fdfdfd',
 };
 
+const imgStyle: React.CSSProperties = {
+  width: 22,
+};
+
 interface Props {
-  icon: SemanticICONS,
+  fileName: string,
 }
 
 class ChatBoxButton extends React.Component<Props> {
@@ -30,7 +36,7 @@ class ChatBoxButton extends React.Component<Props> {
     const style = darkMode ? darkModeStyle : lightModeStyle;
     return (
       <div style={style}>
-        <Icon size="large" name={this.props.icon}/>
+        <img alt='' src={`${this.props.fileName}`} style={imgStyle}/>
       </div>
     );
   }
