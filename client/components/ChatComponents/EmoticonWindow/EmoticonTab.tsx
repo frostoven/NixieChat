@@ -13,11 +13,11 @@ const containerStyle: React.CSSProperties = {
 };
 
 const searchContainerStyle: React.CSSProperties = {
-  minWidth: 380,
   overflow: 'auto hidden',
   marginTop: -6,
   paddingLeft: 8,
   paddingRight: 8,
+  whiteSpace: 'nowrap',
 };
 
 const emoSearchStyle: React.CSSProperties = {
@@ -59,9 +59,11 @@ const emoticonStyle: React.CSSProperties = {
 };
 
 const chooserStyle: React.CSSProperties = {
-  float: 'right',
-  marginTop: -6,
-  marginBottom: -6,
+  display: 'inline-block',
+  marginTop: -5,
+  marginBottom: -5,
+  verticalAlign: 'middle',
+  paddingLeft: 22,
 };
 
 const chooserLabelStyle: React.CSSProperties = {
@@ -171,7 +173,6 @@ class EmoticonTab extends React.Component {
             fileName={`${ICON_PATH}/cog.webp`}
             style={toneSettingsStyle}
           />
-
           <div style={chooserStyle}>
             <div style={chooserLabelStyle}>Style:</div>
             <ChatBoxButton
