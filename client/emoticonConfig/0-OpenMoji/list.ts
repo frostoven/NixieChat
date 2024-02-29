@@ -2,6 +2,8 @@ import { name } from '../name';
 
 // TODO: add unit tests that check for duplicate entries.
 const openMojiList: number[] = [
+  name.thumbsUp,
+  name.thumbsDown,
   name.faceSlightlySmiling,
   name.faceLoudlyCrying,
   name.faceTearsOfJoy,

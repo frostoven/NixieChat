@@ -1,6 +1,8 @@
 import { name } from '../name';
 
 const notoList: number[] = [
+  name.thumbsUp,
+  name.thumbsDown,
   name.faceSlightlySmiling,
   name.faceSmilingTear,
   name.faceLoudlyCrying,
