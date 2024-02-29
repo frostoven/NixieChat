@@ -109,6 +109,7 @@ const dropdownRotatedTextStyle: React.CSSProperties = {
   left: -10,
   width: 0,
   textWrap: 'wrap',
+  whiteSpace: 'pre-line',
 };
 
 const chooserItemStyle: React.CSSProperties = {
