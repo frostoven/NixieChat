@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AccountChooser } from './AccountChooser';
-import { AccountCreator } from './AccrountCreator';
+import { AccountCreator } from './AccountCreator';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Button } from 'semantic-ui-react';
 import { NixieStorage } from '../../storage/NixieStorage';

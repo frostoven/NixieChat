@@ -11,7 +11,7 @@ import { Icon, Message, Segment } from 'semantic-ui-react';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { ContextualHelp } from '../Generic/ContextualHelp';
 import { PasswordChooser } from '../Generic/PasswordChooser';
-import { AccountCreator } from './AccrountCreator';
+import { AccountCreator } from './AccountCreator';
 
 const errorStyle: React.CSSProperties = {
   padding: 10,
