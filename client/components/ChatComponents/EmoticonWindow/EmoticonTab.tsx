@@ -41,6 +41,7 @@ const containerStyle: React.CSSProperties = {
 
 const searchContainerStyle: React.CSSProperties = {
   marginTop: -6,
+  paddingTop: 4,
   paddingLeft: 8,
   paddingRight: 8,
   whiteSpace: 'nowrap',
