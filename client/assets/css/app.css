@@ -127,6 +127,7 @@
   .column {
     margin-right: 15px;
   }
+
   .mobile-margin-fix {
     margin-left: 15px;
     margin-right: 0;
@@ -148,4 +149,35 @@
 .ui.inverted.bottom.attached.segment.active.tab {
   border-radius: 0;
   border: none;
+}
+
+/* Default is crazy thick. Let's be a bit more.. gentle. */
+.menu.transition.visible .item {
+  height: 24px;
+  padding: 18px !important;
+}
+
+/* Unreadably dark menu headings - lighten it up a bit. */
+.menu.transition.visible .header {
+  color: #cdcdcd;
+}
+
+/* Add a light mode for dropdowns (Semantic has no inverted built in) */
+/* ------------------------------------------------------------------ */
+
+.ui.button.labeled.dropdown.icon.dropdown-light-mode {
+  background-color: #efefef;
+  color: #000;
+  border: thin solid #747474 !important;
+}
+
+.dropdown-light-mode .menu.transition.visible {
+  color: #000 !important;
+  background-color: #f8f8f8 !important;
+  border: thin solid #d7d7d7;
+}
+
+.dropdown-light-mode .menu.transition.visible .header,
+.dropdown-light-mode .menu.transition.visible .item {
+  color: #2d2d2d !important;
 }
