@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import PropTypes from 'prop-types';
 import './modal';
 import { RootNode } from './RootNode';
+import { Dropdown } from 'semantic-ui-react';
 
 if (
   location.protocol === 'http:' &&
@@ -21,6 +23,14 @@ if (
     ),
   });
 }
+
+// This prop-type is incorrectly defined in the library. We override it here to
+// prevent invalid console errors.
+Dropdown.propTypes.text = PropTypes.oneOfType([
+  PropTypes.string,
+  PropTypes.element,
+]);
+console.log(Dropdown.propTypes);
 
 async function boot() {
   const domContainer = document.querySelector('#react-element');
