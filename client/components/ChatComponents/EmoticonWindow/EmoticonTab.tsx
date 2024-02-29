@@ -1,11 +1,38 @@
 import React from 'react';
 import { Settings } from '../../../storage/cacheFrontends/Settings';
-import { ChatBoxButton } from '../ChatBoxButton';
 import { getAllStyles } from '../../../emoticonConfig';
 import { Emoticon } from '../Emoticon';
+import {
+  Dropdown, DropdownDivider,
+  DropdownHeader,
+  DropdownItem, DropdownItemProps,
+  DropdownMenu,
+} from 'semantic-ui-react';
 
-const ICON_PATH = 'assets/icons';
+const TONE_PREFIX = 'assets/emo/1-Noto/emoji_u';
 const MAX_EMOTICONS_PER_ROW = 9;
+
+// TODO: Find a way to make this more generic. These fucking icon size
+//  differences drive me insane.
+// Used to squeeze icon previews into small spaces. Not used for  emoticon
+// chooserStyle lists.
+const iconPreviewConfig = [
+  {
+    src: 'assets/emo/0-OpenMoji/1F642.webp',
+    width: 28,
+    marginTop: -14,
+    marginRight: -19,
+    marginLeft: -19,
+    marginBottom: -3,
+  },
+  {
+    src: 'assets/emo/1-Noto/emoji_u1f642.webp',
+    width: 21,
+    marginTop: -10,
+    marginRight: -14,
+    marginLeft: -15,
+  },
+];
 
 const containerStyle: React.CSSProperties = {
   position: 'relative',
@@ -13,7 +40,6 @@ const containerStyle: React.CSSProperties = {
 };
 
 const searchContainerStyle: React.CSSProperties = {
-  overflow: 'auto hidden',
   marginTop: -6,
   paddingLeft: 8,
   paddingRight: 8,
@@ -24,12 +50,6 @@ const emoSearchStyle: React.CSSProperties = {
   display: 'inline-block',
   padding: 4,
   maxWidth: 170,
-};
-
-const toneSettingsStyle: React.CSSProperties = {
-  display: 'inline-block',
-  marginTop: 8,
-  verticalAlign: 'middle',
 };
 
 const emoticonContainerStyle: React.CSSProperties = {
@@ -58,17 +78,47 @@ const emoticonStyle: React.CSSProperties = {
   width: 40,
 };
 
-const chooserStyle: React.CSSProperties = {
-  display: 'inline-block',
-  marginTop: -5,
-  marginBottom: -5,
-  verticalAlign: 'middle',
-  paddingLeft: 22,
+const toneStyle = {
+  marginLeft: 4,
+  marginRight: 4,
+  marginTop: 4,
+  width: 21,
 };
 
-const chooserLabelStyle: React.CSSProperties = {
+const chooserStyle: React.CSSProperties = {
   display: 'inline-block',
-  marginTop: 15,
+  marginTop: -7,
+  marginBottom: -5,
+  verticalAlign: 'middle',
+  paddingLeft: 8,
+};
+
+const chooserDropdownStyle: React.CSSProperties = {
+  height: 29,
+};
+
+const dropdownMenuStyle: React.CSSProperties = {
+  marginLeft: -87,
+  paddingBottom: 2,
+};
+
+const dropdownRotatedTextStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: 25,
+  left: -10,
+  width: 0,
+  textWrap: 'wrap',
+};
+
+const chooserItemStyle: React.CSSProperties = {
+  marginLeft: 28,
+};
+
+const chooserItemTextStyle: React.CSSProperties = {
+  paddingLeft: 4,
+  display: 'inline-block',
+  marginLeft: 28,
+  marginTop: -7,
   verticalAlign: 'top',
 };
 
@@ -90,7 +140,7 @@ class EmoticonTab extends React.Component {
     this.forceUpdate();
   };
 
-  handleSearch = (event) => {
+  handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     this.setState({
       searchText: event.target.value,
     });
@@ -99,9 +149,7 @@ class EmoticonTab extends React.Component {
   drawEmoticonList = () => {
     const activeStyle = this.state.activeStyle;
     const style = getAllStyles()[activeStyle];
-    const {
-      availableEmoticons, toneSupport, dir, filePrefix, lookupTable,
-    } = style;
+    const { availableEmoticons } = style;
 
     const viewportWidth = (window.innerWidth / window.devicePixelRatio) * 0.35;
     const itemsPerRow = Math.min(
@@ -113,6 +161,9 @@ class EmoticonTab extends React.Component {
     for (let i = 0, len = availableEmoticons.length; i < len; i++) {
       const unicode: number = availableEmoticons[i];
       currentLine.push(
+        // TODO: for tone change, consider changing the emoticon key. This
+        //  allows the Emoticon component to ignore all non-tone-change
+        //  renders.
         <div key={unicode} style={emoticonStyle}>
           <Emoticon
             key={`${activeStyle}-${unicode}`}
@@ -149,16 +200,33 @@ class EmoticonTab extends React.Component {
     return result;
   };
 
-  handleStyleChange = (number: number) => {
-    Settings.setActiveEmoticonStyle(number).catch(console.error);
+  handleStyleChange = (_: any, result: DropdownItemProps) => {
+    Settings.setActiveEmoticonStyle(result.value).catch(console.error);
     this.setState({
-      activeStyle: number,
+      activeStyle: result.value,
     });
+  };
+
+  getStyleIconPreview = (styleIndex: number) => {
+    const previewInfo = iconPreviewConfig[styleIndex];
+    return (
+      <img
+        alt=""
+        src={previewInfo.src}
+        style={{
+          width: previewInfo.width,
+          marginTop: previewInfo.marginTop,
+          marginRight: previewInfo.marginRight,
+          marginLeft: previewInfo.marginLeft,
+          marginBottom: previewInfo.marginBottom,
+        }}
+      />
+    );
   };
 
   render() {
     const darkMode = Settings.isDarkModeEnabled();
-    const { searchText } = this.state;
+    const { searchText, activeStyle } = this.state;
     return (
       <div style={containerStyle}>
         <div style={searchContainerStyle}>
@@ -169,24 +237,75 @@ class EmoticonTab extends React.Component {
             style={emoSearchStyle}
             onChange={this.handleSearch}
           />
-          <ChatBoxButton
-            fileName={`${ICON_PATH}/cog.webp`}
-            style={toneSettingsStyle}
-          />
           <div style={chooserStyle}>
-            <div style={chooserLabelStyle}>Style:</div>
-            <ChatBoxButton
-              fileName={'assets/emo/0-OpenMoji/1F642.webp'}
-              width={28}
-              style={{ verticalAlign: 'text-bottom' }}
-              onClick={() => this.handleStyleChange(0)}
-            />
-            <ChatBoxButton
-              fileName={'assets/emo/1-Noto/emoji_u1f642.webp'}
-              width={23}
-              style={{ verticalAlign: 'text-bottom', marginBottom: 9 }}
-              onClick={() => this.handleStyleChange(1)}
-            />
+            <Dropdown
+              button
+              className={`icon ${darkMode ? '' : 'dropdown-light-mode'}`}
+              labeled
+              labelPosition={'right'}
+              // @ts-ignore
+              text={this.getStyleIconPreview(activeStyle)}
+              style={chooserDropdownStyle}
+            >
+              <DropdownMenu style={dropdownMenuStyle}>
+                <img
+                  src={`${TONE_PREFIX}1f44d.webp`}
+                  style={toneStyle} alt=""
+                />
+                <img
+                  src={`${TONE_PREFIX}1f44d_1f3fb.webp`}
+                  style={toneStyle} alt=""
+                />
+                <img
+                  src={`${TONE_PREFIX}1f44d_1f3fc.webp`}
+                  style={toneStyle} alt=""
+                />
+                <img
+                  src={`${TONE_PREFIX}1f44d_1f3fd.webp`}
+                  style={toneStyle} alt=""
+                />
+                <img
+                  src={`${TONE_PREFIX}1f44d_1f3fe.webp`}
+                  style={toneStyle} alt=""
+                />
+                <img
+                  src={`${TONE_PREFIX}1f44d_1f3ff.webp`}
+                  style={toneStyle} alt=""
+                />
+
+                <DropdownDivider/>
+
+                <DropdownHeader
+                  content="s t y l e"
+                  style={dropdownRotatedTextStyle}
+                />
+
+                <DropdownItem
+                  key={'OpenMoji'}
+                  value={0}
+                  style={chooserItemStyle}
+                  onClick={this.handleStyleChange}
+                >
+                  {this.getStyleIconPreview(0)}
+                  <div style={chooserItemTextStyle}>
+                    OpenMoji
+                  </div>
+                </DropdownItem>
+
+                <DropdownItem
+                  key={'Noto'}
+                  value={1}
+                  style={chooserItemStyle}
+                  onClick={this.handleStyleChange}
+                >
+                  {this.getStyleIconPreview(1)}
+                  <div style={chooserItemTextStyle}>
+                    Noto
+                  </div>
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+
           </div>
         </div>
         <div style={emoticonContainerStyle}>
