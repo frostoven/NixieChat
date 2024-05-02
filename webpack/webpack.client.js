@@ -6,6 +6,7 @@
 //  Client bundle                                                            //
 // ========================================================================= //
 
+const webpack = require('webpack');
 const dynamicDatabaseImport = require('./nixiePlugins/dynamicDatabaseImport');
 const informativeTitleBar = require('./nixiePlugins/informativeTitleBar');
 
@@ -84,9 +85,19 @@ module.exports = {
     dynamicDatabaseImport(),
     // Update the terminal title with build info.
     informativeTitleBar(),
+    // Make Buffer globally available for libs that assume they're server-side.
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+    }),
   ],
 
   resolve: {
+    // Polyfills.
+    fallback: {
+      'crypto': require.resolve('crypto-browserify'),
+      'stream': false,
+      'buffer': require.resolve('buffer/'),
+    },
     extensions: [ '.js', '.json', '.jsx', '.ts', '.tsx' ],
   },
 };
