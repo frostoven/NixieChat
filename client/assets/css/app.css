@@ -181,3 +181,21 @@
 .dropdown-light-mode .menu.transition.visible .item {
   color: #2d2d2d !important;
 }
+
+/* NixieChat-specific stuff */
+/* =================================== */
+
+/* Hide border on active contentEditiable. */
+.advanced-editable:read-write:focus {
+  outline: none;
+}
+
+/* contentEditiables don't support placeholders by default. This enables it. */
+.advanced-editable:empty::before {
+  content: attr(placeholder);
+  color: #555;
+}
+
+.advanced-editable:empty:focus::before {
+  content: "|";
+}

@@ -13,34 +13,52 @@ const metadataStyle: React.CSSProperties = {
 interface Props {
   unicode: number,
   styleManifest: StyleManifest,
+  onClick: (unicode: number, styleManifest: StyleManifest, path: string) => void,
 }
 
 class Emoticon extends React.Component<Props> {
-  public shouldComponentUpdate(): boolean {
-    return false;
-  }
+  path: string;
 
-  render() {
-    const { unicode, styleManifest } = this.props;
+  constructor(props: Props | Readonly<Props>) {
+    super(props);
+
+    const { unicode, styleManifest } = props;
 
     // When concatenating with a few hundred strings, even fast computers start
     // to crawl. This is a *far* faster method of string concatenation.
     const caseFn = styleManifest.lowerCase ? 'toLowerCase' : 'toUpperCase';
-    const path = [
+    this.path = [
       EMOTION_BASE, styleManifest.dir, '/', styleManifest.filePrefix || '',
       unicode.toString(16)[caseFn](), '.webp',
     ].join('');
+  }
+
+  shouldComponentUpdate(): boolean {
+    // Always false means never re-render. This is intentional - these
+    // components exist in the thousands, if the host component was a new
+    // version it should change the key.
+    return false;
+  }
+
+  handleClick = () => {
+    this.props.onClick(
+      this.props.unicode,
+      this.props.styleManifest,
+      this.path,
+    );
+  };
+
+  render() {
+    const { unicode, styleManifest } = this.props;
 
     return (
-      <span>
+      <span onClick={this.handleClick}>
         <img
           alt={String.fromCharCode(unicode)}
-          src={path}
+          src={this.path}
           style={{
             cursor: 'pointer',
-            width: styleManifest.size,
-            // marginBottom: styleManifest.margin,
-            margin: styleManifest.margin,
+            width: styleManifest.previewSize,
           }}
         />
 

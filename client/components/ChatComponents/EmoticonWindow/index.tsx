@@ -2,6 +2,7 @@ import React from 'react';
 import { Settings } from '../../../storage/cacheFrontends/Settings';
 import { Tab, TabPane, TabProps } from 'semantic-ui-react';
 import { EmoticonTab } from './EmoticonTab';
+import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
 
 const tabStyle: React.CSSProperties = {
   height: '25vh',
@@ -10,7 +11,13 @@ const tabStyle: React.CSSProperties = {
   paddingTop: 8,
 };
 
-class EmoticonWindow extends React.Component {
+interface Props {
+  onInsertEmoticon: (
+    unicode: number, styleManifest: StyleManifest, path: string,
+  ) => void,
+}
+
+class EmoticonWindow extends React.Component<Props> {
   state = {
     activeTab: Settings.lastEmoticonTab(),
   };
@@ -50,7 +57,9 @@ class EmoticonWindow extends React.Component {
                     inverted={!darkMode}
                     style={tabStyle}
                   >
-                    <EmoticonTab/>
+                    <EmoticonTab
+                      onInsertEmoticon={this.props.onInsertEmoticon}
+                    />
                   </TabPane>
                 );
               },

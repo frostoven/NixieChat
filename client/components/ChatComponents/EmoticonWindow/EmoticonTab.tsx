@@ -8,6 +8,7 @@ import {
   DropdownItem, DropdownItemProps,
   DropdownMenu,
 } from 'semantic-ui-react';
+import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
 
 const TONE_PREFIX = 'assets/emo/1-Noto/emoji_u';
 const MAX_EMOTICONS_PER_ROW = 9;
@@ -124,7 +125,13 @@ const chooserItemTextStyle: React.CSSProperties = {
   verticalAlign: 'top',
 };
 
-class EmoticonTab extends React.Component {
+interface Props {
+  onInsertEmoticon: (
+    unicode: number, styleManifest: StyleManifest, path: string,
+  ) => void,
+}
+
+class EmoticonTab extends React.Component<Props> {
   state = {
     activeStyle: Settings.lastActiveEmoticonStyle(),
     searchText: '',
@@ -146,6 +153,12 @@ class EmoticonTab extends React.Component {
     this.setState({
       searchText: event.target.value,
     });
+  };
+
+  handleEmoticonClick = (
+    unicode: number, styleManifest: StyleManifest, path: string,
+  ) => {
+    this.props.onInsertEmoticon(unicode, styleManifest, path);
   };
 
   drawEmoticonList = () => {
@@ -171,6 +184,7 @@ class EmoticonTab extends React.Component {
             key={`${activeStyle}-${unicode}`}
             unicode={unicode}
             styleManifest={style}
+            onClick={this.handleEmoticonClick}
           />
         </div>,
       );
@@ -244,7 +258,6 @@ class EmoticonTab extends React.Component {
               button
               className={`icon ${darkMode ? '' : 'dropdown-light-mode'}`}
               labeled
-              labelPosition={'right'}
               // @ts-ignore
               text={this.getStyleIconPreview(activeStyle)}
               style={chooserDropdownStyle}
