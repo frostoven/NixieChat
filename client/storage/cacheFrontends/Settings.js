@@ -98,6 +98,24 @@ class Settings {
     cache.lastEmoticonStyle = value;
     await storage.writeSettings(cache);
   }
+
+  // Used to track the last tab the user had open in the emoticon window.
+  static richInputEnabled() {
+    const cache = storage.settingsCache || {};
+    if (typeof cache.richInputEnabled === 'undefined') {
+      return true;
+    }
+    else {
+      return !!cache.richInputEnabled;
+    }
+  }
+
+  // Used to track the last tab the user had open in the emoticon window.
+  static async setRichInputEnabled(value) {
+    const cache = storage.settingsCache || {};
+    cache.richInputEnabled = !!value;
+    await storage.writeSettings(cache);
+  }
 }
 
 window.$nixieDebugUtils.settings = Settings;
