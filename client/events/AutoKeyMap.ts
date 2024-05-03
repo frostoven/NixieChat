@@ -37,8 +37,12 @@ let totalInstances = 0;
  *     console.log('->', code); // 'Enter'
  *   };
  *
- *   handleCancellation = ({ code }) => {
+ *   handleCancellation = ({ code }, allowBubbling) => {
  *     console.log('->', code); // 'Escape'
+ *
+ *     // We may optionally allow bubbling by calling the second argument as a
+ *     // function.
+ *     allowBubbling();
  *   };
  */
 class AutoKeyMap {
@@ -118,9 +122,16 @@ class AutoKeyMap {
 
     const binding = this._keyMap[event.code];
     if (typeof binding === 'function') {
-      event.preventDefault();
-      event.stopPropagation();
-      binding(event);
+      let allowBubbling = false;
+      binding(event, (allow = true) => {
+        // Allow the user to request bubbling.
+        allowBubbling = allow;
+      });
+
+      if (!allowBubbling) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
     }
   };
 
