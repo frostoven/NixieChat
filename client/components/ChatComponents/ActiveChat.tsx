@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes, { any } from 'prop-types';
+import PropTypes from 'prop-types';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import {
   EncryptedAccountStorage,
@@ -87,7 +87,8 @@ class ActiveChat extends React.Component<Props> {
   private messageBatches: Message[][] = [];
 
   // === Note: Does not yet send messages. === //
-  onSendMessage = (plaintext: string) => {
+  onSendMessage = (plaintext: string, possiblyHasFormatting: boolean) => {
+    console.log(`-> Sending "${plaintext}" (has formatting? ${possiblyHasFormatting})`);
     const message = new Message();
     message.time = Date.now();
     // TODO: Add markdown processor.
@@ -115,7 +116,7 @@ class ActiveChat extends React.Component<Props> {
     });
   };
 
-  animateScrollToBottom = (ref: HTMLElement, delta) => {
+  animateScrollToBottom = (ref: HTMLElement, delta: number) => {
     const scrollAmount = Math.ceil((
       ref.scrollHeight - (ref.scrollTop + ref.offsetHeight)
     ) * delta);

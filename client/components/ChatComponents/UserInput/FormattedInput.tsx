@@ -53,6 +53,7 @@ interface Props {
   accountName: string,
   messageDetachableId: string,
   onSendMessage: Function,
+  getSendTrigger: Function,
   onBack: Function,
 }
 
@@ -68,6 +69,12 @@ class FormattedInput extends React.Component<Props> {
   private draftTimer: NodeJS.Timer | number = 0;
 
   draft = new DraftIo(this.props.accountName, this.props.messageDetachableId);
+
+  constructor(props: Props | Readonly<Props>) {
+    super(props);
+    // Allow the parent to trigger a message send via external means.
+    props.getSendTrigger(this.sendMessage);
+  }
 
   componentDidMount() {
     // Update caret control instance.
@@ -111,6 +118,13 @@ class FormattedInput extends React.Component<Props> {
 
     // Save drafts when the tab / application exits.
     window.addEventListener('beforeunload', this.saveOnExit);
+
+    setTimeout(() => {
+      // For some reason Chrome doesn't update properly unless we wait a bit.
+      // Note that this recalc isn't critical; typing some text will auto-fix
+      // this problem anyway, it's more for visual pretties / consistency.
+      this.recalculateSize();
+    }, 100);
   }
 
   componentWillUnmount() {
@@ -133,14 +147,9 @@ class FormattedInput extends React.Component<Props> {
   }
 
   public shouldComponentUpdate(nextProps: Readonly<Props>): boolean {
-    // If this starts triggering then it's possible we've made some parent
-    // process inefficient, so I'm putting this here so that we can investigate
-    // if this warning starts triggering.
-    if (this.props.textBoxRef === nextProps.textBoxRef) {
-      console.warn('Refusing to rerender FormattedInput: ref unchanged.');
-      return false;
-    }
-    return true;
+    // Unless the textBoxRef has changed, there's no reason to update this
+    // component.
+    return this.props.textBoxRef !== nextProps.textBoxRef;
   }
 
   saveOnExit = () => {

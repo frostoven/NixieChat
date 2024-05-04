@@ -61,6 +61,13 @@ interface Props {
 class ChatBox extends React.Component<Props> {
   private readonly textBoxRef: React.RefObject<any>;
   private caretControl = new CaretControl();
+  // Hints that the text may contain emoticons or other formatted text. The
+  // reason we indicate this is so that the recipient doesn't waste CPU
+  // manually parsing a message when all we have is a bunch of plaintext.
+  private possiblyHasFormatting = false;
+  // This is overwritten by getSendTrigger in the render function.
+  private requestInputMessageSend: Function = () => {
+  };
 
   state = {
     showEmoticonWindow: false,
@@ -101,6 +108,7 @@ class ChatBox extends React.Component<Props> {
       return;
     }
 
+    this.possiblyHasFormatting = true;
     if (this.textBoxRef.current) {
       const emo = generateEmoticon(
         unicode,
@@ -112,6 +120,17 @@ class ChatBox extends React.Component<Props> {
     else {
       console.error('ref not ready');
     }
+  };
+
+  onSendMessage = (text: string) => {
+    this.props.onSendMessage(text, this.possiblyHasFormatting);
+    this.possiblyHasFormatting = false;
+  };
+
+  // Allows us to force the input component to trigger a message send via
+  // external means (such as an unrelated button component).
+  saveSendTrigger = (callback: Function) => {
+    this.requestInputMessageSend = callback;
   };
 
   render() {
@@ -145,7 +164,8 @@ class ChatBox extends React.Component<Props> {
               caretControl={this.caretControl}
               accountName={this.props.accountName}
               messageDetachableId={this.props.messageDetachableId}
-              onSendMessage={this.props.onSendMessage}
+              onSendMessage={this.onSendMessage}
+              getSendTrigger={this.saveSendTrigger}
               onBack={this.onBack}
             />
           </div>
@@ -157,6 +177,7 @@ class ChatBox extends React.Component<Props> {
           <div className="chat-box-column" style={buttonStyle}>
             <ChatBoxButton
               fileName={`${ICON_PATH}/send.webp`}
+              onClick={() => this.requestInputMessageSend()}
             />
           </div>
         </div>

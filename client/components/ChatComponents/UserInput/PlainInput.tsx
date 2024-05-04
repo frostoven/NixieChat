@@ -48,6 +48,7 @@ interface Props {
   accountName: string,
   messageDetachableId: string,
   onSendMessage: Function,
+  getSendTrigger: Function,
   onBack: Function,
 }
 
@@ -69,6 +70,12 @@ class PlainInput extends React.Component<Props> {
 
   draft = new DraftIo(this.props.accountName, this.props.messageDetachableId);
 
+  constructor(props: Props | Readonly<Props>) {
+    super(props);
+    // Allow the parent to trigger a message send via external means.
+    props.getSendTrigger(this.sendMessage);
+  }
+
   componentDidMount() {
     // Set up keybindings.
     this.autoKeyMap.bindKeys({
@@ -88,6 +95,9 @@ class PlainInput extends React.Component<Props> {
 
     // Save drafts when the tab / application exits.
     window.addEventListener('beforeunload', this.saveOnExit);
+
+    // Allow the parent to trigger a message send via external means.
+    this.props.getSendTrigger(() => this.sendMessage);
 
     setTimeout(() => {
       // For some reason Chrome doesn't update properly unless we wait a bit.

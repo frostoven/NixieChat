@@ -30,7 +30,7 @@ interface Props {
   fileName: string,
   style?: React.CSSProperties,
   width?: number,
-  onClick?: () => void,
+  onClick?: Function | any,
 }
 
 class ChatBoxButton extends React.Component<Props> {
@@ -52,7 +52,7 @@ class ChatBoxButton extends React.Component<Props> {
     }
 
     return (
-      <div style={containerStyle} onClick={onClick ? onClick : undefined}>
+      <div style={containerStyle} onClick={onClick ? onClick : null}>
         <img alt="" src={`${this.props.fileName}`} style={buttonStyle}/>
       </div>
     );
