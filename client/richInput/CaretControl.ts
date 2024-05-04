@@ -33,12 +33,12 @@ class CaretControl {
    */
   recordSelectionData() {
     if (!this._parent) {
-      return null;
+      return;
     }
 
     const selection = window.getSelection();
     if (document.activeElement !== this._parent || !selection) {
-      return null;
+      return;
     }
 
     this._lastSelectionOffset = selection.focusOffset;
