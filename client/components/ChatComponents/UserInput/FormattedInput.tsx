@@ -96,12 +96,17 @@ class FormattedInput extends React.Component<Props> {
       this.draft.loadDraft((value: string) => {
         textArea.textContent = value;
       });
-      textArea.onblur = () => this.draft.saveDraft(textArea.textContent);
+      textArea.addEventListener('blur', () => {
+        this.draft.saveDraft(textArea.textContent);
+      });
       this.draftTimer = setInterval(() => this.draft.saveDraft(textArea), 60000);
 
       // Manually autofocus. Needed for contentEditable, which does not support
       // autofocus.
       textArea.focus();
+
+      // Removes unrecognized formatting from the specified content-editable.
+      textArea.addEventListener('paste', this.handlePaste);
     }
 
     // Save drafts when the tab / application exits.
@@ -127,6 +132,17 @@ class FormattedInput extends React.Component<Props> {
     window.removeEventListener('beforeunload', this.saveOnExit);
   }
 
+  public shouldComponentUpdate(nextProps: Readonly<Props>): boolean {
+    // If this starts triggering then it's possible we've made some parent
+    // process inefficient, so I'm putting this here so that we can investigate
+    // if this warning starts triggering.
+    if (this.props.textBoxRef === nextProps.textBoxRef) {
+      console.warn('Refusing to rerender FormattedInput: ref unchanged.');
+      return false;
+    }
+    return true;
+  }
+
   saveOnExit = () => {
     // Store draft of the current text so the user does not lose it.
     const textArea: HTMLDivElement = this.props.textBoxRef.current;
@@ -135,17 +151,33 @@ class FormattedInput extends React.Component<Props> {
     }
   };
 
+  // Due to the fact that Firefox does not support plaintext-only
+  // content-editable fields, we need to manually strip out garbage that
+  // comes randomly pasted sources.
+  // TODO: Correctly deal with emoticon metadata.
+  handlePaste = (event: ClipboardEvent) => {
+    console.log('--> pasting');
+    const textArea: HTMLDivElement = this.props.textBoxRef.current;
+    if (!textArea) {
+      // Return before doing preventDefault() so that users would hopefully
+      // still have some pasting functionality if we ever introduced bugs.
+      return;
+    }
+
+    event.preventDefault();
+    const text = event.clipboardData?.getData('text') || '';
+    this.props.caretControl.insertNodeAtCaret(document.createTextNode(text));
+    this.recalculateSize();
+  };
+
   sendMessage = () => {
     const textArea: HTMLDivElement = this.props.textBoxRef.current;
     if (!textArea) {
       return;
     }
 
-    console.log('AutoKeyMap.isShiftDown?', AutoKeyMap.isShiftDown);
-
     if (AutoKeyMap.isShiftDown) {
-      console.log('=> FormattedInput 239');
-      this.props.caretControl.insertElementAtCaret(document.createElement('br'));
+      this.props.caretControl.insertNodeAtCaret(document.createElement('br'));
       // Sometimes we get cucked and apparently nothing happens. Force.
       this.appendLineBreakIfNeeded();
     }

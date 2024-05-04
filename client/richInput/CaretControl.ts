@@ -63,20 +63,23 @@ class CaretControl {
    * current element position.
    * @param element
    */
-  insertElementAtCaret(element: HTMLElement) {
+  insertNodeAtCaret(element: HTMLElement | Node) {
     this.restoreCaretPosition(true);
 
     let targetNode: Node;
     const lastSelectedNode = this._lastSelectedNode;
-    if (!lastSelectedNode || !this._parent) {
-      console.warn(
-        '[insertElementAtCaret] Failed; ' +
-        'lastSelectedNode =', lastSelectedNode,
-        'parent =', this._parent,
-      );
+    if (!this._parent) {
+      console.error('[insertNodeAtCaret] Cannot insert node: Parent is not set.');
+      return;
+    }
+    if (!lastSelectedNode) {
+      // This happens if the user inserts something like an emoticon before
+      // having clicked the chat box.
+      this._parent.append(element);
       return;
     }
 
+    // Check what the caret was last resting on.
     if (lastSelectedNode.nodeType === Node.TEXT_NODE) {
       const textNode = this._lastSelectedNode as Text;
       if (!textNode) {

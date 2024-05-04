@@ -107,8 +107,7 @@ class ChatBox extends React.Component<Props> {
         path,
         styleManifest,
       );
-      console.log('-> emoticon:', emo);
-      this.caretControl.insertElementAtCaret(emo);
+      this.caretControl.insertNodeAtCaret(emo);
     }
     else {
       console.error('ref not ready');
