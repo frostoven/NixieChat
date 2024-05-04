@@ -64,10 +64,6 @@ class PlainInput extends React.Component<Props> {
   private autoKeyMap = new AutoKeyMap();
   private draftTimer: NodeJS.Timer | number = 0;
 
-  state = {
-    showEmoticonWindow: false,
-  };
-
   draft = new DraftIo(this.props.accountName, this.props.messageDetachableId);
 
   constructor(props: Props | Readonly<Props>) {

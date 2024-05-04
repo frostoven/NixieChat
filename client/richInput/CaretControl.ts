@@ -87,7 +87,6 @@ class CaretControl {
       }
       const rightSide = textNode.splitText(this._lastSelectionOffset);
       const leftSide = rightSide.previousSibling as Text;
-      console.log('=>', { leftSide, rightSide });
       try {
         this._parent.replaceChild(textNode, leftSide);
       }
