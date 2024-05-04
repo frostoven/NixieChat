@@ -26,7 +26,12 @@ const textBoxStyle: React.CSSProperties = {
   borderRadius: 'none',
   paddingBottom: 10,
   overflowY: 'auto',
-  whiteSpace: 'pre',
+  whiteSpace: 'pre-wrap',
+  // TODO: Consider giving the user the option to switch this to
+  //  `overflow-wrap: normal`, maybe call the option "scroll on very long
+  //  lines" or something. While most lines will still break, this option
+  //  allows really long lines to scroll horizontally while still breaking
+  //  everything else. `anywhere` aligns more with other chat apps.
   overflowWrap: 'anywhere',
 };
 
@@ -194,9 +199,6 @@ class FormattedInput extends React.Component<Props> {
     // const themeStyle = darkMode ? containerStyleDark : containerStyleLight;
 
     return (
-      // TODO: Unlike with TextArea I can't get contentEditable to word-break
-      //  on very long lines, causing it to push the right-side buttons out of
-      //  view. Might need to calculate a max-with on render and/or resize.
       <div
         className="advanced-editable"
         ref={this.props.textBoxRef}

@@ -16,6 +16,7 @@
   order: 0;
 }
 
+/* Chat area */
 .chat-box-column:nth-child(2) {
   display: block;
   flex-grow: 1;
@@ -23,6 +24,7 @@
   flex-basis: auto;
   align-self: auto;
   order: 0;
+  overflow-x: hidden;
 }
 
 .chat-box-column:nth-child(3) {
