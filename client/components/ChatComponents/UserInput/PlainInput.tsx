@@ -16,7 +16,7 @@ const lightTheme: React.CSSProperties = {
 
 const textBoxStyle: React.CSSProperties = {
   textAlign: 'left',
-  width: '100%',
+  width: '97%',
   // This is the starting value only. This is auto-calculated as the user
   // enters text.
   height: 'auto',
@@ -88,6 +88,13 @@ class PlainInput extends React.Component<Props> {
 
     // Save drafts when the tab / application exits.
     window.addEventListener('beforeunload', this.saveOnExit);
+
+    setTimeout(() => {
+      // For some reason Chrome doesn't update properly unless we wait a bit.
+      // Note that this recalc isn't critical; typing some text will auto-fix
+      // this problem anyway, it's more for visual pretties / consistency.
+      this.recalculateSize();
+    }, 100);
   }
 
   componentWillUnmount() {
@@ -158,6 +165,7 @@ class PlainInput extends React.Component<Props> {
 
     return (
       <textarea
+        className="plain-editable"
         ref={this.props.textBoxRef}
         autoFocus
         style={textBoxTheme}

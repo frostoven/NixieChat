@@ -196,6 +196,20 @@
   color: #555;
 }
 
-.advanced-editable:empty:focus::before {
-  content: "|";
+/* Probably no longer need this; can fake a caret on blurred inputs. */
+/*.advanced-editable:empty:not(:focus)::before {*/
+/*  content: "|";*/
+/*}*/
+
+/* Thin out the scrollbars for browsers that support scrollbar-width. */
+/* TODO: Allow the user to disable this. */
+.plain-editable, .advanced-editable {
+  scrollbar-width: thin;
+}
+
+/* Thin out the scrollbars for browsers that support -webkit-scrollbar. */
+/* TODO: Allow the user to disable this. */
+.plain-editable::-webkit-scrollbar,
+.advanced-editable::-webkit-scrollbar {
+  width: 2px;
 }
