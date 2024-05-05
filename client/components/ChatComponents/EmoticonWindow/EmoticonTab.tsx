@@ -257,7 +257,7 @@ class EmoticonTab extends React.Component<Props> {
           <Form.Field>
             <br/><br/>
             <label>
-              Emoticons are disabled when using the fallback input style.
+              Emoticons are disabled when using fallback input.
             </label>
             <label>
               You may change this option from the Settings tab.
