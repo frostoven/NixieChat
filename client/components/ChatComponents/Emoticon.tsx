@@ -13,7 +13,7 @@ const metadataStyle: React.CSSProperties = {
 interface Props {
   unicode: number,
   styleManifest: StyleManifest,
-  onClick: (unicode: number, styleManifest: StyleManifest, path: string) => void,
+  onClick?: (unicode: number, styleManifest: StyleManifest, path: string) => void,
 }
 
 class Emoticon extends React.Component<Props> {
@@ -41,6 +41,9 @@ class Emoticon extends React.Component<Props> {
   }
 
   handleClick = () => {
+    if (!this.props.onClick) {
+      return;
+    }
     this.props.onClick(
       this.props.unicode,
       this.props.styleManifest,

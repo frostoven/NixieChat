@@ -7,7 +7,7 @@ class Message {
   // it to us.
   isLocal: boolean | undefined;
   // The formatted text the user sees.
-  body: string | undefined;
+  body: any;
   // If true, the message has since been modified.
   edited: boolean | undefined;
   // Message construction time.

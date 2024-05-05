@@ -1,4 +1,7 @@
+import React from 'react';
 import { EMOTICON_CONTROL_CHAR } from './constants';
+import { getStyleById } from '../emoticonConfig';
+import { Emoticon } from '../components/ChatComponents/Emoticon';
 
 enum MessageFragment {
   skip,
@@ -15,10 +18,15 @@ type EmoticonType = [ MessageFragment.emoticon, unicode: number, packId: string 
 type FragmentType = SkipType | TextType | BrType | EmoticonType;
 type FormattedMessage = FragmentType[];
 
+// This is incremented for each new emoticon and then cached.
+let emoticonKey = 0;
+
 class MessageFormatter {
-  _array: FormattedMessage = [];
+  private _array: FormattedMessage = [];
+  private _reactCache: ((JSX.Element | string)[]) | null = null;
 
   importFromElement(element: HTMLDivElement | HTMLTextAreaElement) {
+    this.clearCaches();
     const result: FormattedMessage = [];
 
     const childNodes = element.childNodes;
@@ -45,7 +53,10 @@ class MessageFormatter {
           node.childNodes[1].nodeName === 'SPAN';  // Emoticon metadata.
 
         if (!isValid) {
-          console.warn('Found invalid div node in message; skipping.');
+          console.warn('Skipping invalid div in message:', node);
+          console.warn(' -> length:', node.childNodes.length);
+          console.warn(' -> node[0]:', node.childNodes[0].nodeName);
+          console.warn(' -> node[1]:', node.childNodes[1].nodeName);
           continue;
         }
 
@@ -70,11 +81,17 @@ class MessageFormatter {
     }
 
     console.log('message/>', result);
+    this._array = result;
     return this;
   }
 
-  importFromFormattedArray(array: (FragmentType)[]) {
-    //
+  importFromFormattedArray(array: FormattedMessage) {
+    this.clearCaches();
+    if (!Array.isArray(array)) {
+      console.error('importFromFormattedArray requires an array.');
+      return;
+    }
+    this._array = array;
   }
 
   exportAsFormattedArray() {
@@ -82,7 +99,55 @@ class MessageFormatter {
   }
 
   exportAsReactComponent() {
-    //
+    if (this._reactCache) {
+      return this._reactCache;
+    }
+
+    console.log('working with');
+
+    const array = this._array;
+    const jsx: (JSX.Element | string)[] = [];
+    for (let i = 0, len = array.length; i < len; i++) {
+      const item = array[i];
+      console.log('---> [exportAsReactComponent] item:', item);
+      if (!item || !item.length) {
+        continue;
+      }
+
+      const type = item[0];
+      if (type === MessageFragment.lineBreak) {
+        jsx.push(<br/>);
+      }
+      else if (type === MessageFragment.text && item.length === 2) {
+        jsx.push(item[1] || '');
+      }
+      else if (type === MessageFragment.emoticon && item.length === 3) {
+        const unicode = item[1];
+        const packId = item[2];
+        const style = getStyleById(packId);
+        if (!unicode || !style) {
+          console.error('Invalid emoticon data:', { unicode, packId, style });
+          continue;
+        }
+        jsx.push(
+          <Emoticon
+            key={emoticonKey}
+            unicode={unicode}
+            styleManifest={style}
+          />,
+        );
+      }
+      else {
+        console.error('Ignoring fragment', item);
+      }
+    }
+
+    this._reactCache = jsx;
+    return jsx;
+  }
+
+  clearCaches() {
+    this._reactCache = null;
   }
 }
 
