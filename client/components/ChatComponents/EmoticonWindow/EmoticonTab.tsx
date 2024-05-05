@@ -256,7 +256,7 @@ class EmoticonTab extends React.Component<Props> {
           <div style={chooserStyle}>
             <Dropdown
               button
-              className={`icon ${darkMode ? '' : 'dropdown-light-mode'}`}
+              className={`icon thin-dropdown ${darkMode ? '' : 'dropdown-light-mode'}`}
               labeled
               // @ts-ignore
               text={this.getStyleIconPreview(activeStyle)}

@@ -3,6 +3,7 @@ import { Settings } from '../../../storage/cacheFrontends/Settings';
 import { Tab, TabPane, TabProps } from 'semantic-ui-react';
 import { EmoticonTab } from './EmoticonTab';
 import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
+import { SettingsTab } from './SettingsTab';
 import { StickersTab } from './StickersTab';
 import { GifsTab } from './GifsTab';
 
@@ -17,6 +18,7 @@ interface Props {
   onInsertEmoticon: (
     unicode: number, styleManifest: StyleManifest, path: string,
   ) => void,
+  onRefreshNeeded: Function,
 }
 
 class EmoticonWindow extends React.Component<Props> {
@@ -46,7 +48,7 @@ class EmoticonWindow extends React.Component<Props> {
               menuItem: 'Settings', render: () => {
                 return (
                   <TabPane inverted={!darkMode} style={tabStyle}>
-                    Settings TBD
+                    <SettingsTab onRefreshNeeded={this.props.onRefreshNeeded}/>
                   </TabPane>
                 );
               },

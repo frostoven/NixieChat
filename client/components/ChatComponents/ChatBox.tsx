@@ -145,7 +145,10 @@ class ChatBox extends React.Component<Props> {
       <div style={themeStyle}>
         {
           showEmoticonWindow ?
-            <EmoticonWindow onInsertEmoticon={this.onInsertEmoticon}/> :
+            <EmoticonWindow
+              onInsertEmoticon={this.onInsertEmoticon}
+              onRefreshNeeded={() => this.forceUpdate()}
+            /> :
             null
         }
         <div className="chat-box" style={innerStyle}>
