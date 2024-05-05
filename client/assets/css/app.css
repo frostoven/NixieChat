@@ -188,12 +188,12 @@
 /* NixieChat-specific stuff */
 /* =================================== */
 
-/* Hide border on active contentEditiable. */
+/* Hide border on active contentEditable. */
 .advanced-editable:read-write:focus {
   outline: none;
 }
 
-/* contentEditiables don't support placeholders by default. This enables it. */
+/* contentEditables don't support placeholders by default. This enables it. */
 .advanced-editable:empty::before {
   content: attr(placeholder);
   color: #555;

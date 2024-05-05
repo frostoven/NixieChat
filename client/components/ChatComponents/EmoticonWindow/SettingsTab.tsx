@@ -1,10 +1,8 @@
 import React from 'react';
 import {
-  Dropdown,
   DropdownProps,
   Form,
   FormSelect,
-  Label,
 } from 'semantic-ui-react';
 import { ContextualHelp } from '../../Generic/ContextualHelp';
 import { Settings } from '../../../storage/cacheFrontends/Settings';
@@ -24,7 +22,7 @@ interface Props {
 }
 
 class SettingsTab extends React.Component<Props> {
-  handleRichTextChange = (_, data: DropdownProps) => {
+  handleRichTextChange = (_: any, data: DropdownProps) => {
     Settings.setRichInputEnabled(data.value)
       .then(() => this.props.onRefreshNeeded())
       .catch((error) => console.error('[Settings] Input change:', error));
