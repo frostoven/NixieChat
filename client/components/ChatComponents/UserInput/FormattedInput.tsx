@@ -200,7 +200,7 @@ class FormattedInput extends React.Component<Props> {
       if (!result) {
         return;
       }
-      this.props.onSendMessage(textArea.textContent);
+      this.props.onSendMessage(textArea);
       textArea.textContent = '';
     }
 

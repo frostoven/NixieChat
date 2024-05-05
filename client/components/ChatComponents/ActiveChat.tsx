@@ -7,6 +7,9 @@ import {
 import { ChatBox } from './ChatBox';
 import { Message } from '../../storage/EncryptedChat/Message';
 import { ChatBubble } from './ChatBubble';
+import {
+  MessageFormatter,
+} from '../../richInput/MessageFormatter';
 
 const accountStorage = new EncryptedAccountStorage();
 
@@ -87,12 +90,16 @@ class ActiveChat extends React.Component<Props> {
   private messageBatches: Message[][] = [];
 
   // === Note: Does not yet send messages. === //
-  onSendMessage = (plaintext: string, possiblyHasFormatting: boolean) => {
-    console.log(`-> Sending "${plaintext}" (has formatting? ${possiblyHasFormatting})`);
+  onSendMessage = (element: HTMLDivElement | HTMLTextAreaElement) => {
+    const formattedMessage =
+      new MessageFormatter()
+        .importFromElement(element)
+        .exportAsReactComponent();
+
     const message = new Message();
     message.time = Date.now();
     // TODO: Add markdown processor.
-    message.body = plaintext;
+    message.body = formattedMessage;
     message.runtimeId = ++bubbleCount;
 
     // As we're still in dev mode, randomly choose who the message originated

@@ -122,8 +122,8 @@ class ChatBox extends React.Component<Props> {
     }
   };
 
-  onSendMessage = (text: string) => {
-    this.props.onSendMessage(text, this.possiblyHasFormatting);
+  onSendMessage = (element: HTMLDivElement | HTMLTextAreaElement) => {
+    this.props.onSendMessage(element, this.possiblyHasFormatting);
     this.possiblyHasFormatting = false;
   };
 

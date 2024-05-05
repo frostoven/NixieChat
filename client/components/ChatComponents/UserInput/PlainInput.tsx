@@ -147,7 +147,7 @@ class PlainInput extends React.Component<Props> {
       if (!result) {
         return;
       }
-      this.props.onSendMessage(textArea.value);
+      this.props.onSendMessage(textArea);
       textArea.value = '';
     }
 
