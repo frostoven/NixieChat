@@ -6,7 +6,7 @@ import {
   Dropdown, DropdownDivider,
   DropdownHeader,
   DropdownItem, DropdownItemProps,
-  DropdownMenu,
+  DropdownMenu, Form,
 } from 'semantic-ui-react';
 import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
 
@@ -34,6 +34,13 @@ const iconPreviewConfig = [
     marginLeft: -15,
   },
 ];
+
+const emoticonsDisabledStyle: React.CSSProperties = {
+  textAlign: 'center',
+  width: '80%',
+  margin: 'auto',
+};
+
 
 const containerStyle: React.CSSProperties = {
   position: 'relative',
@@ -242,6 +249,24 @@ class EmoticonTab extends React.Component<Props> {
 
   render() {
     const darkMode = Settings.isDarkModeEnabled();
+
+    const richInputEnabled = Settings.richInputEnabled() || false;
+    if (!richInputEnabled) {
+      return (
+        <Form inverted={!darkMode} style={emoticonsDisabledStyle}>
+          <Form.Field>
+            <br/><br/>
+            <label>
+              Emoticons are disabled when using the fallback input style.
+            </label>
+            <label>
+              You may change this option from the Settings tab.
+            </label>
+          </Form.Field>
+        </Form>
+      )
+    }
+
     const { searchText, activeStyle } = this.state;
     return (
       <div style={containerStyle}>
