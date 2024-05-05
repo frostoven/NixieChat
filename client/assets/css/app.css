@@ -67,6 +67,7 @@
   color: white !important;
 }
 
+.ui.inverted.form label,
 .ui.segment.inverted,
 .ui.segment.inverted > .ui.header,
 .ui.segment.inverted > .ui.form .field > label {
@@ -152,7 +153,7 @@
 }
 
 /* Default is crazy thick. Let's be a bit more.. gentle. */
-.menu.transition.visible .item {
+.thin-dropdown .menu.transition.visible .item {
   height: 24px;
   padding: 18px !important;
 }
@@ -171,12 +172,14 @@
   border: thin solid #747474 !important;
 }
 
+.dropdown-light-mode .ui.dropdown,
 .dropdown-light-mode .menu.transition.visible {
   color: #000 !important;
   background-color: #f8f8f8 !important;
   border: thin solid #d7d7d7;
 }
 
+.dropdown-light-mode .dropdown .text,
 .dropdown-light-mode .menu.transition.visible .header,
 .dropdown-light-mode .menu.transition.visible .item {
   color: #2d2d2d !important;
