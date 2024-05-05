@@ -1,10 +1,12 @@
 import { StyleManifest } from '../emoticonConfig/types/StyleManifest';
+import { EMOTICON_CONTROL_CHAR } from './constants';
 
 function generateEmoticon(unicode: number, imgSrc: string, style: StyleManifest) {
   if (unicode < 0x20 || unicode === 0x7F) {
     unicode = '�'.charCodeAt(0);
   }
 
+  const packId = style.packId;
   const { marginTop, marginRight, marginBottom, marginLeft } = style.uiFit;
 
   // This contains our emoticon image and its metadata.
@@ -23,7 +25,7 @@ function generateEmoticon(unicode: number, imgSrc: string, style: StyleManifest)
   // data such as the emoticon pack this emoticon is from.
   const emoMeta = document.createElement('span');
   emoMeta.style.display = 'none';
-  emoMeta.innerText = `\u001A:${unicode}`;
+  emoMeta.innerText = `${EMOTICON_CONTROL_CHAR}:${unicode}:${packId}`;
 
   // Bring it all together.
   emoContainer.append(emoFace, emoMeta);

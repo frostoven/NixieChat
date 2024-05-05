@@ -1,4 +1,15 @@
 interface StyleManifest {
+  // The ID that uniquely identifies this emoticon pack. It may contain any
+  // characters you can type with a US keyboard except ':'. The entire ID is
+  // sent with each emoticon, every message, so to save on bandwidth the
+  // recommended structure is 4 randomly generated secure-password-style
+  // characters (which offers a few million combinations). The idea with pack
+  // IDs is that, eventually, users may submit emoticon packs to NixieChat (or
+  // use their own emoticon servers they trust). We'd then sanitise images from
+  // these pack to ensure they don't contain malicious data. If someone sends
+  // you an emoticon from a pack you do don't have, you may then choose to
+  // download the relevant pack, or decline to do so.
+  packId: string,
   // Parent directory.
   dir: string,
   // All emoticons we currently have for this pack.

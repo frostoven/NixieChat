@@ -12,6 +12,7 @@ import { StyleManifest } from './types/StyleManifest';
 
 const emoticonConfig: StyleManifest[] = [
   {
+    packId: '❄omj',
     dir: '0-OpenMoji',
     availableEmoticons: openMojiList,
     toneSupport: openMojiToneSupport,
@@ -25,6 +26,7 @@ const emoticonConfig: StyleManifest[] = [
     },
   },
   {
+    packId: '❄nto',
     dir: '1-Noto',
     availableEmoticons: notoList,
     filePrefix: 'emoji_u',
@@ -40,6 +42,7 @@ const emoticonConfig: StyleManifest[] = [
     },
   },
   {
+    packId: '❄tgm',
     dir: '2-Telegram',
     availableEmoticons: tgramList,
     lookupTable: tgramLookup,
@@ -54,6 +57,7 @@ const emoticonConfig: StyleManifest[] = [
     },
   },
   {
+    packId: '❄nxm',
     dir: '3-Misc',
     availableEmoticons: miscMojiList,
     toneSupport: miscMojiToneSupport,
