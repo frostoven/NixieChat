@@ -65,7 +65,7 @@ class MessageFormatter {
       }
     }
 
-    console.log('message/>', result);
+    // console.log('message/>', result);
     this._array = result;
     return this;
   }
@@ -88,13 +88,10 @@ class MessageFormatter {
       return this._reactCache;
     }
 
-    console.log('working with');
-
     const array = this._array;
     const jsx: (JSX.Element | string)[] = [];
     for (let i = 0, len = array.length; i < len; i++) {
       const item = array[i];
-      console.log('---> [exportAsReactComponent] item:', item);
       if (!item || !item.length) {
         continue;
       }
@@ -118,6 +115,7 @@ class MessageFormatter {
           <Emoticon
             key={++emoticonKey}
             unicode={unicode}
+            isPreview={false}
             styleManifest={style}
           />,
         );

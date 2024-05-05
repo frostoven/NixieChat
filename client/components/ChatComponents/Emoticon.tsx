@@ -12,6 +12,8 @@ const metadataStyle: React.CSSProperties = {
 
 interface Props {
   unicode: number,
+  // Preview emoticons are larger. Default is true.
+  isPreview?: boolean,
   styleManifest: StyleManifest,
   onClick?: (unicode: number, styleManifest: StyleManifest, path: string) => void,
 }
@@ -52,17 +54,31 @@ class Emoticon extends React.Component<Props> {
   };
 
   render() {
-    const { unicode, styleManifest } = this.props;
+    const { unicode, styleManifest, isPreview } = this.props;
+
+    let style: React.CSSProperties;
+    if (isPreview === false) {
+      const {
+        width, marginTop, marginRight, marginBottom, marginLeft,
+      } = styleManifest.uiFit;
+      style = {
+        cursor: 'pointer',
+        width, marginTop, marginRight, marginBottom, marginLeft,
+      };
+    }
+    else {
+      style = {
+        cursor: 'pointer',
+        width: styleManifest.previewSize,
+      };
+    }
 
     return (
       <span onClick={this.handleClick}>
         <img
           alt={String.fromCharCode(unicode)}
           src={this.path}
-          style={{
-            cursor: 'pointer',
-            width: styleManifest.previewSize,
-          }}
+          style={style}
         />
 
         <span style={metadataStyle}>
