@@ -21,10 +21,35 @@ type FormattedMessage = FragmentType[];
 // This is incremented for each new emoticon and then cached.
 let emoticonKey = 0;
 
+/**
+ * #### Security info
+ * Note for maintainers: This class does not, and should not ever, store HTML
+ * code. Doing would be a massive security risk as it would allow hacking
+ * contacts via <script> tags embedded inside messages. Instead, This class
+ * assigns numeric values to every element we require for messaging, and
+ * generates any / all markup on the fly as needed.
+ *
+ * #### Internal format
+ * Data is stored as numbers inside arrays. For example, a message containing
+ * text and an emoticon would look like this:
+ * @example
+ *   [
+ *     // 1 = text, 2 = line break, 3 = emoji
+ *     [ 1, 'This is an OpenMoji heart emoji: ' ], [ 3, 0x2764, '❄omj' ],
+ *     [ 2 ],
+ *     [ 1, 'This text comes follows a line break.' ],
+ *   ]
+ */
 class MessageFormatter {
   private _array: FormattedMessage = [];
   private _reactCache: ((JSX.Element | string)[]) | null = null;
 
+  /**
+   * Scans the specified HTML element for text nodes, br nodes, and img tags.
+   * Converts safe-to-use data to the MessageFormatter blackbox format,
+   * discards everything else.
+   * @param element
+   */
   importFromElement(element: HTMLDivElement | HTMLTextAreaElement) {
     this.clearCaches();
     const result: FormattedMessage = [];
@@ -65,11 +90,15 @@ class MessageFormatter {
       }
     }
 
-    // console.log('message/>', result);
+    console.log('message/>', result);
     this._array = result;
     return this;
   }
 
+  /**
+   * Stores the specified array.
+   * @param array
+   */
   importFromFormattedArray(array: FormattedMessage) {
     this.clearCaches();
     if (!Array.isArray(array)) {
@@ -79,10 +108,10 @@ class MessageFormatter {
     this._array = array;
   }
 
-  exportAsFormattedArray() {
-    return this._array;
-  }
-
+  /**
+   * Used for message rendering. Converts stored information into a React
+   * component and caches the result.
+   */
   exportAsReactComponent() {
     if (this._reactCache) {
       return this._reactCache;
@@ -129,6 +158,23 @@ class MessageFormatter {
     return jsx;
   }
 
+  /**
+   * Used for message editing. Uses stored info to generate HTML nodes.
+   */
+  exportAsHtmlElement() {
+    console.error('exportAsHtmlElement: not yet implemented.');
+  }
+
+  /**
+   * Dumps imported data.
+   */
+  exportAsFormattedArray() {
+    return this._array;
+  }
+
+  /**
+   * Deletes all processed information.
+   */
   clearCaches() {
     this._reactCache = null;
   }
