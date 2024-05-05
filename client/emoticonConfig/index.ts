@@ -72,6 +72,12 @@ const emoticonConfig: StyleManifest[] = [
   },
 ];
 
+const styleById = {};
+for (let i = 0, len = emoticonConfig.length; i < len; i++) {
+  const style = emoticonConfig[i];
+  styleById[style.packId] = style;
+}
+
 function getStyleCount() {
   return emoticonConfig.length;
 }
@@ -80,7 +86,12 @@ function getAllStyles() {
   return emoticonConfig;
 }
 
+function getStyleById(packId: string) {
+  return styleById[packId];
+}
+
 export {
   getStyleCount,
   getAllStyles,
+  getStyleById,
 };
