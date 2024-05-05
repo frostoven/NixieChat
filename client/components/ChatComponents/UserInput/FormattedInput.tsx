@@ -191,7 +191,12 @@ class FormattedInput extends React.Component<Props> {
       this.appendLineBreakIfNeeded();
     }
     else {
-      let result = textArea.textContent!.trim();
+      // We cannot see image-based emoticons with text accessors such as
+      // textContent et al. In order to ensure the field contains valid data we
+      // therefore also find the first (if any) as part of the check.
+      let result =
+        textArea.textContent!.trim() +
+        (textArea.querySelector('img')?.alt || '');
       if (!result) {
         return;
       }
