@@ -34,10 +34,11 @@ let emoticonKey = 0;
  * text and an emoticon would look like this:
  * @example
  *   [
- *     // 1 = text, 2 = line break, 3 = emoji
- *     [ 1, 'This is an OpenMoji heart emoji: ' ], [ 3, 0x2764, '❄omj' ],
+ *     // 1 = text, 2 = line break, 3 = emoticon
+ *     [ 1, 'This is an OpenMoji heart emoji: ' ],
+ *     [ 3, 0x2764, '❄omj' ], // type, unicode, packId
  *     [ 2 ],
- *     [ 1, 'This text comes follows a line break.' ],
+ *     [ 1, 'This text follows a line break.' ],
  *   ]
  */
 class MessageFormatter {
