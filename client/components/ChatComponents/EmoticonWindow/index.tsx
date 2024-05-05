@@ -3,6 +3,8 @@ import { Settings } from '../../../storage/cacheFrontends/Settings';
 import { Tab, TabPane, TabProps } from 'semantic-ui-react';
 import { EmoticonTab } from './EmoticonTab';
 import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
+import { StickersTab } from './StickersTab';
+import { GifsTab } from './GifsTab';
 
 const tabStyle: React.CSSProperties = {
   height: '25vh',
@@ -52,11 +54,7 @@ class EmoticonWindow extends React.Component<Props> {
             {
               menuItem: 'Emoticons', render: () => {
                 return (
-                  <TabPane
-                    className="54"
-                    inverted={!darkMode}
-                    style={tabStyle}
-                  >
+                  <TabPane inverted={!darkMode} style={tabStyle}>
                     <EmoticonTab
                       onInsertEmoticon={this.props.onInsertEmoticon}
                     />
@@ -68,7 +66,7 @@ class EmoticonWindow extends React.Component<Props> {
               menuItem: 'Stickers', render: () => {
                 return (
                   <TabPane inverted={!darkMode} style={tabStyle}>
-                    Stickers TBD
+                    <StickersTab/>
                   </TabPane>
                 );
               },
@@ -77,7 +75,7 @@ class EmoticonWindow extends React.Component<Props> {
               menuItem: 'GIFs', render: () => {
                 return (
                   <TabPane inverted={!darkMode} style={tabStyle}>
-                    GIFs TBD
+                    <GifsTab/>
                   </TabPane>
                 );
               },
