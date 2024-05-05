@@ -1,7 +1,7 @@
 import React from 'react';
-import { EMOTICON_CONTROL_CHAR } from './constants';
 import { getStyleById } from '../emoticonConfig';
 import { Emoticon } from '../components/ChatComponents/Emoticon';
+import { EmoticonElement } from './generateEmoticon';
 
 enum MessageFragment {
   skip,
@@ -43,39 +43,24 @@ class MessageFormatter {
         // what might turn out to be a non-issue.
         result.push([ MessageFragment.lineBreak ]);
       }
-      else if (node.nodeName === 'DIV') {
-        // The only divs we currently allow are emoticons. Attempt to build
+      else if (node.nodeName === 'IMG') {
+        // The only images we currently allow are emoticons. Attempt to build
         // one, if it fails then assume something went wrong and skip. For
         // security reasons we need to be very pedantic about the structure.
-        const isValid =
-          node.childNodes.length === 2 &&          // Always 2, no exception.
-          node.childNodes[0].nodeName === 'IMG' && // Emoticon image.
-          node.childNodes[1].nodeName === 'SPAN';  // Emoticon metadata.
+        const emoticon = node as EmoticonElement;
+        const unicode = parseInt(emoticon.dataset.unicode);
+        const packId = emoticon.dataset.packId;
+        const isValid = isFinite(unicode) && packId;
 
         if (!isValid) {
-          console.warn('Skipping invalid div in message:', node);
-          console.warn(' -> length:', node.childNodes.length);
-          console.warn(' -> node[0]:', node.childNodes[0].nodeName);
-          console.warn(' -> node[1]:', node.childNodes[1].nodeName);
-          continue;
-        }
-
-        // We don't need the <img> data, only the <span> matters here.
-        const metadata = node.childNodes[1].textContent || '';
-        const metadataParts = metadata.split(':');
-        const metadataIsValid =
-          metadataParts.length === 3 &&
-          metadataParts[0] === EMOTICON_CONTROL_CHAR;
-
-        if (!metadataIsValid) {
-          console.warn('Found invalid emoticon; skipping.');
+          console.warn('Invalid emoticon found; skipping.');
           continue;
         }
 
         result.push([
           MessageFragment.emoticon,
-          parseInt(metadataParts[1]),
-          metadataParts[2],
+          unicode,
+          packId,
         ]);
       }
     }
@@ -131,7 +116,7 @@ class MessageFormatter {
         }
         jsx.push(
           <Emoticon
-            key={emoticonKey}
+            key={++emoticonKey}
             unicode={unicode}
             styleManifest={style}
           />,

@@ -1,5 +1,0 @@
-const EMOTICON_CONTROL_CHAR = '\u001A';
-
-export {
-  EMOTICON_CONTROL_CHAR,
-}
