@@ -216,6 +216,18 @@ class MessageFormatter {
   }
 
   /**
+   * Exports imported data as a flattened JSON string.
+   * @param [clearIfEmpty] - If true, will return '' instead of '[]' the
+   * message has no contents. Default is false.
+   */
+  exportAsJsonString(clearIfEmpty = false) {
+    if (clearIfEmpty && this._array.length === 0) {
+      return '';
+    }
+    return JSON.stringify(this._array);
+  }
+
+  /**
    * Deletes all processed information.
    */
   clearCaches() {
