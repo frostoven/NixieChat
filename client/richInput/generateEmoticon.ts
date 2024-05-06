@@ -24,7 +24,7 @@ function generateEmoticon(
 
   const emoticon = document.createElement('img') as EmoticonElement;
   emoticon.src = imgSrc;
-  emoticon.alt = String.fromCodePoint(unicode);
+  emoticon.alt = String.fromCodePoint(unicode, tone);
   emoticon.style.width = `${style.uiFit.width}px`;
   emoticon.style.margin =
     `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`;
