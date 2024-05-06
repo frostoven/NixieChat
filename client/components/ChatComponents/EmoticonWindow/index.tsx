@@ -16,7 +16,7 @@ const tabStyle: React.CSSProperties = {
 
 interface Props {
   onInsertEmoticon: (
-    unicode: number, styleManifest: StyleManifest, path: string,
+    unicode: number, styleManifest: StyleManifest, path: string, tone: number,
   ) => void,
   onRefreshNeeded: Function,
 }

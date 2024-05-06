@@ -4,6 +4,16 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 
 const storage = new NixieStorage();
 
+/**
+ * This class reads and writes user settings from/to in-RAM cache, and then
+ * asks the DB to store the new values. You therefore never need to actually
+ * await any of these functions as newly set values are guaranteed to be
+ * immediately available even if the DB hasn't started its update yet.
+ *
+ * The core motivation for using this class is to allow React to do DB
+ * operations without ever having to worry about async operations or side
+ * effects.
+ */
 class Settings {
   static isDarkModeEnabled() {
     const cache = storage.settingsCache || {};
@@ -96,6 +106,19 @@ class Settings {
   static async setActiveEmoticonStyle(value) {
     const cache = storage.settingsCache || {};
     cache.lastEmoticonStyle = value;
+    await storage.writeSettings(cache);
+  }
+
+  // Emoticon tone.
+  static getUserTone() {
+    const cache = storage.settingsCache || {};
+    return cache.userTone || 0;
+  }
+
+  // Emoticon tone.
+  static async setUserTone(value) {
+    const cache = storage.settingsCache || {};
+    cache.userTone = value;
     await storage.writeSettings(cache);
   }
 

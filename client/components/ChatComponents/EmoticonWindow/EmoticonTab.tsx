@@ -87,7 +87,8 @@ const emoticonStyle: React.CSSProperties = {
   width: 40,
 };
 
-const toneStyle = {
+const toneStyle: React.CSSProperties = {
+  cursor: 'pointer',
   marginLeft: 4,
   marginRight: 4,
   marginTop: 4,
@@ -134,7 +135,7 @@ const chooserItemTextStyle: React.CSSProperties = {
 
 interface Props {
   onInsertEmoticon: (
-    unicode: number, styleManifest: StyleManifest, path: string,
+    unicode: number, styleManifest: StyleManifest, path: string, tone: number,
   ) => void,
 }
 
@@ -165,10 +166,12 @@ class EmoticonTab extends React.Component<Props> {
   handleEmoticonClick = (
     unicode: number, styleManifest: StyleManifest, path: string,
   ) => {
-    this.props.onInsertEmoticon(unicode, styleManifest, path);
+    const tone = Settings.getUserTone();
+    this.props.onInsertEmoticon(unicode, styleManifest, path, tone);
   };
 
   drawEmoticonList = () => {
+    const tone = Settings.getUserTone();
     const activeStyle = this.state.activeStyle;
     const style = getAllStyles()[activeStyle];
     const { availableEmoticons } = style;
@@ -183,14 +186,12 @@ class EmoticonTab extends React.Component<Props> {
     for (let i = 0, len = availableEmoticons.length; i < len; i++) {
       const unicode: number = availableEmoticons[i];
       currentLine.push(
-        // TODO: for tone change, consider changing the emoticon key. This
-        //  allows the Emoticon component to ignore all non-tone-change
-        //  renders.
-        <div key={unicode} style={emoticonStyle}>
+        <div key={`${unicode}-${tone}`} style={emoticonStyle}>
           <Emoticon
             key={`${activeStyle}-${unicode}`}
             unicode={unicode}
             styleManifest={style}
+            tone={tone}
             onClick={this.handleEmoticonClick}
           />
         </div>,
@@ -230,6 +231,11 @@ class EmoticonTab extends React.Component<Props> {
     });
   };
 
+  handleToneChange = (toneNumber: number) => {
+    Settings.setUserTone(toneNumber).catch(console.error);
+    this.forceUpdate();
+  };
+
   getStyleIconPreview = (styleIndex: number) => {
     const previewInfo = iconPreviewConfig[styleIndex];
     return (
@@ -249,6 +255,7 @@ class EmoticonTab extends React.Component<Props> {
 
   render() {
     const darkMode = Settings.isDarkModeEnabled();
+    // const tone = Settings.getUserTone();
 
     const richInputEnabled = Settings.richInputEnabled() || false;
     if (!richInputEnabled) {
@@ -290,27 +297,33 @@ class EmoticonTab extends React.Component<Props> {
               <DropdownMenu style={dropdownMenuStyle}>
                 <img
                   src={`${TONE_PREFIX}1f44d.webp`}
-                  style={toneStyle} alt=""
+                  style={toneStyle} alt="0"
+                  onClick={() => this.handleToneChange(0)}
                 />
                 <img
                   src={`${TONE_PREFIX}1f44d_1f3fb.webp`}
-                  style={toneStyle} alt=""
+                  style={toneStyle} alt="1"
+                  onClick={() => this.handleToneChange(0x1F3FB)}
                 />
                 <img
                   src={`${TONE_PREFIX}1f44d_1f3fc.webp`}
-                  style={toneStyle} alt=""
+                  style={toneStyle} alt="2"
+                  onClick={() => this.handleToneChange(0x1F3FC)}
                 />
                 <img
                   src={`${TONE_PREFIX}1f44d_1f3fd.webp`}
-                  style={toneStyle} alt=""
+                  style={toneStyle} alt="3"
+                  onClick={() => this.handleToneChange(0x1F3FD)}
                 />
                 <img
                   src={`${TONE_PREFIX}1f44d_1f3fe.webp`}
-                  style={toneStyle} alt=""
+                  style={toneStyle} alt="4"
+                  onClick={() => this.handleToneChange(0x1F3FE)}
                 />
                 <img
                   src={`${TONE_PREFIX}1f44d_1f3ff.webp`}
-                  style={toneStyle} alt=""
+                  style={toneStyle} alt="5"
+                  onClick={() => this.handleToneChange(0x1F3FF)}
                 />
 
                 <DropdownDivider/>

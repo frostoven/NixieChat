@@ -15,6 +15,7 @@ const emoticonConfig: StyleManifest[] = [
     packId: '❄omj',
     dir: '0-OpenMoji',
     availableEmoticons: openMojiList,
+    tonePrefix: '-',
     toneSupport: openMojiToneSupport,
     previewSize: 36,
     uiFit: {
@@ -30,6 +31,7 @@ const emoticonConfig: StyleManifest[] = [
     dir: '1-Noto',
     availableEmoticons: notoList,
     filePrefix: 'emoji_u',
+    tonePrefix: '_',
     toneSupport: notoToneSupport,
     lowerCase: true,
     previewSize: 24,
@@ -45,6 +47,7 @@ const emoticonConfig: StyleManifest[] = [
     packId: '❄tgm',
     dir: '2-Telegram',
     availableEmoticons: tgramList,
+    tonePrefix: '',
     lookupTable: tgramLookup,
     toneSupport: tgramToneSupport,
     previewSize: 33,
@@ -60,6 +63,7 @@ const emoticonConfig: StyleManifest[] = [
     packId: '❄nxm',
     dir: '3-Misc',
     availableEmoticons: miscMojiList,
+    tonePrefix: '-',
     toneSupport: miscMojiToneSupport,
     previewSize: 24,
     uiFit: {

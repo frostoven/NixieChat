@@ -99,7 +99,9 @@ class ChatBox extends React.Component<Props> {
     });
   };
 
-  onInsertEmoticon = (unicode: number, styleManifest: StyleManifest, path: string) => {
+  onInsertEmoticon = (
+    unicode: number, styleManifest: StyleManifest, path: string, tone: number,
+  ) => {
     const richInputEnabled = Settings.richInputEnabled();
     if (!richInputEnabled) {
       // Note: We can *partially* support this (but cannot mix packs / tones in
@@ -114,6 +116,7 @@ class ChatBox extends React.Component<Props> {
         unicode,
         path,
         styleManifest,
+        tone,
       );
       this.caretControl.insertNodeAtCaret(emo);
     }

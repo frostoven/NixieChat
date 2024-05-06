@@ -13,7 +13,9 @@ enum MessageFragment {
 type SkipType = [ MessageFragment.skip ];
 type TextType = [ MessageFragment.text, textPart: string ];
 type BrType = [ MessageFragment.lineBreak ];
-type EmoticonType = [ MessageFragment.emoticon, unicode: number, packId: string ];
+type EmoticonType = [
+  MessageFragment.emoticon, unicode: number, packId: string, tone: number,
+];
 //
 type FragmentType = SkipType | TextType | BrType | EmoticonType;
 type FormattedMessage = FragmentType[];
@@ -76,6 +78,7 @@ class MessageFormatter {
         const emoticon = node as EmoticonElement;
         const unicode = parseInt(emoticon.dataset.unicode);
         const packId = emoticon.dataset.packId;
+        const tone = parseInt(emoticon.dataset.tone || '0');
         const isValid = isFinite(unicode) && packId;
 
         if (!isValid) {
@@ -87,11 +90,12 @@ class MessageFormatter {
           MessageFragment.emoticon,
           unicode,
           packId,
+          tone,
         ]);
       }
     }
 
-    console.log('message/>', result);
+    // console.log('message/>', result);
     this._array = result;
     return this;
   }
@@ -133,9 +137,10 @@ class MessageFormatter {
       else if (type === MessageFragment.text && item.length === 2) {
         jsx.push(item[1] || '');
       }
-      else if (type === MessageFragment.emoticon && item.length === 3) {
+      else if (type === MessageFragment.emoticon && item.length === 4) {
         const unicode = item[1];
         const packId = item[2];
+        const tone = item[3];
         const style = getStyleById(packId);
         if (!unicode || !style) {
           console.error('Invalid emoticon data:', { unicode, packId, style });
@@ -146,6 +151,7 @@ class MessageFormatter {
             key={++emoticonKey}
             unicode={unicode}
             isPreview={false}
+            tone={tone}
             styleManifest={style}
           />,
         );

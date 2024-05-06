@@ -7,10 +7,14 @@ interface EmoticonElement extends HTMLImageElement {
     unicode: string,
     /** ID of the emoticon pack this emoticon belongs to. */
     packId: string,
+    /** User-specified emoticon tone. */
+    tone: string,
   };
 }
 
-function generateEmoticon(unicode: number, imgSrc: string, style: StyleManifest) {
+function generateEmoticon(
+  unicode: number, imgSrc: string, style: StyleManifest, tone: number,
+) {
   if (unicode < 0x20 || unicode === 0x7F) {
     unicode = '�'.charCodeAt(0);
   }
@@ -26,6 +30,7 @@ function generateEmoticon(unicode: number, imgSrc: string, style: StyleManifest)
     `${marginTop}px ${marginRight}px ${marginBottom}px ${marginLeft}px`;
   emoticon.dataset.unicode = `${unicode}`;
   emoticon.dataset.packId = packId;
+  emoticon.dataset.tone = `${tone}`;
 
   return emoticon;
 }

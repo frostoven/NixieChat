@@ -17,6 +17,8 @@ interface StyleManifest {
   toneSupport: Map<number, boolean>,
   // Some sets, such as Noto, have standard naming, but with a file prefix.
   filePrefix?: string,
+  // Usually '-' or '_'.
+  tonePrefix: string,
   // Telegram decided to reinvent the wheel naming-wise. This is used to map
   // their emoticons to unicode characters.
   lookupTable?: object,
