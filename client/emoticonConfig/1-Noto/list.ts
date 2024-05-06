@@ -15,6 +15,7 @@ const notoList: number[] = [
   name.faceConfused,
   name.faceSlightlyFrowning,
   name.faceGrimacing,
+  name.foldedHands,
   name.catFace,
   name.heart,
   name.brokenHeart,
@@ -24,6 +25,9 @@ const notoList: number[] = [
 ];
 
 const notoToneSupport: Map<number, boolean> = new Map();
+notoToneSupport.set(name.thumbsUp, true);
+notoToneSupport.set(name.thumbsDown, true);
+notoToneSupport.set(name.foldedHands, true);
 
 export {
   notoList,

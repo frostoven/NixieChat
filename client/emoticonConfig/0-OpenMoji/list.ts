@@ -15,6 +15,7 @@ const openMojiList: number[] = [
   name.faceSalute,
   name.faceWithDiagonalMouth,
   name.faceGrimacing,
+  name.foldedHands,
   name.heart,
   name.brokenHeart,
   name.pistol,
