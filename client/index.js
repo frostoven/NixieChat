@@ -30,7 +30,6 @@ Dropdown.propTypes.text = PropTypes.oneOfType([
   PropTypes.string,
   PropTypes.element,
 ]);
-console.log(Dropdown.propTypes);
 
 async function boot() {
   const domContainer = document.querySelector('#react-element');

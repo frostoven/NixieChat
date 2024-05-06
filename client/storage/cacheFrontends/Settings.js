@@ -11,7 +11,7 @@ class Settings {
   }
 
   static async setDarkModeEnabled(value, updateUi) {
-    const cache = storage.settingsCache;
+    const cache = storage.settingsCache || {};
     cache.darkModeEnabled = !!value;
     await storage.writeSettings(cache);
     if (updateUi) {
@@ -20,10 +20,10 @@ class Settings {
   }
 
   static async toggleDarkMode(updateUi) {
-    const cache = storage.settingsCache;
-    const darkMode = cache.darkModeEnabled;
-    cache.darkModeEnabled = !darkMode;
-    await storage.writeSettings(storage.settingsCache);
+    const cache = storage.settingsCache || {};
+    const darkModeEnabled = cache.darkModeEnabled;
+    cache.darkModeEnabled = !darkModeEnabled;
+    await storage.writeSettings(cache);
     if (updateUi) {
       clientEmitter.emit(clientEmitterAction.reloadApp);
     }

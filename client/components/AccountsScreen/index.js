@@ -6,7 +6,7 @@ import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Button } from 'semantic-ui-react';
 import { NixieStorage } from '../../storage/NixieStorage';
 import {
-  EncryptedAccountStorage
+  EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 
 const headerStyle = {
@@ -52,6 +52,12 @@ class AccountsScreen extends React.Component {
   plaintextStorage = new NixieStorage();
   accountStorage = new EncryptedAccountStorage();
 
+  handleDarkModeToggle = () => {
+    Settings.toggleDarkMode()
+      .then(() => this.forceUpdate())
+      .catch(console.error);
+  };
+
   render() {
     const { onAccountActivated } = this.props;
     const darkMode = Settings.isDarkModeEnabled();
@@ -60,7 +66,7 @@ class AccountsScreen extends React.Component {
 
     return (
       <div>
-        <div className="f1adeInDown" style={formStyle}>
+        <div className="fadeInDown" style={formStyle}>
           <h3 style={headerStyle}>
             Frostoven's NixieChat
           </h3>
@@ -74,8 +80,9 @@ class AccountsScreen extends React.Component {
         </div>
 
         <Button
-          secondary style={themeButtonStyle}
-          onClick={Settings.toggleDarkMode}
+          secondary
+          style={themeButtonStyle}
+          onClick={this.handleDarkModeToggle}
         >
           Dark Mode
         </Button>
