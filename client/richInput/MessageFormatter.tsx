@@ -38,7 +38,7 @@ let emoticonKey = 0;
  *   [
  *     // 1 = text, 2 = line break, 3 = emoticon
  *     [ 1, 'This is an OpenMoji heart emoji: ' ],
- *     [ 3, 0x2764, '❄omj' ], // type, unicode, packId
+ *     [ 3, 0x2764, '❄omj', 0 ], // type, unicode, packId, tone
  *     [ 2 ],
  *     [ 1, 'This text follows a line break.' ],
  *   ]
@@ -62,7 +62,13 @@ class MessageFormatter {
       const node = childNodes[i];
 
       if (node.nodeName === '#text') {
-        result.push([ MessageFragment.text, node.nodeValue || '' ]);
+        const text = node.nodeValue || '';
+        if (!text) {
+          // We often end up with (actually a very large amount of) empty
+          // nodes. Nodes have a 7-byte overhead; obvious waste, skip.
+          continue;
+        }
+        result.push([ MessageFragment.text, text ]);
       }
       else if (node.nodeName === 'BR') {
         // Note: Text nodes may also contain line breaks, and won't show as
