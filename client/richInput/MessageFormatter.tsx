@@ -1,7 +1,7 @@
 import React from 'react';
-import { getStyleById } from '../emoticonConfig';
+import { getEmoticonUrl, getStyleById } from '../emoticonConfig';
 import { Emoticon } from '../components/ChatComponents/Emoticon';
-import { EmoticonElement } from './generateEmoticon';
+import { EmoticonElement, generateEmoticon } from './generateEmoticon';
 
 enum MessageFragment {
   skip,
@@ -204,8 +204,48 @@ class MessageFormatter {
   /**
    * Used for message editing. Uses stored info to generate HTML nodes.
    */
-  exportAsHtmlElement() {
-    console.error('exportAsHtmlElement: not yet implemented.');
+  exportAsHtmlNodes() {
+    const nodeList: Node[] = [];
+    const array = this._array;
+    for (let i = 0, len = array.length; i < len; i++) {
+      const nodeInfo = array[i];
+      const type = nodeInfo['0'];
+      if (type === MessageFragment.text) {
+        // Note: createTextNode doubles as an HTML escaping function.
+        nodeList.push(document.createTextNode(nodeInfo['1']));
+      }
+      else if (type === MessageFragment.lineBreak) {
+        nodeList.push(document.createElement('br'));
+      }
+      else if (type === MessageFragment.emoticon) {
+        const unicode = nodeInfo[1];
+        const style = getStyleById(nodeInfo[2]);
+        const tone = nodeInfo[3];
+        const path = getEmoticonUrl(unicode, style, tone);
+        nodeList.push(generateEmoticon(unicode, path, style, tone));
+      }
+    }
+    return nodeList;
+  }
+
+  /**
+   * Used for message editing by the fallback input method. Discards all
+   * formatted text, including emoticons.
+   */
+  exportAsPlaintext() {
+    const textArray: string[] = [];
+    const array = this._array;
+    for (let i = 0, len = array.length; i < len; i++) {
+      const nodeInfo = array[i];
+      const type = nodeInfo['0'];
+      if (type === MessageFragment.text) {
+        textArray.push(nodeInfo['1']);
+      }
+      else if (type === MessageFragment.lineBreak) {
+        textArray.push('\n');
+      }
+    }
+    return textArray.join('');
   }
 
   /**
