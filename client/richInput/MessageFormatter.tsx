@@ -114,6 +114,23 @@ class MessageFormatter {
   }
 
   /**
+   * Imports a message from a JSON string.
+   */
+  importFromJsonString(jsonString: string) {
+    let array: FormattedMessage;
+    try {
+      array = JSON.parse(jsonString);
+    }
+    catch (error) {
+      console.error('[importFromJsonString] Failed: Invalid string', jsonString);
+      return this;
+    }
+
+    this.importFromFormattedArray(array);
+    return this;
+  }
+
+  /**
    * Used for message rendering. Converts stored information into a React
    * component and caches the result.
    */
