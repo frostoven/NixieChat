@@ -101,7 +101,6 @@ class MessageFormatter {
       }
     }
 
-    // console.log('message/>', result);
     this._array = result;
     return this;
   }
@@ -117,6 +116,20 @@ class MessageFormatter {
       return;
     }
     this._array = array;
+    return this;
+  }
+
+  /**
+   * Converts the specified string to a usable formatted message.
+   */
+  importFromPlaintext(text: string) {
+    if (text) {
+      this._array = [ [ MessageFragment.text, text ] ];
+    }
+    else {
+      this._array = [];
+    }
+    return this;
   }
 
   /**
