@@ -24,8 +24,10 @@ interface Props {
 class SettingsTab extends React.Component<Props> {
   handleRichTextChange = (_: any, data: DropdownProps) => {
     Settings.setRichInputEnabled(data.value)
-      .then(() => this.props.onRefreshNeeded())
       .catch((error) => console.error('[Settings] Input change:', error));
+    // We don't need to wait for settings to write because our reads always
+    // come from cached in-RAM values.
+    this.props.onRefreshNeeded();
   };
 
   render() {
