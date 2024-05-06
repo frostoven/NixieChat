@@ -84,8 +84,8 @@ class PlainInput extends React.Component<Props> {
     if (textArea) {
       this.draft.loadDraft((value: string) => {
         textArea.value = value;
-      });
-      textArea.onblur = () => this.draft.saveDraft(textArea.value);
+      }, true);
+      textArea.onblur = () => this.draft.saveDraft(textArea);
       this.draftTimer = setInterval(() => this.draft.saveDraft(textArea), 60000);
     }
 
@@ -107,7 +107,7 @@ class PlainInput extends React.Component<Props> {
     // Store draft of the current text so the user does not lose it.
     const textArea: HTMLTextAreaElement = this.props.textBoxRef.current;
     if (textArea) {
-      this.draft.saveDraft(textArea.value);
+      this.draft.saveDraft(textArea);
     }
 
     // Unbind hotkeys.
@@ -126,7 +126,7 @@ class PlainInput extends React.Component<Props> {
     // Store draft of the current text so the user does not lose it.
     const textArea: HTMLTextAreaElement = this.props.textBoxRef.current;
     if (textArea) {
-      this.draft.saveDraft(textArea.value);
+      this.draft.saveDraft(textArea);
     }
   };
 

@@ -100,11 +100,12 @@ class FormattedInput extends React.Component<Props> {
 
     const textArea: HTMLDivElement = this.props.textBoxRef.current;
     if (textArea) {
-      this.draft.loadDraft((value: string) => {
-        textArea.textContent = value;
+      this.draft.loadDraft((nodes: Node[]) => {
+        textArea.textContent = '';
+        textArea.append(...nodes);
       });
       textArea.addEventListener('blur', () => {
-        this.draft.saveDraft(textArea.textContent);
+        this.draft.saveDraft(textArea);
       });
       this.draftTimer = setInterval(() => this.draft.saveDraft(textArea), 60000);
 
@@ -131,7 +132,7 @@ class FormattedInput extends React.Component<Props> {
     // Store draft of the current text so the user does not lose it.
     const textArea: HTMLDivElement = this.props.textBoxRef.current;
     if (textArea) {
-      this.draft.saveDraft(textArea.textContent);
+      this.draft.saveDraft(textArea);
     }
 
     // Unbind hotkeys.
@@ -156,7 +157,7 @@ class FormattedInput extends React.Component<Props> {
     // Store draft of the current text so the user does not lose it.
     const textArea: HTMLDivElement = this.props.textBoxRef.current;
     if (textArea) {
-      this.draft.saveDraft(textArea.textContent);
+      this.draft.saveDraft(textArea);
     }
   };
 
