@@ -2,7 +2,6 @@ import { Socket, io } from 'socket.io-client';
 import EventEmitter from './EventEmitter';
 import { RemoteCrypto } from '../api/RemoteCrypto';
 import { clientEmitterAction } from './clientEmitterAction';
-import { UnencryptedSettingsStore } from '../storage/UnencryptedSettingsStore';
 
 let reconnectionCount = 0;
 const clientEmitter = new EventEmitter();
@@ -23,11 +22,7 @@ function initServerConnection() {
   serverEmitter = io(`${protocol[location.protocol]}//${location.host}`);
 
   async function refreshStorage() {
-    // TODO: Decide if this still makes sense. UnencryptedSettingsStore is shared between
-    //  accounts, and as such is initialised early on. The class is a singleton
-    //  and the init is idempotent, so this is effectively as no-op.
-    const storage = new UnencryptedSettingsStore();
-    await storage.initStorage();
+    // TODO: Consider removing this. It's a relic from older versions.
     clientEmitter.emit(clientEmitterAction.reloadApp);
   }
 
