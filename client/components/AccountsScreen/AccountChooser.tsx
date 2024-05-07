@@ -1,6 +1,5 @@
 import { map } from 'lodash';
 import React from 'react';
-import { NixieStorage } from '../../storage/NixieStorage';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
@@ -41,14 +40,6 @@ const FancyButton = ({ onClick, children }) => {
   );
 };
 
-const DashedOr = () => {
-  return (
-    <div>
-      or
-    </div>
-  );
-};
-
 interface Props {
   onAccountActivated: Function,
 }
@@ -62,7 +53,6 @@ interface State {
 }
 
 class AccountChooser extends React.Component<Props, State> {
-  plaintextStorage = new NixieStorage();
   accountStorage = new EncryptedAccountStorage();
 
   state = {
@@ -145,7 +135,6 @@ class AccountChooser extends React.Component<Props, State> {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
     const allAccounts = this.accountStorage.getAllAccounts();
     const loginCount = this.accountStorage.loginCount;
     const totalAccounts = this.accountStorage.totalAccounts;

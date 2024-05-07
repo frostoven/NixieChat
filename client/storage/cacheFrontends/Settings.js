@@ -1,8 +1,8 @@
-import { NixieStorage } from '../NixieStorage';
+import { UnencryptedSettingsStore } from '../UnencryptedSettingsStore';
 import { clientEmitter } from '../../emitters/comms';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 
-const storage = new NixieStorage();
+const storage = new UnencryptedSettingsStore();
 
 /**
  * This class reads and writes user settings from/to in-RAM cache, and then

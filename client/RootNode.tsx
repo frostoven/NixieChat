@@ -1,7 +1,7 @@
 import React from 'react';
 import './modal';
 import { clientEmitter } from './emitters/comms';
-import { NixieStorage } from './storage/NixieStorage';
+import { UnencryptedSettingsStore } from './storage/UnencryptedSettingsStore';
 import { MainSection } from './components/MainSection';
 import { clientEmitterAction } from './emitters/clientEmitterAction';
 import { EncryptedAccountStorage } from './storage/EncryptedAccountStorage';
@@ -17,7 +17,7 @@ class RootNode extends React.Component {
     bootMessages: [ 'Starting up...' ],
   };
 
-  plaintextStorage = new NixieStorage();
+  plaintextStorage = new UnencryptedSettingsStore();
   accountStorage = new EncryptedAccountStorage();
 
   componentDidMount() {

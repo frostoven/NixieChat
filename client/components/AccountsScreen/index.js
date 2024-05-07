@@ -4,7 +4,9 @@ import { AccountChooser } from './AccountChooser';
 import { AccountCreator } from './AccountCreator';
 import { Settings } from '../../storage/cacheFrontends/Settings';
 import { Button } from 'semantic-ui-react';
-import { NixieStorage } from '../../storage/NixieStorage';
+import {
+  UnencryptedSettingsStore,
+} from '../../storage/UnencryptedSettingsStore';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
@@ -49,7 +51,7 @@ class AccountsScreen extends React.Component {
     onAccountActivated: PropTypes.func.isRequired,
   };
 
-  plaintextStorage = new NixieStorage();
+  plaintextStorage = new UnencryptedSettingsStore();
   accountStorage = new EncryptedAccountStorage();
 
   handleDarkModeToggle = () => {

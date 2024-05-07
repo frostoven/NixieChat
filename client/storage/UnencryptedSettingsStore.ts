@@ -1,17 +1,18 @@
 import { StorageProxy } from './StorageProxy';
 import { CollectionCache } from './types/CollectionCache';
 
-let instance: NixieStorage | null = null;
+let instance: UnencryptedSettingsStore | null = null;
 
-let NX: typeof NixieStorage;
+let NX: typeof UnencryptedSettingsStore;
 
 // TODO: Rename to UnencryptedSettingsStore?
 
 /**
  * Basic storage for situations where key-value pairs suffice (such as whether
- * or not dark mode is enabled, which isn't an account setting).
+ * or not dark mode is enabled, which isn't an account setting). This storage
+ * is shared between accounts.
  */
-class NixieStorage extends StorageProxy {
+class UnencryptedSettingsStore extends StorageProxy {
   static LAST_ACTIVE_ACCOUNT_KEY: string | null = 'last_active_account';
   static SETTINGS_KEY = 'settings_collection';
 
@@ -36,7 +37,7 @@ class NixieStorage extends StorageProxy {
 
   passesChecks() {
     if (!this.initialized) {
-      console.error('NixieStorage queried before initialization.');
+      console.error('UnencryptedSettingsStore queried before initialization.');
       return false;
     }
     return true;
@@ -69,8 +70,8 @@ class NixieStorage extends StorageProxy {
   }
 }
 
-NX = NixieStorage;
+NX = UnencryptedSettingsStore;
 
 export {
-  NixieStorage,
+  UnencryptedSettingsStore,
 };

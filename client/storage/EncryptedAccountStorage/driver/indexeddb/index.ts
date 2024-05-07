@@ -20,9 +20,9 @@ const strict: IDBTransactionOptions = { durability: 'strict' };
  *   relaxed. There is no central place to force strict durability.
  *
  * Other details:
- * - To simplify matters, AccountsStorage uses NixieStorage for unencrypted
+ * - To simplify matters, AccountsStorage uses UnencryptedSettingsStore for unencrypted
  *   data (such as storing non-chat initialization vectors). We do this is
- *   because NixieStorage offers a high level key:value API that 'just works'™
+ *   because UnencryptedSettingsStore offers a high level key:value API that 'just works'™
  *   and thus makes one-off values extremely easy to manage.
  * - Data is encrypted on a per-value level. This means you cannot always do
  *   queries by arbitrary values such as text fields. There are some
