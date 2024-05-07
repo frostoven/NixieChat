@@ -91,10 +91,18 @@ class ActiveChat extends React.Component<Props> {
 
   // === Note: Does not yet send messages. === //
   onSendMessage = (element: HTMLDivElement | HTMLTextAreaElement) => {
-    const formattedMessage =
-      new MessageFormatter()
-        .importFromElement(element)
-        .exportAsReactComponent();
+    // @ts-ignore - Possible failure is part of the test.
+    const textOnly = element.type === 'textarea';
+
+    const formatter = new MessageFormatter();
+    if (textOnly) {
+      // @ts-ignore
+      formatter.importFromPlaintext(element.value);
+    }
+    else {
+      formatter.importFromElement(element);
+    }
+    const formattedMessage = formatter.exportAsReactComponent();
 
     const message = new Message();
     message.time = Date.now();
