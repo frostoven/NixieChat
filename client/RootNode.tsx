@@ -42,6 +42,7 @@ class RootNode extends React.Component {
       bootMessages: [ ...this.state.bootMessages, 'Preparing database...' ],
     });
     await accountStorage.prepareAccountsStore();
+    await this.plaintextStorage.initStorage();
 
     await this.asyncSetState({
       bootMessages: [ ...this.state.bootMessages, 'Loading accounts...' ],
@@ -50,6 +51,14 @@ class RootNode extends React.Component {
 
     this.setState({
       bootComplete: true,
+    }, () => {
+      // To prevent blinding the dark theme folks with a flash of white during
+      // boot, we hardcode boot styles into the loader elements. Those styles
+      // get in the way after boot; remove them here.
+      const bodyBackdrop = document.querySelector('.initial-body-backdrop');
+      const loaderBackdrop = document.querySelector('.initial-loader-backdrop');
+      bodyBackdrop && bodyBackdrop.classList.remove('initial-body-backdrop');
+      loaderBackdrop && loaderBackdrop.classList.remove('initial-loader-backdrop');
     });
   };
 

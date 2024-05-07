@@ -47,12 +47,12 @@
   </script>
 
   <style>
-    body {
+    .initial-body-backdrop {
       padding: 12px;
       background: #52678E linear-gradient(160deg, #52678E00 -268%, #3b6e2f 46%, #000d1d 149%);
     }
 
-    .main-background {
+    .initial-loader-backdrop {
       background-image: url('/assets/img/flare.png');
       position: fixed;
       background-size: cover;
@@ -65,8 +65,8 @@
   </style>
 </head>
 
-<body>
-<div class="main-background">
+<body class="initial-body-backdrop">
+<div class="initial-loader-backdrop">
   <div id="react-element">
     <div style="text-align: center;">
       <h3>Frostoven's NixieChat</h3>
