@@ -7,32 +7,50 @@ let trieCache: EmoTrie;
 // 'tearsOfJoy' rather create one entry using 'tears' and another using 'joy'.
 // This is needed because we use a trie structure, which cannot search for
 // substrings (without pushing the complexity to O(n^2), anyway, thus making it
-// slower than a for loop).
+// slower than a for loop). Also note the aliases that follow - for example, we
+// don't have a definition for 'cry', because 'cry' is an alias of 'sad'.
+//
+// Also, please keep the keys in alphabetical order to ease maintenance. The
+// values on the right don't need to be alphabetical, those will display in the
+// order they're written.
 const emoticonAliases: { [key: string]: number[] } = {
   aubergine: [ name.aubergine ],
   broken: [ name.brokenHeart ],
+  cat: [ name.catFace ],
+  confused: [ name.faceConfused ],
+  folded: [ name.foldedHands ],
   gun: [ name.pistol ],
+  grimace: [ name.faceGrimacing ],
+  hands: [ name.foldedHands, name.thumbsUp, name.thumbsDown ],
   heart: [ name.heart, name.brokenHeart ],
+  monocle: [ name.faceWithMonocle ],
   neutral: [ name.faceNeutral ],
   peach: [ name.peach ],
+  thumbs: [ name.thumbsUp, name.thumbsDown ],
   sad: [
-    name.faceSlightlyFrowning, name.faceSmilingTear, name.faceWithDiagonalMouth,
+    name.faceSlightlyFrowning, name.faceConfused, name.faceNeutral,
+    name.faceWithDiagonalMouth, name.faceLoudlyCrying,
+    name.faceWithPleadingEyes, name.faceSmilingTear,
+
   ],
   salute: [ name.faceSalute ],
   smile: [
     name.faceTearsOfJoy, name.faceSweatSmile, name.faceSlightlySmiling,
     name.faceSmilingTear,
   ],
-  sweat: [ name.faceSweatSmile, name.faceSmilingTear ],
+  sweat: [ name.faceSweatSmile ],
+  tear: [ name.faceTearsOfJoy, name.faceSmilingTear ],
+  thinking: [ name.faceThinking, name.faceWithMonocle ],
 };
 
 // Aliases
+emoticonAliases.cry = [ ...emoticonAliases.sad, name.faceTearsOfJoy ];
 emoticonAliases.eggplant = emoticonAliases.aubergine;
 emoticonAliases.laugh = emoticonAliases.smile;
-emoticonAliases.cry = emoticonAliases.sad;
+emoticonAliases.pistol = emoticonAliases.gun;
+emoticonAliases.thought = emoticonAliases.thinking;
 emoticonAliases.weapon = emoticonAliases.gun;
 emoticonAliases.water = emoticonAliases.gun;
-emoticonAliases.pistol = emoticonAliases.gun;
 
 function findEmoticon(input: string, packId: string) {
   // Some performance.now() tests from my Ryzen 7 3750H laptop:
