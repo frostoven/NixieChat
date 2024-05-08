@@ -9,6 +9,7 @@ import {
   DropdownMenu, Form,
 } from 'semantic-ui-react';
 import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
+import { findEmoticon } from '../../../emoticonConfig/emoticonFinder';
 
 const TONE_PREFIX = 'assets/emo/1-Noto/emoji_u';
 const MAX_EMOTICONS_PER_ROW = 9;
@@ -176,6 +177,14 @@ class EmoticonTab extends React.Component<Props> {
     const style = getAllStyles()[activeStyle];
     const { availableEmoticons } = style;
 
+    let displayedItems: number[];
+    if (this.state.searchText) {
+      displayedItems = findEmoticon(this.state.searchText, style.packId);
+    }
+    else {
+      displayedItems = availableEmoticons;
+    }
+
     const viewportWidth = (window.innerWidth / window.devicePixelRatio) * 0.35;
     const itemsPerRow = Math.min(
       Math.ceil(viewportWidth / MAX_EMOTICONS_PER_ROW), MAX_EMOTICONS_PER_ROW,
@@ -183,8 +192,8 @@ class EmoticonTab extends React.Component<Props> {
 
     const result: JSX.Element[] = [];
     let currentLine: JSX.Element[] = [];
-    for (let i = 0, len = availableEmoticons.length; i < len; i++) {
-      const unicode: number = availableEmoticons[i];
+    for (let i = 0, len = displayedItems.length; i < len; i++) {
+      const unicode: number = displayedItems[i];
       currentLine.push(
         <div key={`${unicode}-${tone}`} style={emoticonStyle}>
           <Emoticon

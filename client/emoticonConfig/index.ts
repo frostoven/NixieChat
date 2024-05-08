@@ -94,7 +94,7 @@ function getAllStyles() {
   return emoticonConfig;
 }
 
-function getStyleById(packId: string) {
+function getStyleById(packId: string): StyleManifest {
   return styleById[packId];
 }
 
