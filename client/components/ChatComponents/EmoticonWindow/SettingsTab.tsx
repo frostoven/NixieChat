@@ -5,7 +5,9 @@ import {
   FormSelect,
 } from 'semantic-ui-react';
 import { ContextualHelp } from '../../Generic/ContextualHelp';
-import { Settings } from '../../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../../storage/cacheFrontends/UnencryptedSettings';
 
 const containerStyle: React.CSSProperties = {
   textAlign: 'center',
@@ -23,7 +25,7 @@ interface Props {
 
 class SettingsTab extends React.Component<Props> {
   handleRichTextChange = (_: any, data: DropdownProps) => {
-    Settings.setRichInputEnabled(data.value)
+    UnencryptedSettings.setRichInputEnabled(data.value)
       .catch((error) => console.error('[Settings] Input change:', error));
     // We don't need to wait for settings to write because our reads always
     // come from cached in-RAM values.
@@ -31,8 +33,8 @@ class SettingsTab extends React.Component<Props> {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled() || false;
-    const richInputEnabled = Settings.richInputEnabled() || false;
+    const darkMode = UnencryptedSettings.isDarkModeEnabled() || false;
+    const richInputEnabled = UnencryptedSettings.richInputEnabled() || false;
 
     return (
       <div style={containerStyle}>

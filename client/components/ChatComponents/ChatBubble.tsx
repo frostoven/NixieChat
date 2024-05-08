@@ -3,7 +3,9 @@ import { Message } from '../../storage/EncryptedChat/Message';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 
 const accountStorage = new EncryptedAccountStorage();
 
@@ -85,7 +87,7 @@ class ChatBubble extends React.Component<Props> {
   render() {
     console.log('Rendering bubble', this.props.bubbleId);
     const { message } = this.props;
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
 
     const style = styleDirectionIsOutbound.get(message.isLocal);
     const bubbleStyle = darkMode ? style.darkMode : style.lightMode;

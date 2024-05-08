@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Icon, Popup } from 'semantic-ui-react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 
 class ContextualHelp extends React.Component {
   static propTypes = {
@@ -13,7 +15,7 @@ class ContextualHelp extends React.Component {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     return (
       <Popup
         inverted={!darkMode}

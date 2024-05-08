@@ -1,6 +1,8 @@
 import React from 'react';
 import { Form } from 'semantic-ui-react';
-import { Settings } from '../../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../../storage/cacheFrontends/UnencryptedSettings';
 
 const containerStyle: React.CSSProperties = {
   textAlign: 'center',
@@ -14,7 +16,7 @@ const formStyle: React.CSSProperties = {
 
 class StickersTab extends React.Component {
   render() {
-    const darkMode = Settings.isDarkModeEnabled() || false;
+    const darkMode = UnencryptedSettings.isDarkModeEnabled() || false;
 
     return (
       <div style={containerStyle}>

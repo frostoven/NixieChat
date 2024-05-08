@@ -1,5 +1,7 @@
 import React from 'react';
-import { Settings } from '../../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../../storage/cacheFrontends/UnencryptedSettings';
 import { Tab, TabPane, TabProps } from 'semantic-ui-react';
 import { EmoticonTab } from './EmoticonTab';
 import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
@@ -23,19 +25,19 @@ interface Props {
 
 class EmoticonWindow extends React.Component<Props> {
   state = {
-    activeTab: Settings.lastEmoticonTab(),
+    activeTab: UnencryptedSettings.lastEmoticonTab(),
   };
 
   handleTabChange = (_: any, data: TabProps) => {
     const activeTab = data.activeIndex;
-    Settings.setActiveEmoticonTab(activeTab).catch(console.error);
+    UnencryptedSettings.setActiveEmoticonTab(activeTab).catch(console.error);
     this.setState({
       activeTab,
     });
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const { activeTab } = this.state;
     return (
       <div>

@@ -5,7 +5,9 @@ import {
   getSafeRandomIntInclusive,
   sha256,
 } from './utils';
-import { Settings } from './storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from './storage/cacheFrontends/UnencryptedSettings';
 
 declare global {
   interface Window {
@@ -13,7 +15,7 @@ declare global {
     $floatingForm: Modal;
     $nixieDebugUtils: {
       // Allows experimenting with general settings.
-      settings: Settings,
+      settings: UnencryptedSettings,
       // Useful util stuff.
       getRandomBits: typeof getRandomBits,
       get256RandomBits: typeof get256RandomBits,

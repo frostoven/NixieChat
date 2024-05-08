@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
@@ -192,7 +194,7 @@ class ActiveChat extends React.Component<Props> {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const bgStyle = darkMode ? chatBgStyleInverted : chatBgStyle;
     return (
       <>

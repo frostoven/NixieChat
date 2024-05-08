@@ -1,5 +1,7 @@
 import React from 'react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { ChatBoxButton } from './ChatBoxButton';
 import { EmoticonWindow } from './EmoticonWindow';
 import { StyleManifest } from '../../emoticonConfig/types/StyleManifest';
@@ -102,7 +104,7 @@ class ChatBox extends React.Component<Props> {
   onInsertEmoticon = (
     unicode: number, styleManifest: StyleManifest, path: string, tone: number,
   ) => {
-    const richInputEnabled = Settings.richInputEnabled();
+    const richInputEnabled = UnencryptedSettings.richInputEnabled();
     if (!richInputEnabled) {
       // Note: We can *partially* support this (but cannot mix packs / tones in
       // one message). Whether we should spend the time is still to be decided.
@@ -137,8 +139,8 @@ class ChatBox extends React.Component<Props> {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
-    const richInputEnabled = Settings.richInputEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
+    const richInputEnabled = UnencryptedSettings.richInputEnabled();
     const themeStyle = darkMode ? containerStyleDark : containerStyleLight;
 
     let InputComponent = richInputEnabled ? FormattedInput : PlainInput;

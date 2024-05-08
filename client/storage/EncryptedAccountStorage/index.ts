@@ -19,7 +19,7 @@ import {
   importRsaPrivateKey,
   importRsaPublicKey,
 } from '../../encryption/rsa';
-import { Settings } from '../cacheFrontends/Settings';
+import { UnencryptedSettings } from '../cacheFrontends/UnencryptedSettings';
 import { getPasswordStore } from './getPasswordStore';
 import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { clientEmitter, initServerConnection } from '../../emitters/comms';
@@ -106,7 +106,7 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
       // average 0.7ms for an account to decrypt on my 2019 era laptop, or
       // 0.4ms post-boot).
       options.password = '0000';
-      await Settings.setOneOrMoreAccountsUnencrypted(true);
+      await UnencryptedSettings.setOneOrMoreAccountsUnencrypted(true);
     }
 
     // This is a way of uniquely identifying the account without needing the
@@ -169,7 +169,8 @@ class EncryptedAccountStorage /*implements StoreInterface*/ {
     }
 
     this.totalAccounts = accounts.length;
-    const oneOrMoreAccountsUnencrypted = Settings.oneOrMoreAccountsUnencrypted();
+    const oneOrMoreAccountsUnencrypted =
+      UnencryptedSettings.oneOrMoreAccountsUnencrypted();
 
     this.loginCount = 0;
 

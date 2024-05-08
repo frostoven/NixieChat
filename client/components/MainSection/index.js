@@ -7,7 +7,9 @@ import {
   Sidebar,
 } from 'semantic-ui-react';
 import { ContactsAndChatGrid } from '../ChatComponents/ContactsAndChatGrid';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
@@ -30,7 +32,7 @@ const NixieHeader = ({ style } = {}) => {
 };
 
 const Pusher = (props) => {
-  const darkMode = Settings.isDarkModeEnabled() || false;
+  const darkMode = UnencryptedSettings.isDarkModeEnabled() || false;
   const { children, sidebarItems, onPusherClick, visible } = props;
   return (
     <Sidebar.Pushable style={{ ...overlayStyle, zIndex: 5, right: -10 }}>
@@ -56,7 +58,7 @@ const Pusher = (props) => {
 };
 
 const NavBarContents = (props) => {
-  const darkMode = Settings.isDarkModeEnabled();
+  const darkMode = UnencryptedSettings.isDarkModeEnabled();
   const { onToggle, rightItems } = props;
   return (
     <>
@@ -136,7 +138,7 @@ class NavBar extends React.Component {
 }
 
 const sidebarItems = () => {
-  const darkMode = Settings.isDarkModeEnabled();
+  const darkMode = UnencryptedSettings.isDarkModeEnabled();
   return [
     {
       key: 'heading',
@@ -172,7 +174,7 @@ const sidebarItems = () => {
           <Icon name={darkMode ? 'toggle on' : 'toggle off'}/>
         </Container>
       ),
-      onClick: () => Settings.toggleDarkMode(true),
+      onClick: () => UnencryptedSettings.toggleDarkMode(true),
     },
   ];
 };

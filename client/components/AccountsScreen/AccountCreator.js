@@ -8,7 +8,9 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import { createSigningKeyPair } from '../../encryption';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { getSafeRandomIntInclusive } from '../../utils';
 import { NxField } from '../Generic/NxField';
 import {
@@ -217,7 +219,7 @@ class AccountCreator extends React.Component {
       headerText = 'Creating a new local account';
     }
 
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     return (
       <Segment style={{ textAlign: 'left' }} inverted={!darkMode}>
         <Header>{headerText}</Header>
@@ -226,7 +228,6 @@ class AccountCreator extends React.Component {
         <br/>
         <br/>
         <Form>
-
           <NxField
             label="Account Name (only you can see this)"
             help={

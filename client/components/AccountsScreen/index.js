@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { AccountChooser } from './AccountChooser';
 import { AccountCreator } from './AccountCreator';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { Button } from 'semantic-ui-react';
 import {
   UnencryptedSettingsStore,
@@ -55,14 +57,13 @@ class AccountsScreen extends React.Component {
   accountStorage = new EncryptedAccountStorage();
 
   handleDarkModeToggle = () => {
-    Settings.toggleDarkMode()
-      .then(() => this.forceUpdate())
-      .catch(console.error);
+    UnencryptedSettings.toggleDarkMode().catch(console.error);
+    this.forceUpdate();
   };
 
   render() {
     const { onAccountActivated } = this.props;
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const formStyle = darkMode ? chatBgStyleInverted : chatBgStyle;
     const totalAccounts = this.accountStorage.totalAccounts;
 

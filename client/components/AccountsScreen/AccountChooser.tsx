@@ -7,7 +7,9 @@ import {
   AccountCache,
 } from '../../storage/EncryptedAccountStorage/types/AccountCache';
 import { Icon, Message, Segment } from 'semantic-ui-react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { ContextualHelp } from '../Generic/ContextualHelp';
 import { PasswordChooser } from '../Generic/PasswordChooser';
 import { AccountCreator } from './AccountCreator';
@@ -27,7 +29,7 @@ const segmentStyle: React.CSSProperties = {
 };
 
 const FancyButton = ({ onClick, children }) => {
-  const darkMode = Settings.isDarkModeEnabled();
+  const darkMode = UnencryptedSettings.isDarkModeEnabled();
   return (
     <Segment
       inverted={!darkMode}

@@ -5,7 +5,9 @@
 import React from 'react';
 import { Input, Modal as SemanticModal } from 'semantic-ui-react';
 import { Button } from 'semantic-ui-react';
-import { Settings } from '../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../storage/cacheFrontends/UnencryptedSettings';
 import PropTypes from 'prop-types';
 
 /**
@@ -561,7 +563,7 @@ export default class Modal extends React.Component {
     const className = this.props.className || '';
     const selected = this.state.selectionIndex || 0;
     const modalCountText = this._getModalCountText();
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const happyTitle = this.props.happyTitle ? 'happy' : '';
 
     // Remove props not intended to flow lower down the component chain.

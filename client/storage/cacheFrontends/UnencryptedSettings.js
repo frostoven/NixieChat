@@ -13,8 +13,12 @@ const storage = new UnencryptedSettingsStore();
  * The core motivation for using this class is to allow React to do DB
  * operations without ever having to worry about async operations or side
  * effects.
+ *
+ * As the name suggests, the items stored here are not encrypted. As such, it
+ * only contains information safe to not encrypt (such as whether or not dark
+ * mode is enabled).
  */
-class Settings {
+class UnencryptedSettings {
   static isDarkModeEnabled() {
     const cache = storage.settingsCache || {};
     return cache.darkModeEnabled || false;
@@ -141,8 +145,8 @@ class Settings {
   }
 }
 
-window.$nixieDebugUtils.settings = Settings;
+window.$nixieDebugUtils.settings = UnencryptedSettings;
 
 export {
-  Settings,
+  UnencryptedSettings,
 };

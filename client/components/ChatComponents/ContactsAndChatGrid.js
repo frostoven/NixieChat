@@ -2,7 +2,9 @@ import React from 'react';
 import { Grid } from 'semantic-ui-react';
 import { OngoingChatsList } from './OngoingChatsList';
 import { ActiveChat } from './ActiveChat';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
@@ -84,7 +86,7 @@ class ContactsAndChatGrid extends React.Component {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const contacts = accountsStorage.getActiveContacts();
 
     const { accountName, messageDetachableId } = this.state;

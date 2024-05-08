@@ -1,7 +1,9 @@
 import React from 'react';
 import { AutoKeyMap } from '../../../events/AutoKeyMap';
 import { DraftIo } from './DraftIo';
-import { Settings } from '../../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../../storage/cacheFrontends/UnencryptedSettings';
 import { CaretControl } from '../../../richInput/CaretControl';
 
 // TODO: Move text box themes to a central point.
@@ -241,7 +243,7 @@ class FormattedInput extends React.Component<Props> {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const textBoxTheme = darkMode ? textBoxStyleDark : textBoxStyleLight;
     // const themeStyle = darkMode ? containerStyleDark : containerStyleLight;
 

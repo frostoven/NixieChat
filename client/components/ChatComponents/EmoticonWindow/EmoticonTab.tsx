@@ -1,5 +1,7 @@
 import React from 'react';
-import { Settings } from '../../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../../storage/cacheFrontends/UnencryptedSettings';
 import { getAllStyles } from '../../../emoticonConfig';
 import { Emoticon } from '../Emoticon';
 import {
@@ -142,7 +144,7 @@ interface Props {
 
 class EmoticonTab extends React.Component<Props> {
   state = {
-    activeStyle: Settings.lastActiveEmoticonStyle(),
+    activeStyle: UnencryptedSettings.lastActiveEmoticonStyle(),
     searchText: '',
   };
 
@@ -167,12 +169,12 @@ class EmoticonTab extends React.Component<Props> {
   handleEmoticonClick = (
     unicode: number, styleManifest: StyleManifest, path: string,
   ) => {
-    const tone = Settings.getUserTone();
+    const tone = UnencryptedSettings.getUserTone();
     this.props.onInsertEmoticon(unicode, styleManifest, path, tone);
   };
 
   drawEmoticonList = () => {
-    const tone = Settings.getUserTone();
+    const tone = UnencryptedSettings.getUserTone();
     const activeStyle = this.state.activeStyle;
     const style = getAllStyles()[activeStyle];
     const { availableEmoticons } = style;
@@ -234,14 +236,14 @@ class EmoticonTab extends React.Component<Props> {
   };
 
   handleStyleChange = (_: any, result: DropdownItemProps) => {
-    Settings.setActiveEmoticonStyle(result.value).catch(console.error);
+    UnencryptedSettings.setActiveEmoticonStyle(result.value).catch(console.error);
     this.setState({
       activeStyle: result.value,
     });
   };
 
   handleToneChange = (toneNumber: number) => {
-    Settings.setUserTone(toneNumber).catch(console.error);
+    UnencryptedSettings.setUserTone(toneNumber).catch(console.error);
     this.forceUpdate();
   };
 
@@ -263,10 +265,10 @@ class EmoticonTab extends React.Component<Props> {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     // const tone = Settings.getUserTone();
 
-    const richInputEnabled = Settings.richInputEnabled() || false;
+    const richInputEnabled = UnencryptedSettings.richInputEnabled() || false;
     if (!richInputEnabled) {
       return (
         <Form inverted={!darkMode} style={emoticonsDisabledStyle}>
@@ -280,7 +282,7 @@ class EmoticonTab extends React.Component<Props> {
             </label>
           </Form.Field>
         </Form>
-      )
+      );
     }
 
     const { searchText, activeStyle } = this.state;

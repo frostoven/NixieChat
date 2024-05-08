@@ -1,5 +1,7 @@
 import React from 'react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 
 const baseStyle: React.CSSProperties = {
   display: 'inline-block',
@@ -35,7 +37,7 @@ interface Props {
 
 class ChatBoxButton extends React.Component<Props> {
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const { style, width, onClick } = this.props;
     let containerStyle = darkMode ? darkModeStyle : lightModeStyle;
 

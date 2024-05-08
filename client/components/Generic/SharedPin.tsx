@@ -8,7 +8,9 @@ import {
   uint8ArrayToHexString,
 } from '../../utils';
 import { Segment } from 'semantic-ui-react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 
 // The user has two options: view the full SHA-256 hash, or view a weaker
 // simplified pin. The following table is used to generate that weaker pin.
@@ -297,7 +299,7 @@ class SharedPin extends React.Component<Props> {
   }
 
   genFullPin = () => {
-    const darkMode = Settings.isDarkModeEnabled() || false;
+    const darkMode = UnencryptedSettings.isDarkModeEnabled() || false;
     let text = 'Show Full Pin';
     const style = { ...fullPinStyle };
 

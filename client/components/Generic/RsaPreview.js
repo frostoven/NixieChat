@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { Accordion, Icon, Segment } from 'semantic-ui-react';
 import randomart from '@frostoven/randomart';
 
@@ -99,7 +101,7 @@ class RsaPreview extends React.Component {
     super(props);
     this.state = {
       showAdvancedInfo: false,
-      artView: Settings.preferRsaArtView(),
+      artView: UnencryptedSettings.preferRsaArtView(),
       showOwnKey: false,
     };
   }
@@ -183,7 +185,7 @@ class RsaPreview extends React.Component {
     this.setState({
       artView: !this.state.artView,
     }, () => {
-      Settings.setPreferRsaArtView(this.state.artView).catch(console.error);
+      UnencryptedSettings.setPreferRsaArtView(this.state.artView).catch(console.error);
     });
   };
 
@@ -194,7 +196,7 @@ class RsaPreview extends React.Component {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const { showAdvancedInfo, showOwnKey } = this.state;
     return (
       <Segment inverted={!darkMode}>

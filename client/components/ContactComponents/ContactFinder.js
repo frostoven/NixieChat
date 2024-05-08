@@ -7,7 +7,9 @@ import {
   Message,
   Segment,
 } from 'semantic-ui-react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
 import {
   EncryptedAccountStorage,
@@ -190,7 +192,7 @@ class ContactFinder extends React.Component {
       );
     }
 
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const {
       localGreetingName,
       contactPublicName,

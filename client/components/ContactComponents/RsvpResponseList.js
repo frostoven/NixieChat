@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { InvitationResponse } from '../../../shared/InvitationResponse';
 import { Button, Form, List, Loader } from 'semantic-ui-react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { RsaPreview } from '../Generic/RsaPreview';
 import { SharedPin } from '../Generic/SharedPin';
 import { clientEmitter } from '../../emitters/comms';
@@ -10,7 +12,7 @@ import { clientEmitterAction } from '../../emitters/clientEmitterAction';
 import { Invitation } from '../../api/Invitation';
 import { RemoteCrypto } from '../../api/RemoteCrypto';
 import {
-  EncryptedAccountStorage
+  EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 
 const accountStorage = new EncryptedAccountStorage();
@@ -186,7 +188,7 @@ class RsvpResponseList extends React.Component {
   render() {
     /** @type InvitationInfo[] */
     const invitationIds = this.props.invitationIds;
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
 
     const { selected } = this.state;
     const leftSide = [

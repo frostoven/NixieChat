@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button, Form, Segment } from 'semantic-ui-react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { InvitationResponse } from '../../../shared/InvitationResponse';
 import {
   EncryptedAccountStorage,
@@ -214,7 +216,7 @@ class ReceiveInvitation extends React.Component {
     const {
       greetingName, greetingMessage, waitingForConfirmation,
     } = this.state;
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
 
     const {
       time,

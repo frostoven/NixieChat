@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Form, Input } from 'semantic-ui-react';
 import { ContextualHelp } from './ContextualHelp';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 
 class NxField extends React.Component {
   static propTypes = {
@@ -40,7 +42,7 @@ class NxField extends React.Component {
       return null;
     }
 
-    const darkMode = Settings.isDarkModeEnabled() || false;
+    const darkMode = UnencryptedSettings.isDarkModeEnabled() || false;
 
     const {
       label, help, rightSideComponent, placeholder, value, autoFocus,

@@ -1,7 +1,9 @@
 import React from 'react';
 import { AutoKeyMap } from '../../../events/AutoKeyMap';
 import { DraftIo } from './DraftIo';
-import { Settings } from '../../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../../storage/cacheFrontends/UnencryptedSettings';
 
 // TODO: Move text box themes to a central point.
 const darkTheme: React.CSSProperties = {
@@ -165,7 +167,7 @@ class PlainInput extends React.Component<Props> {
   };
 
   render() {
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const textBoxTheme = darkMode ? textBoxStyleDark : textBoxStyleLight;
     // const themeStyle = darkMode ? containerStyleDark : containerStyleLight;
 

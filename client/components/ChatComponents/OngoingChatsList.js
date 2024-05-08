@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 
 const accountsStorage = new EncryptedAccountStorage();
 
@@ -55,7 +57,7 @@ class OngoingChatsList extends React.Component {
 
   genList = () => {
     const result = [];
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const chatList = accountsStorage.getActiveChats();
     const accountName = accountsStorage.getActiveAccount().accountName;
     for (let i = 0, len = chatList.length; i < len; i++) {

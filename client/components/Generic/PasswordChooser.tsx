@@ -8,7 +8,9 @@ import {
   Message,
   Segment,
 } from 'semantic-ui-react';
-import { Settings } from '../../storage/cacheFrontends/Settings';
+import {
+  UnencryptedSettings,
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 import { AutoKeyMap } from '../../events/AutoKeyMap';
 
 const capsLockWarnStyle: React.CSSProperties = {
@@ -72,7 +74,7 @@ class PasswordChooser extends React.Component<Props> {
     } = this.props;
     const { password, confirmPassword, error } = this.state;
     const labelText = noConfirm ? 'Password' : 'Password (leave empty to skip)';
-    const darkMode = Settings.isDarkModeEnabled();
+    const darkMode = UnencryptedSettings.isDarkModeEnabled();
     return (
       <Segment style={{ textAlign: 'left' }} inverted={!darkMode}>
         <Header>{header}</Header>
