@@ -1,5 +1,5 @@
 import React from 'react';
-import { AutoKeyMap } from '../../../events/AutoKeyMap';
+import { AutoKeyMap } from '../../../frostLib/AutoKeyMap';
 import { DraftIo } from './DraftIo';
 import {
   UnencryptedSettings,

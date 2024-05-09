@@ -11,7 +11,7 @@ import {
 import {
   UnencryptedSettings,
 } from '../../storage/cacheFrontends/UnencryptedSettings';
-import { AutoKeyMap } from '../../events/AutoKeyMap';
+import { AutoKeyMap } from '../../frostLib/AutoKeyMap';
 
 const capsLockWarnStyle: React.CSSProperties = {
   padding: 10,

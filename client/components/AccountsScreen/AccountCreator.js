@@ -17,7 +17,7 @@ import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 import { PasswordChooser } from '../Generic/PasswordChooser';
-import { AutoKeyMap } from '../../events/AutoKeyMap';
+import { AutoKeyMap } from '../../frostLib/AutoKeyMap';
 import { randomAccountName } from '../../../shared/textGen';
 
 const accountStore = new EncryptedAccountStorage();
