@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import './modal';
+import './frostLib/modal';
 import { RootNode } from './RootNode';
 import { Dropdown } from 'semantic-ui-react';
 

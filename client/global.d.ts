@@ -1,4 +1,4 @@
-import Modal from './modal/Modal';
+import Modal from './frostLib/modal/Modal';
 import {
   get256RandomBits,
   getRandomBits,

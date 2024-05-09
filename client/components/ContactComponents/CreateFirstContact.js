@@ -1,7 +1,7 @@
 import React from 'react';
 import { LargeCircleIconButton } from '../Generic/LargeCircleIconButton';
 import { Grid, GridColumn } from 'semantic-ui-react';
-import { showAddContactDialog } from '../../modal/nixieDialogs';
+import { showAddContactDialog } from '../../frostLib/modal/nixieDialogs';
 import {
   EncryptedAccountStorage
 } from '../../storage/EncryptedAccountStorage';

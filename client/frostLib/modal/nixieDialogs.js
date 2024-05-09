@@ -1,8 +1,10 @@
 import React from 'react';
-import { ContactFinder } from '../components/ContactComponents/ContactFinder';
 import {
-  ReceiveInvitation,
-} from '../components/ContactComponents/ReceiveInvitation';
+  ContactFinder,
+} from '../../components/ContactComponents/ContactFinder';
+import {
+  ReceiveInvitation
+} from '../../components/ContactComponents/ReceiveInvitation';
 
 function showAddContactDialog(ownPublicName) {
   let header = 'Add Contact';

@@ -3,12 +3,12 @@
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Input, Modal as SemanticModal } from 'semantic-ui-react';
 import { Button } from 'semantic-ui-react';
 import {
-  UnencryptedSettings,
-} from '../storage/cacheFrontends/UnencryptedSettings';
-import PropTypes from 'prop-types';
+  UnencryptedSettings
+} from '../../storage/cacheFrontends/UnencryptedSettings';
 
 /**
  * @typedef {{

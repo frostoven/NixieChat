@@ -1,5 +1,5 @@
 import React from 'react';
-import './modal';
+import './frostLib/modal';
 import { clientEmitter } from './emitters/comms';
 import { UnencryptedSettingsStore } from './storage/UnencryptedSettingsStore';
 import { MainSection } from './components/MainSection';

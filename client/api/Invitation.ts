@@ -1,7 +1,7 @@
 import { EncryptedAccountStorage } from '../storage/EncryptedAccountStorage';
 import { exportRsaPublicKey, importRsaPublicKey } from '../encryption/rsa';
 import { clientEmitter } from '../emitters/comms';
-import { showInvitationDialog } from '../modal/nixieDialogs';
+import { showInvitationDialog } from '../frostLib/modal/nixieDialogs';
 import { InvitationResponse } from '../../shared/InvitationResponse';
 import { getDiffieHellman } from 'diffie-hellman';
 import { KeyStrengthFriendly } from '../../shared/KeyStrength';
