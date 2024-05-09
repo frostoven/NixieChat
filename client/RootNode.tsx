@@ -5,6 +5,7 @@ import { UnencryptedSettingsStore } from './storage/UnencryptedSettingsStore';
 import { MainSection } from './components/MainSection';
 import { clientEmitterAction } from './emitters/clientEmitterAction';
 import { EncryptedAccountStorage } from './storage/EncryptedAccountStorage';
+import { microRouter } from './microRouter';
 
 const bootStyle: React.CSSProperties = {
   textAlign: 'center',
@@ -21,6 +22,7 @@ class RootNode extends React.Component {
   accountStorage = new EncryptedAccountStorage();
 
   componentDidMount() {
+    microRouter.init();
     this.watchBoot().catch(console.error);
     clientEmitter.on(clientEmitterAction.reloadApp, async () => {
       this.watchBoot().then(() => {

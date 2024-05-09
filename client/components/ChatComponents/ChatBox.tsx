@@ -9,6 +9,7 @@ import { PlainInput } from './UserInput/PlainInput';
 import { FormattedInput } from './UserInput/FormattedInput';
 import { CaretControl } from '../../richInput/CaretControl';
 import { generateEmoticon } from '../../richInput/generateEmoticon';
+import { microRouter } from '../../microRouter';
 
 const ICON_PATH = 'assets/icons';
 
@@ -85,6 +86,7 @@ class ChatBox extends React.Component<Props> {
       this.setState({
         showEmoticonWindow: false,
       }, () => {
+        microRouter.back();
         if (this.textBoxRef.current) {
           this.textBoxRef.current.focus();
         }
@@ -98,6 +100,17 @@ class ChatBox extends React.Component<Props> {
   toggleEmoticonWindow = () => {
     this.setState({
       showEmoticonWindow: !this.state.showEmoticonWindow,
+    }, () => {
+      if (this.state.showEmoticonWindow) {
+        microRouter.changeRoute({
+          to: 'options',
+          nav: { back: 'chat' },
+          onBackTriggered: () => this.onBack(),
+        });
+      }
+      else {
+        microRouter.back();
+      }
     });
   };
 

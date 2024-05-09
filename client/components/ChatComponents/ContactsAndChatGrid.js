@@ -9,6 +9,7 @@ import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 import { CreateFirstContact } from '../ContactComponents/CreateFirstContact';
+import { microRouter } from '../../microRouter';
 
 const accountsStorage = new EncryptedAccountStorage();
 
@@ -85,6 +86,21 @@ class ContactsAndChatGrid extends React.Component {
     });
   };
 
+  onOpenChat = ({ accountName, messageDetachableId }) => {
+    this.setState({
+      accountName,
+      messageDetachableId,
+    });
+
+    microRouter.changeRoute({
+      to: 'chat',
+      nav: { back: '/' },
+      onBackTriggered: () => {
+        this.onCloseChat();
+      },
+    });
+  };
+
   render() {
     const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const contacts = accountsStorage.getActiveContacts();
@@ -131,12 +147,7 @@ class ContactsAndChatGrid extends React.Component {
             style={columnLeftStyle}
           >
             <OngoingChatsList
-              onOpenChat={({ accountName, messageDetachableId }) => {
-                this.setState({
-                  accountName,
-                  messageDetachableId,
-                });
-              }}
+              onOpenChat={this.onOpenChat}
             />
           </Grid.Column>
           <Grid.Column
