@@ -9,7 +9,7 @@ import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 import { CreateFirstContact } from '../ContactComponents/CreateFirstContact';
-import { microRouter } from '../../microRouter';
+import { microRouter } from '../../frostLib/microRouter';
 
 const accountsStorage = new EncryptedAccountStorage();
 

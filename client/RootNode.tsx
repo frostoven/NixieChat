@@ -5,7 +5,7 @@ import { UnencryptedSettingsStore } from './storage/UnencryptedSettingsStore';
 import { MainSection } from './components/MainSection';
 import { clientEmitterAction } from './emitters/clientEmitterAction';
 import { EncryptedAccountStorage } from './storage/EncryptedAccountStorage';
-import { microRouter } from './microRouter';
+import { microRouter } from './frostLib/microRouter';
 
 const bootStyle: React.CSSProperties = {
   textAlign: 'center',

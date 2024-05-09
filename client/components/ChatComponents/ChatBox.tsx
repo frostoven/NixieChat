@@ -9,7 +9,7 @@ import { PlainInput } from './UserInput/PlainInput';
 import { FormattedInput } from './UserInput/FormattedInput';
 import { CaretControl } from '../../richInput/CaretControl';
 import { generateEmoticon } from '../../richInput/generateEmoticon';
-import { microRouter } from '../../microRouter';
+import { microRouter } from '../../frostLib/microRouter';
 
 const ICON_PATH = 'assets/icons';
 
