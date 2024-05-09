@@ -7,8 +7,8 @@ import { EmoticonWindow } from './EmoticonWindow';
 import { StyleManifest } from '../../emoticonConfig/types/StyleManifest';
 import { PlainInput } from './UserInput/PlainInput';
 import { FormattedInput } from './UserInput/FormattedInput';
-import { CaretControl } from '../../richInput/CaretControl';
-import { generateEmoticon } from '../../richInput/generateEmoticon';
+import { CaretControl } from '../../frostLib/richInput/CaretControl';
+import { generateEmoticon } from '../../frostLib/richInput/generateEmoticon';
 import { microRouter } from '../../frostLib/microRouter';
 
 const ICON_PATH = 'assets/icons';

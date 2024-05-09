@@ -1,6 +1,10 @@
+/**
+ * This file released by Frostoven under the MIT License.
+ */
+
 import React from 'react';
-import { getEmoticonUrl, getStyleById } from '../emoticonConfig';
-import { Emoticon } from '../components/ChatComponents/Emoticon';
+import { getEmoticonUrl, getStyleById } from '../../emoticonConfig';
+import { Emoticon } from './react/Emoticon';
 import { EmoticonElement, generateEmoticon } from './generateEmoticon';
 
 enum MessageFragment {

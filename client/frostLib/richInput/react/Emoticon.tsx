@@ -1,6 +1,10 @@
+/**
+ * This file released by Frostoven under the MIT License.
+ */
+
 import React from 'react';
-import { StyleManifest } from '../../emoticonConfig/types/StyleManifest';
-import { getEmoticonUrl } from '../../emoticonConfig';
+import { StyleManifest } from '../../../emoticonConfig/types/StyleManifest';
+import { getEmoticonUrl } from '../../../emoticonConfig';
 
 interface Props {
   unicode: number,

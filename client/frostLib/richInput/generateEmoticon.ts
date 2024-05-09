@@ -1,4 +1,8 @@
-import { StyleManifest } from '../emoticonConfig/types/StyleManifest';
+/**
+ * This file released by Frostoven under the MIT License.
+ */
+
+import { StyleManifest } from '../../emoticonConfig/types/StyleManifest';
 
 /* This exists solely for auto-completion. */
 interface EmoticonElement extends HTMLImageElement {

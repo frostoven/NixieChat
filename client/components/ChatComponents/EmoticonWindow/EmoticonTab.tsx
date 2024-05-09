@@ -3,7 +3,7 @@ import {
   UnencryptedSettings,
 } from '../../../storage/cacheFrontends/UnencryptedSettings';
 import { getAllStyles } from '../../../emoticonConfig';
-import { Emoticon } from '../Emoticon';
+import { Emoticon } from '../../../frostLib/richInput/react/Emoticon';
 import {
   Dropdown, DropdownDivider,
   DropdownHeader,

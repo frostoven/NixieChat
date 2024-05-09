@@ -4,7 +4,7 @@ import { DraftIo } from './DraftIo';
 import {
   UnencryptedSettings,
 } from '../../../storage/cacheFrontends/UnencryptedSettings';
-import { CaretControl } from '../../../richInput/CaretControl';
+import { CaretControl } from '../../../frostLib/richInput/CaretControl';
 
 // TODO: Move text box themes to a central point.
 const darkTheme: React.CSSProperties = {
