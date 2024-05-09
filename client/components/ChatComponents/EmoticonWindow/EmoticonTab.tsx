@@ -181,7 +181,10 @@ class EmoticonTab extends React.Component<Props> {
 
     let displayedItems: number[];
     if (this.state.searchText) {
-      displayedItems = findEmoticon(this.state.searchText, style.packId);
+      displayedItems = findEmoticon(
+        this.state.searchText.toLowerCase(),
+        style.packId,
+      );
     }
     else {
       displayedItems = availableEmoticons;
