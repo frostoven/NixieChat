@@ -1,3 +1,7 @@
+/**
+ * This file released by Frostoven under the MIT License.
+ */
+
 import { getStyleById } from './index';
 
 /**
