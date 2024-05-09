@@ -7,11 +7,10 @@ import {
 } from '../../storage/cacheFrontends/UnencryptedSettings';
 import { Button } from 'semantic-ui-react';
 import {
-  UnencryptedSettingsStore,
-} from '../../storage/UnencryptedSettingsStore';
-import {
   EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
+
+const mobileConstraints = '(min-width: 544px)';
 
 const headerStyle = {
   textAlign: 'center',
@@ -45,6 +44,19 @@ const themeButtonStyle = {
   right: 8,
   top: 12,
   fontSize: '75%',
+  borderRadius: 4,
+  zIndex: 1,
+};
+
+const tinyButtonStyle = {
+  position: 'fixed',
+  right: 8,
+  top: 12,
+  fontSize: '8pt',
+  borderRadius: 4,
+  paddingLeft: 8,
+  paddingRight: 8,
+  width: 52,
   zIndex: 1,
 };
 
@@ -53,8 +65,27 @@ class AccountsScreen extends React.Component {
     onAccountActivated: PropTypes.func.isRequired,
   };
 
-  plaintextStorage = new UnencryptedSettingsStore();
   accountStorage = new EncryptedAccountStorage();
+  mediaWatcher = window.matchMedia(mobileConstraints);
+  state = {
+    isMobile: !this.mediaWatcher.matches,
+  };
+
+  componentDidMount() {
+    this.mediaWatcher
+      .addEventListener('change', this.watchMediaSize);
+  }
+
+  componentWillUnmount() {
+    this.mediaWatcher
+      .removeEventListener('change', this.watchMediaSize);
+  }
+
+  watchMediaSize = (event) => {
+    this.setState({
+      isMobile: !event.matches,
+    });
+  };
 
   handleDarkModeToggle = () => {
     UnencryptedSettings.toggleDarkMode().catch(console.error);
@@ -62,6 +93,7 @@ class AccountsScreen extends React.Component {
   };
 
   render() {
+    const { isMobile } = this.state;
     const { onAccountActivated } = this.props;
     const darkMode = UnencryptedSettings.isDarkModeEnabled();
     const formStyle = darkMode ? chatBgStyleInverted : chatBgStyle;
@@ -84,7 +116,7 @@ class AccountsScreen extends React.Component {
 
         <Button
           secondary
-          style={themeButtonStyle}
+          style={isMobile ? tinyButtonStyle : themeButtonStyle}
           onClick={this.handleDarkModeToggle}
         >
           Dark Mode
