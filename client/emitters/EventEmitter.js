@@ -4,6 +4,10 @@
  *
  * File taken from:
  * https://gist.github.com/mudge/5830382
+ *
+ * License:
+ * BSD-3-Clause license
+ * https://github.com/mudge/pacta/tree/master?tab=BSD-3-Clause-1-ov-file#readme
  */
 
 /* Polyfill indexOf. */
