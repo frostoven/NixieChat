@@ -3,7 +3,7 @@ import { LargeCircleIconButton } from '../Generic/LargeCircleIconButton';
 import { Grid, GridColumn } from 'semantic-ui-react';
 import { showAddContactDialog } from '../../frostLib/modal/nixieDialogs';
 import {
-  EncryptedAccountStorage
+  EncryptedAccountStorage,
 } from '../../storage/EncryptedAccountStorage';
 
 const accountStorage = new EncryptedAccountStorage();

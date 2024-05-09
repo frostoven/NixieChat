@@ -855,7 +855,7 @@ class Invitation {
 
     // // Useful for visualisations.
     this.localPemKey = await exportRsaPublicKey({
-      publicKey: receivingAccount.decryptedData.publicKey
+      publicKey: receivingAccount.decryptedData.publicKey,
     }, 'pem') as string;
 
     const ownResponse = await showInvitationDialog(this.getInfo());

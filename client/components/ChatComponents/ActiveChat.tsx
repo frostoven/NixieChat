@@ -10,7 +10,7 @@ import { ChatBox } from './ChatBox';
 import { Message } from '../../storage/EncryptedChat/Message';
 import { ChatBubble } from './ChatBubble';
 import {
-  MessageFormatter
+  MessageFormatter,
 } from '../../frostLib/richInput/MessageFormatter';
 
 const accountStorage = new EncryptedAccountStorage();

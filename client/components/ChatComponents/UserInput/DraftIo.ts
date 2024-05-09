@@ -1,7 +1,9 @@
 import {
   EncryptedAccountStorage,
 } from '../../../storage/EncryptedAccountStorage';
-import { MessageFormatter } from '../../../frostLib/richInput/MessageFormatter';
+import {
+  MessageFormatter,
+} from '../../../frostLib/richInput/MessageFormatter';
 
 const accountStorage = new EncryptedAccountStorage();
 
