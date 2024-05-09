@@ -268,7 +268,7 @@ class AccountCreator extends React.Component {
           />
 
           <NxField
-            label="Optional Public Name (needed to add you as a contact)"
+            label="Optional Public Name (required for new contacts to find you)"
             help={
               <div>
                 If you want people to invite you to chats, you need to have a
