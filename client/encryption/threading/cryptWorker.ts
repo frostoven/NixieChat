@@ -1,8 +1,11 @@
+/**
+ * This file is a web worker. Access is via CryptPool.
+ */
+
 import { aesGcmEncrypt, aesGcmDecrypt } from '../crypto-aes-gcm';
 
 onmessage = ({ data }) => {
   if (data.action === 'aesGcmEncrypt') {
-    setTimeout(() => {
     const { password, plaintext } = data;
     aesGcmEncrypt(password, plaintext)
       .then(self.postMessage)
@@ -10,7 +13,6 @@ onmessage = ({ data }) => {
         console.error(reason);
         self.postMessage(null);
       });
-    }, 3000);
   }
   else if (data.action === 'aesGcmDecrypt') {
     const { password, ciphertext, iv, silenceDecryptError } = data;
