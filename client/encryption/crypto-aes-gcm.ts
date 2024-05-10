@@ -25,7 +25,6 @@ const VERBOSE = false;
  *
  * @param   {String} password - Password to use to encrypt plaintext.
  * @param   {String} plaintext - Plaintext to be encrypted.
- * @returns {String} Encrypted ciphertext.
  *
  * @example
  *   const ciphertext = await aesGcmEncrypt('my secret text', 'pw');
