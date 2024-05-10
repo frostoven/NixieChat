@@ -19,6 +19,9 @@
 
 const VERBOSE = false;
 
+type AesGcmEncryptResult = { iv: Uint8Array; ciphertext: Uint8Array } | null;
+type AesGcmDecryptResult = string | null;
+
 /**
  * Encrypts plaintext using AES-GCM with supplied password, for decryption with aesGcmDecrypt().
  *                                                                      (c) Chris Veness MIT Licence
@@ -30,7 +33,13 @@ const VERBOSE = false;
  *   const ciphertext = await aesGcmEncrypt('my secret text', 'pw');
  *   aesGcmEncrypt('my secret text', 'pw').then(function(ciphertext) { console.log(ciphertext); });
  */
-async function aesGcmEncrypt(password: string, plaintext: string) {
+async function aesGcmEncrypt(
+  password: string, plaintext: string,
+): Promise<AesGcmEncryptResult> {
+  if (!password) {
+    console.error('[aesGcmEncrypt] A password is required.');
+    return null;
+  }
   const start = performance.now();
 
   // Encode password as UTF-8.
@@ -93,7 +102,11 @@ async function aesGcmEncrypt(password: string, plaintext: string) {
 async function aesGcmDecrypt(
   password: string, ciphertext: Uint8Array, iv: Uint8Array,
   silenceDecryptError = false,
-) {
+): Promise<AesGcmDecryptResult> {
+  if (!password) {
+    console.error('[aesGcmDecrypt] A password is required.');
+    return null;
+  }
   const start = performance.now();
 
   // Encode password as UTF-8.
@@ -127,7 +140,7 @@ async function aesGcmDecrypt(
       `of length ${keyLength} and plaintext of length ${plainBuffer.byteLength}.`,
     );
 
-    return new TextDecoder().decode(plainBuffer);
+    return new TextDecoder().decode(plainBuffer) as AesGcmDecryptResult;
   }
   catch (error) {
     (!silenceDecryptError) && console.error('[AES-GCM] Decrypt failed:', error);
@@ -138,4 +151,6 @@ async function aesGcmDecrypt(
 export {
   aesGcmEncrypt,
   aesGcmDecrypt,
+  AesGcmEncryptResult,
+  AesGcmDecryptResult,
 };
