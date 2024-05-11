@@ -10,7 +10,9 @@ type WorkerArgs = {
 }
 
 /**
- * Spawns the specified amo
+ * Spawns the specified amount of workers. As you feed this class requests, it
+ * will send those to available workers. If workers are not available, your
+ * request will pause until a worker becomes available.
  */
 class ThreadPool {
   // If true, this thread pool is ready for action.
