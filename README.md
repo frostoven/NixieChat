@@ -22,6 +22,20 @@ encryption software, please check your country's laws, regulations and policies
 concerning the import, possession, or use, and re-export of encryption
 software, to see if this is permitted.
 
+## Security
+
+As with all security software, please scrutinize this application before you
+use it. If you notice any problems or have concerns, please report them by
+[creating an issue](https://github.com/frostoven/NixieChat/issues/new)
+for us to investigate. This application is designed with security as the main
+priority, and we aim to maintain that standard.
+
+As this application is still in its early stages, if you uncover any
+vulnerabilities, please submit an issue. As NixieChat develops, we will
+establish a dedicated security page outside of GitHub where vulnerabilities can
+be submitted without posing a risk to users. We will update the issues page as
+well as this README with relevant details in due course.
+
 ## Screenshots
 
 Adding contacts:
