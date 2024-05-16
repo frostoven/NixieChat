@@ -48,6 +48,10 @@ Profile pics are generated from RSA keys:
 
 ![preview](preview_profile.png)
 
+Chats are still a work in progress, but this is what we have so far:
+
+![preview](chat.webp)
+
 ## Developer notes
 
 For build instructions see [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md).
