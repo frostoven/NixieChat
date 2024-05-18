@@ -2,9 +2,9 @@
  * This file released by Frostoven under the MIT License.
  */
 
-// ========================================================================= //
-//  Client bundle                                                            //
-// ========================================================================= //
+  // ===================================================================== //
+  //  Client bundle                                                        //
+  // ===================================================================== //
 
 const webpack = require('webpack');
 const dynamicDatabaseImport = require('./nixiePlugins/dynamicDatabaseImport');
