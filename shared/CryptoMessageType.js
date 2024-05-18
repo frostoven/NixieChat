@@ -8,6 +8,6 @@ const CryptoMessageType = {
   sendDhPubKey: 'sendDhPubKey',
 };
 
-module.exports = {
+export {
   CryptoMessageType,
 };

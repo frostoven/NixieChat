@@ -7,6 +7,6 @@ const MessageVersion = {
   sendInvitationV1: 'v1',
 };
 
-module.exports = {
-  MessageVersion: MessageVersion,
+export {
+  MessageVersion,
 };
