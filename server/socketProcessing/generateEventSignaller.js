@@ -45,9 +45,9 @@ const generateEventSignaller = (context = null) => {
     _getCallbacks: () => {
       return callbacks;
     },
-  }
+  };
 };
 
-module.exports = {
+export {
   generateEventSignaller,
 };

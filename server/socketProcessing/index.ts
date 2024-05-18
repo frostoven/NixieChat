@@ -1,6 +1,8 @@
-import { socketEvent } from '../controllers/websocket.controller';
+import websocketController from '../controllers/websocket.controller';
 import { Emitter } from '@socket.io/postgres-emitter';
 import { NixieApi } from './NixieApi';
+
+const { socketEvent } = websocketController;
 
 // --- Start server API --- //
 

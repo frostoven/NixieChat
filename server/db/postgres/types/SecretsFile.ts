@@ -5,9 +5,9 @@ interface SecretsFile {
     database: undefined | string,
     password: undefined | string,
     port: undefined | number,
-  }
+  };
 }
 
 export {
   SecretsFile,
-}
+};

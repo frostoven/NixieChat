@@ -1,4 +1,6 @@
-const { generateEventSignaller } = require('../socketProcessing/generateEventSignaller');
+import {
+  generateEventSignaller,
+} from '../socketProcessing/generateEventSignaller';
 
 const socketEvent = {
   ping: generateEventSignaller(),
@@ -36,7 +38,7 @@ function sendDhPubKey(socket, options, callback) {
   }
 }
 
-module.exports = {
+const controller = {
   socketEvent,
   ping,
   makeDiscoverable,
@@ -44,3 +46,5 @@ module.exports = {
   respondToInvite,
   sendDhPubKey,
 };
+
+export default controller;

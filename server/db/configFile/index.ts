@@ -25,7 +25,7 @@ try {
 }
 catch (_) {
   configFile = {
-    ...configDefaults
+    ...configDefaults,
   };
 }
 

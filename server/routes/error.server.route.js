@@ -2,7 +2,7 @@
  * Catchall for uncaught errors.
  */
 
-const errorController = require("../controllers/error.server.controller");
+import errorController from '../controllers/error.server.controller';
 
 // Handle uncaught errors.
-module.exports = errorController.handleErrors;
+export default errorController;
