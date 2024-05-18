@@ -1,4 +1,4 @@
-const socketController = require('../controllers/websocket.controller');
+import socketController from '../controllers/websocket.controller';
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -7,7 +7,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const canRespondTo = Object.keys(socketController);
 
 // https://socket.io/docs/v4/index.html
-module.exports = function ioCallback(socket) {
+export default function ioCallback(socket) {
   isProd || console.log('[Socket.io] A client has connected.');
 
   for (let i = 0, len = canRespondTo.length; i < len; i++) {
@@ -25,4 +25,4 @@ module.exports = function ioCallback(socket) {
       socket, data, callback,
     ));
   }
-};
+}

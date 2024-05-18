@@ -10,7 +10,7 @@
  */
 
 // Sends a generic message to the client.
-const { PlainMessageType } = require('../../shared/PlainMessageType');
+import { PlainMessageType } from '../../shared/PlainMessageType';
 
 function sendMessageToClient({ message, color = null, socket } = {}) {
   socket.emit(PlainMessageType.message, { message, color });
@@ -26,7 +26,7 @@ function sendServerReadyNoticeToClient({ socket }) {
   socket.emit(PlainMessageType.notifyServerReady);
 }
 
-module.exports = {
+export {
   sendMessageToClient,
   sendErrorToClient,
   sendServerReadyNoticeToClient,

@@ -17,7 +17,7 @@ function enforceSafePermissions(fileName: string, path: string = ''): boolean {
   if (process.platform === 'win32') {
     console.warn(
       `* Warning: Not checking the file permissions of "${filePath}" ` +
-      'because we\'re on Windows.'
+      'because we\'re on Windows.',
     );
     return false;
   }
@@ -67,4 +67,4 @@ function enforceSafePermissions(fileName: string, path: string = ''): boolean {
 
 export {
   enforceSafePermissions,
-}
+};

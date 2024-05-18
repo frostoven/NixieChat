@@ -10,4 +10,4 @@ let config = Object.freeze({
   }),
 });
 
-module.exports = config;
+export default config;

@@ -1,4 +1,4 @@
-const _ = require('lodash');
+import _ from 'lodash';
 
 const { isObject, isNumber } = _;
 const isArray = Array.isArray;
@@ -164,6 +164,6 @@ class AssertReject {
   }
 }
 
-module.exports = {
+export {
   AssertReject,
 };

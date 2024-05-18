@@ -44,7 +44,7 @@ switch (process.env.PLATFORM) {
 function dynamicDatabaseImport() {
   return new webpack.DefinePlugin({
     __DB_IMPORT__: `'${dbDriver}'`,
-  })
+  });
 }
 
 module.exports = dynamicDatabaseImport;

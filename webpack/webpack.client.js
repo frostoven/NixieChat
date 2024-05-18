@@ -2,9 +2,9 @@
  * This file released by Frostoven under the MIT License.
  */
 
-// ========================================================================= //
-//  Client bundle                                                            //
-// ========================================================================= //
+  // ===================================================================== //
+  //  Client bundle                                                        //
+  // ===================================================================== //
 
 const webpack = require('webpack');
 const dynamicDatabaseImport = require('./nixiePlugins/dynamicDatabaseImport');
@@ -87,17 +87,40 @@ module.exports = {
     informativeTitleBar(),
     // Make Buffer globally available for libs that assume they're server-side.
     new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
+      Buffer: [ 'buffer', 'Buffer' ],
+    }),
+    // Needed by some Node polyfills.
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
     }),
   ],
 
   resolve: {
-    // Polyfills.
-    fallback: {
-      'crypto': require.resolve('crypto-browserify'),
-      'stream': false,
-      'buffer': require.resolve('buffer/'),
-    },
     extensions: [ '.js', '.json', '.jsx', '.ts', '.tsx' ],
+    alias: {
+      process: "process/browser"
+    },
+    fallback: {
+      // Polyfills.
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
+      buffer: require.resolve('buffer/'),
+      util: require.resolve('util/'),
+      tty: require.resolve('tty-browserify'),
+      os: require.resolve('os-browserify/browser'),
+      url: require.resolve('url/'),
+      vm: require.resolve('vm-browserify'),
+
+      // Unused.
+      assert: false,
+      child_process: false,
+      fs: false,
+      http: false,
+      https: false,
+      net: false,
+      path: false,
+      tls: false,
+      zlib: false,
+    },
   },
 };

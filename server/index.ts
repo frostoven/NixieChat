@@ -9,6 +9,12 @@ import { initSocketApi } from './socketProcessing';
 import { Emitter } from '@socket.io/postgres-emitter';
 import { ascii } from './utils/ascii';
 
+// Get route files
+import assetsRoute from './routes/assets.server.route';
+import defaultRoute from './routes/default.server.route';
+import errorRoute from './routes/error.server.route';
+import websocketRoute from './routes/websocket.route';
+
 if (process.env.NODE_ENV === 'development') {
   // Force unhandled promise rejections to throw errors during dev testing.
   process.on('unhandledRejection', unhandledRejection => {
@@ -41,11 +47,11 @@ async function initDb() {
 
 function buildRoutes(clusterEmitter: Emitter | null) {
   // Our custom routes.
-  app.use(require('./routes/assets.server.route'));
-  app.use(require('./routes/default.server.route'));
+  app.use(assetsRoute);
+  app.use(defaultRoute);
 
   // Error handler.
-  app.use(require('./routes/error.server.route'));
+  app.use(errorRoute);
 
   // Show boot message.
   ascii.log('').dark().drawLine().reset();
@@ -65,7 +71,7 @@ function buildRoutes(clusterEmitter: Emitter | null) {
   // Readies the websocket listeners.
   initSocketApi(clusterEmitter);
 
-  const lookupSocketRoute = require('./routes/websocket.route');
+  const lookupSocketRoute = websocketRoute;
 
   // Client / server communication.
   io.on('connection', (socket) => {

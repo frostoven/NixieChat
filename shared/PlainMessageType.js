@@ -6,6 +6,6 @@ const PlainMessageType = {
   notifyServerReady: 3,
 };
 
-module.exports = {
+export {
   PlainMessageType,
 };

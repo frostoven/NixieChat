@@ -1,38 +1,36 @@
-const path = require('path');
-
-const config = require('../config/server');
+import path from 'path';
 
 const semanticUiPath = '../../node_modules/semantic-ui-css/';
 const semanticUiForestPath = '../../node_modules/semantic-ui-forest-themes/';
 
 // All the below is what the server sees.
 
-exports.favicon = (req, res) => {
+function favicon(_, res) {
   res.sendFile(path.join(__dirname + '../../../client/assets/icons/favicon.ico'));
-};
+}
 
-exports.app = (req, res) => {
+function app(_, res) {
   res.sendFile(path.join(__dirname + '../../../client/index.html'));
-};
+}
 
-exports.bundleDir = (req, res) => {
+function bundleDir(req, res) {
   const fileName = req.params.fileName;
   res.sendFile(path.join(
     __dirname +
     '../../../client/.build/' +
     fileName,
   ));
-};
+}
 
-exports.css = (req, res) => {
+function css(req, res) {
   res.sendFile(path.join(__dirname + '../../../client/assets/css/' + req.params.file));
-};
+}
 
-exports.semanticCss = (req, res) => {
+function semanticCss(_, res) {
   res.sendFile(path.join(`${__dirname}/${semanticUiPath}/semantic.min.css`));
-};
+}
 
-exports.customTheme = (req, res) => {
+function customTheme(req, res) {
   const fileName = req.params.fileName;
   if (fileName.slice(-4) === '.css') {
     res.sendFile(path.join(`${__dirname}/${semanticUiForestPath}/semantic.darkly.css`));
@@ -40,14 +38,16 @@ exports.customTheme = (req, res) => {
   else {
     res.json({ error: true, 'message': 'Theme file must be css.' });
   }
-};
+}
 
-exports.getFont = (req, res) => {
+function getFont(req, res) {
   const fontName = req.params.fontName;
-  let semanticPath = semanticUiPath;
-  if (fontName.includes('custom_theme')) {
-    semanticPath = semanticUiForestPath;
-  }
+  // Commenting this out because I'm not so sure that we want font
+  // inconsistencies.
+  // let semanticPath = semanticUiPath;
+  // if (fontName.includes('custom_theme')) {
+  //   semanticPath = semanticUiForestPath;
+  // }
 
   res.sendFile(path.join(
     __dirname +
@@ -56,36 +56,52 @@ exports.getFont = (req, res) => {
     '/themes/default/assets/fonts/' +
     fontName,
   ));
-};
+}
 
-exports.getBackground = (req, res) => {
+function getBackground(req, res) {
   res.sendFile(path.join(
     __dirname +
     '../../../client/assets/backgrounds/' +
     req.params.fileName,
   ));
-};
+}
 
-exports.getIcon = (req, res) => {
+function getIcon(req, res) {
   res.sendFile(path.join(
     __dirname +
     '../../../client/assets/icons/' +
     req.params.fileName,
   ));
-};
+}
 
-exports.getImage = (req, res) => {
+function getImage(req, res) {
   res.sendFile(path.join(
     __dirname +
     '../../../client/assets/img/' +
     req.params.fileName,
   ));
-};
+}
 
-exports.getEmoticon = (req, res) => {
+function getEmoticon(req, res) {
   res.sendFile(path.join(
     __dirname +
     `../../../client/assets/emo/${req.params.dirName}/` +
     req.params.fileName,
   ));
+}
+
+const controller = {
+  favicon,
+  app,
+  bundleDir,
+  css,
+  semanticCss,
+  customTheme,
+  getFont,
+  getBackground,
+  getIcon,
+  getImage,
+  getEmoticon,
 };
+
+export default controller;

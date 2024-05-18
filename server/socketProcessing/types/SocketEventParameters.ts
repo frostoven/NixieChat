@@ -8,4 +8,4 @@ interface SocketEventParameters {
 
 export {
   SocketEventParameters,
-}
+};
